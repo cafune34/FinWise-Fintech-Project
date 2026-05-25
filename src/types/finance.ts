@@ -84,7 +84,7 @@ export type PaymentOrder = {
   payee: string;
   amount: number;
   dueDate: string;
-  status: "planlandi" | "simule_edildi";
+  status: "planlandi" | "isleme_alindi" | "beklemede" | "tamamlandi";
   isMock: true;
 };
 

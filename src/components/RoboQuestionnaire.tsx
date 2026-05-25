@@ -29,6 +29,7 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
   }
 
   const allAnswered = questions.every((question) => Boolean(answersByQuestionId[question.id]));
+  const answeredCount = Object.keys(answersByQuestionId).length;
 
   const result = useMemo(() => {
     if (!allAnswered) {
@@ -51,16 +52,16 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
   }, [allAnswered, answersByQuestionId, questions]);
 
   return (
-    <div className="space-y-4">
-      <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">Risk Anketi</h3>
+    <div className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.72fr)]">
+      <article className="rounded-xl border border-white/10 bg-white/[0.045] p-6 shadow-xl shadow-black/10">
+        <h3 className="text-base font-semibold text-white">Risk Profili Analizi</h3>
         <p className="mt-2 text-sm text-slate-300">
           Tüm soruları yanıtladığınızda risk profili ve önerilen dağılım otomatik oluşturulur.
         </p>
 
         <div className="mt-4 space-y-4">
           {questions.map((question, index) => (
-            <div key={question.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+            <div key={question.id} className="rounded-lg border border-white/10 bg-slate-950/50 p-4">
               <p className="text-sm font-medium text-slate-100">
                 {index + 1}. {question.question}
               </p>
@@ -73,7 +74,7 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
                     <label
                       key={option.value}
                       htmlFor={inputId}
-                      className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400/60"
+                      className="flex cursor-pointer items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400/60"
                     >
                       <input
                         id={inputId}
@@ -94,16 +95,33 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
         </div>
       </article>
 
-      {result ? (
-        <div className="grid gap-4 xl:grid-cols-2">
-          <RoboResultCard score={result.score} profile={result.profile} allocation={result.allocation} />
-          <RoboAllocationChart data={result.allocation} />
-        </div>
-      ) : (
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 px-4 py-3 text-sm text-slate-400">
-          Sonucu görmek için 5 sorunun tamamını yanıtlayın.
-        </p>
-      )}
+      <aside className="space-y-4">
+        {result ? (
+          <>
+            <RoboResultCard score={result.score} profile={result.profile} allocation={result.allocation} />
+            <RoboAllocationChart data={result.allocation} />
+          </>
+        ) : (
+          <article className="rounded-xl border border-white/10 bg-white/[0.045] p-6 shadow-xl shadow-black/10">
+            <h3 className="text-base font-semibold text-white">Canlı profil özeti</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Sorular yanıtlandıkça profil analizi hazırlanır. Sonuç panelinde skor ve önerilen dağılım birlikte gösterilir.
+            </p>
+            <div className="mt-5 rounded-xl border border-white/10 bg-slate-950/45 p-4">
+              <p className="text-sm text-slate-400">Yanıtlanan soru</p>
+              <p className="mt-2 text-2xl font-semibold text-cyan-200">
+                {answeredCount}/{questions.length}
+              </p>
+              <div className="mt-4 h-2 rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-cyan-300"
+                  style={{ width: `${Math.round((answeredCount / questions.length) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </article>
+        )}
+      </aside>
     </div>
   );
 }

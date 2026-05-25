@@ -1,4 +1,4 @@
-﻿import AppShell from "@/components/AppShell";
+import AppShell from "@/components/AppShell";
 import RoboQuestionnaire from "@/components/RoboQuestionnaire";
 import type { RoboQuestion } from "@/types/finance";
 
@@ -53,15 +53,10 @@ const roboQuestions: RoboQuestion[] = [
 export default function RoboAdvisorPage() {
   return (
     <AppShell
-      title="Robo Danışman"
-      description="Risk anketi sonucu profilinizi ve eğitim amaçlı örnek portföy dağılımını görüntüleyin."
+      title="Yatırım Profili"
+      description="Risk profili analizi ve önerilen dağılım görünümüyle finansal tercihlerinizi değerlendirin."
     >
-      <p className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-        Bu modül eğitim amaçlı robo-danışmanlık simülasyonudur. Gerçek yatırım tavsiyesi değildir.
-      </p>
-
       <RoboQuestionnaire questions={roboQuestions} />
     </AppShell>
   );
 }
-

@@ -1,6 +1,8 @@
 import AppShell from "@/components/AppShell";
 import TransactionFilters from "@/components/TransactionFilters";
+import StatCard from "@/components/StatCard";
 import { mockAccounts, mockBudgets, mockTransactions, mockUser } from "@/data/mockData";
+import { formatCurrencyTRY } from "@/lib/format";
 import { generateRegTechAlerts, getHighRiskTransactions } from "@/lib/regtech";
 
 export default function TransactionsPage() {
@@ -13,15 +15,19 @@ export default function TransactionsPage() {
     userId: mockUser.id,
   });
   const highRiskTransactionIds = getHighRiskTransactions(alerts);
+  const income = mockTransactions.filter((txn) => txn.direction === "in").reduce((sum, txn) => sum + txn.amount, 0);
+  const expense = mockTransactions.filter((txn) => txn.direction === "out").reduce((sum, txn) => sum + txn.amount, 0);
 
   return (
     <AppShell
-      title="Islemler"
-      description="Tum mock islem hareketleri tablo halinde sunulur. Kategori, islem tipi ve hesap bazli filtreleme desteklenir."
+      title="İşlemler"
+      description="Gelir, gider ve transfer hareketlerini kategori, hesap ve işlem tipine göre inceleyin."
     >
-      <p className="text-sm text-slate-400">
-        Islem tipi filtresinde gelir/gider secilebilir. Transfer kayitlari kategori filtresi ile ayristirilabilir.
-      </p>
+      <div className="grid w-full gap-4 md:grid-cols-3">
+        <StatCard title="Toplam İşlem" value={String(mockTransactions.length)} description="Listelenen finans hareketi" />
+        <StatCard title="Gelir Toplamı" value={formatCurrencyTRY(income)} tone="positive" description="Tüm gelir kayıtları" />
+        <StatCard title="Gider Toplamı" value={formatCurrencyTRY(expense)} tone="negative" description="Tüm gider kayıtları" />
+      </div>
 
       <TransactionFilters
         transactions={sortedTransactions}
