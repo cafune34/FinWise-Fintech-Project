@@ -1,20 +1,67 @@
-import AppShell from "@/components/AppShell";
+﻿import AppShell from "@/components/AppShell";
+import RoboQuestionnaire from "@/components/RoboQuestionnaire";
+import type { RoboQuestion } from "@/types/finance";
+
+const roboQuestions: RoboQuestion[] = [
+  {
+    id: "investment-horizon",
+    question: "Yatırım vadeniz nedir?",
+    options: [
+      { value: "short", label: "0-1 yıl", score: 1 },
+      { value: "mid", label: "1-3 yıl", score: 2 },
+      { value: "long", label: "3 yıl ve üzeri", score: 3 },
+    ],
+  },
+  {
+    id: "risk-preference",
+    question: "Risk tercihiniz nedir?",
+    options: [
+      { value: "low", label: "Düşük risk, istikrarlı getiri", score: 1 },
+      { value: "medium", label: "Orta risk, dengeli getiri", score: 2 },
+      { value: "high", label: "Yüksek risk, yüksek getiri potansiyeli", score: 3 },
+    ],
+  },
+  {
+    id: "savings-rate",
+    question: "Aylık gelirinizin ne kadarını birikime ayırabilirsiniz?",
+    options: [
+      { value: "low", label: "%10'dan az", score: 1 },
+      { value: "medium", label: "%10-%25 arası", score: 2 },
+      { value: "high", label: "%25 ve üzeri", score: 3 },
+    ],
+  },
+  {
+    id: "market-fall-reaction",
+    question: "Piyasa düşerse ne yaparsınız?",
+    options: [
+      { value: "sell", label: "Hızla satış yaparım", score: 1 },
+      { value: "hold", label: "Beklerim, pozisyonu korurum", score: 2 },
+      { value: "buy", label: "Fırsat görür, alım yaparım", score: 3 },
+    ],
+  },
+  {
+    id: "liquidity-need",
+    question: "Acil nakit ihtiyacınız var mı?",
+    options: [
+      { value: "yes", label: "Evet, kısa vadede ihtiyacım olabilir", score: 1 },
+      { value: "maybe", label: "Belirsiz, kısmen olabilir", score: 2 },
+      { value: "no", label: "Hayır, acil nakit ihtiyacım yok", score: 3 },
+    ],
+  },
+];
 
 export default function RoboAdvisorPage() {
   return (
     <AppShell
-      title="Robo Danisman"
-      description="Robo danisman arayuzu Sprint 3 ve sonrasinda kademeli olarak genisletilecektir."
+      title="Robo Danışman"
+      description="Risk anketi sonucu profilinizi ve eğitim amaçlı örnek portföy dağılımını görüntüleyin."
     >
-      <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">Yakinda Gelistirilecek</h3>
-        <p className="mt-2 text-sm text-slate-300">
-          Portfoy simulasyonu, dagilim onerileri ve kural tabanli yonlendirme ekranlari sonraki sprintlerde eklenecektir.
-        </p>
-        <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-          Not: Bu uygulama gercek yatirim tavsiyesi vermez.
-        </p>
-      </article>
+      <p className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+        Bu modül eğitim amaçlı robo-danışmanlık simülasyonudur. Gerçek yatırım tavsiyesi değildir.
+      </p>
+
+      <RoboQuestionnaire questions={roboQuestions} />
     </AppShell>
   );
 }
+

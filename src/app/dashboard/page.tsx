@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import ChartCard from "@/components/ChartCard";
 import ForecastCard from "@/components/ForecastCard";
@@ -90,6 +91,34 @@ export default function DashboardPage() {
           tone={netCashFlow >= 0 ? "positive" : "negative"}
         />
       </div>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <article className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 p-4">
+          <h3 className="text-base font-semibold text-cyan-200">Sprint 4 Ozeti</h3>
+          <p className="mt-2 text-sm text-slate-200">
+            PISP mantigini odeme emri simulasyonu ile test edin.
+          </p>
+          <Link
+            href="/payments"
+            className="mt-3 inline-flex items-center rounded-lg bg-cyan-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400"
+          >
+            Odeme Simulasyonunu Dene
+          </Link>
+        </article>
+
+        <article className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
+          <h3 className="text-base font-semibold text-emerald-200">Sprint 4 Ozeti</h3>
+          <p className="mt-2 text-sm text-slate-200">
+            Risk anketiyle profilinizi gorup portfoy dagilimi simulasyonunu inceleyin.
+          </p>
+          <Link
+            href="/robo-advisor"
+            className="mt-3 inline-flex items-center rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
+          >
+            Robo Danismanlik Anketini Dene
+          </Link>
+        </article>
+      </section>
 
       <section className="grid gap-4 md:grid-cols-3">
         {mockAccounts.map((account) => (

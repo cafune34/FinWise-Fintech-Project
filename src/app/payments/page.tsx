@@ -1,20 +1,25 @@
-import AppShell from "@/components/AppShell";
+﻿import AppShell from "@/components/AppShell";
+import PaymentSimulationForm from "@/components/PaymentSimulationForm";
 
 export default function PaymentsPage() {
   return (
     <AppShell
-      title="Odeme Simulasyonu"
-      description="Odeme modulu Sprint 4 kapsaminda detaylandirilacaktir."
+      title="Ödeme Simülasyonu"
+      description="PISP (Ödeme Emri Başlatma Hizmeti) mantığını eğitim amaçlı, güvenli bir simülasyon akışıyla deneyimleyin."
     >
       <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">Yakinda Gelistirilecek</h3>
+        <h3 className="text-base font-semibold text-white">PISP Nedir?</h3>
         <p className="mt-2 text-sm text-slate-300">
-          Planli odeme akislarinin detay ekranlari bir sonraki asamalarda eklenecektir.
+          PISP, kullanıcı adına ödeme emri başlatma akışını ifade eder. FinWise içinde bu akış yalnızca eğitim amacıyla,
+          mock hesaplar üzerinden simüle edilir.
         </p>
         <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-          Not: Bu projede gercek odeme altyapisi yoktur, islevler egitim amacli simulasyon olarak kalacaktir.
+          Bu sayfa eğitim amaçlı ödeme emri simülasyonudur. Gerçek para transferi veya fatura ödemesi yapılmaz.
         </p>
       </article>
+
+      <PaymentSimulationForm />
     </AppShell>
   );
 }
+
