@@ -1,10 +1,12 @@
 import AppShell from "@/components/AppShell";
 import ChartCard from "@/components/ChartCard";
+import ForecastCard from "@/components/ForecastCard";
+import RiskAlertCard from "@/components/RiskAlertCard";
 import StatCard from "@/components/StatCard";
 import TransactionTable from "@/components/TransactionTable";
 import ExpenseByCategoryChart from "@/components/dashboard/ExpenseByCategoryChart";
 import IncomeExpenseChart from "@/components/dashboard/IncomeExpenseChart";
-import { mockAccounts, mockTransactions } from "@/data/mockData";
+import { mockAccounts, mockBudgets, mockTransactions, mockUser } from "@/data/mockData";
 import {
   calculateMonthlyExpense,
   calculateMonthlyIncome,
@@ -13,7 +15,9 @@ import {
   getCategoryExpenseTotals,
   getRecentTransactions,
 } from "@/lib/finance";
+import { forecastAllCategories, getRiskyForecastCategories } from "@/lib/forecasting";
 import { formatCurrencyTRY } from "@/lib/format";
+import { generateRegTechAlerts } from "@/lib/regtech";
 import type { TransactionCategory } from "@/types/finance";
 
 const categoryLabels: Record<TransactionCategory, string> = {
@@ -38,6 +42,16 @@ export default function DashboardPage() {
   const monthlyIncome = calculateMonthlyIncome(mockTransactions, referenceDate);
   const monthlyExpense = calculateMonthlyExpense(mockTransactions, referenceDate);
   const netCashFlow = calculateNetCashFlow(mockTransactions, referenceDate);
+  const forecastResults = forecastAllCategories(mockTransactions, mockBudgets, { referenceDate });
+  const riskyForecasts = getRiskyForecastCategories(forecastResults, 3);
+  const regtechAlerts = generateRegTechAlerts({
+    transactions: mockTransactions,
+    budgets: mockBudgets,
+    userId: mockUser.id,
+    referenceDate,
+  });
+  const priorityAlerts = regtechAlerts.slice(0, 3);
+  const transactionById = new Map(mockTransactions.map((transaction) => [transaction.id, transaction]));
 
   const recentTransactions = getRecentTransactions(mockTransactions, 8);
 
@@ -101,6 +115,45 @@ export default function DashboardPage() {
         <ChartCard title="Aylik Gelir-Gider" description="Son 6 ay icin gelir ve gider degisimi.">
           <IncomeExpenseChart data={monthlyTrendData} />
         </ChartCard>
+      </section>
+
+      <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-base font-semibold text-white">Akilli Uyarilar</h3>
+          <p className="text-xs text-slate-400">
+            RegTech ve tahminleme ciktisi egitim amacli kural tabanli simulasyondur.
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-slate-200">Onemli 3 RegTech Uyarisi</h4>
+            {priorityAlerts.length > 0 ? (
+              priorityAlerts.map((alert) => (
+                <RiskAlertCard
+                  key={alert.id}
+                  alert={alert}
+                  transaction={alert.transactionId ? transactionById.get(alert.transactionId) : undefined}
+                />
+              ))
+            ) : (
+              <p className="rounded-lg border border-dashed border-slate-700 p-3 text-sm text-slate-400">
+                Bu ay icin oncelikli RegTech uyarisi uretilmedi.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-slate-200">Gelecek Ay Butce Riski Olan 3 Kategori</h4>
+            {riskyForecasts.length > 0 ? (
+              riskyForecasts.map((forecast) => <ForecastCard key={forecast.category} forecast={forecast} />)
+            ) : (
+              <p className="rounded-lg border border-dashed border-slate-700 p-3 text-sm text-slate-400">
+                Gelecek ay icin butce asim riski gorunmuyor.
+              </p>
+            )}
+          </div>
+        </div>
       </section>
     </AppShell>
   );

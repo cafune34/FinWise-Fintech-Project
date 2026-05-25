@@ -61,11 +61,24 @@ export type PaymentOrder = {
   isMock: true;
 };
 
+export type RegTechSeverity = "high" | "medium" | "low";
+
+export type RegTechRuleCode =
+  | "LARGE_TRANSACTION"
+  | "MONTHLY_EXPENSE_OVER_INCOME"
+  | "BUDGET_EXCEEDED"
+  | "TRANSFER_DENSITY"
+  | "NIGHT_HIGH_AMOUNT"
+  | "REPEATING_MERCHANT";
+
 export type RegTechAlert = {
   id: string;
   userId: string;
-  transactionId: string;
+  transactionId?: string;
   level: "dusuk" | "orta" | "yuksek";
+  severity?: RegTechSeverity;
+  ruleCode?: RegTechRuleCode;
+  title?: string;
   reason: string;
   createdAt: string;
   resolved: boolean;

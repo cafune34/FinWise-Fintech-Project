@@ -7,6 +7,7 @@ import TransactionTable from "@/components/TransactionTable";
 type TransactionFiltersProps = {
   transactions: Transaction[];
   accounts: BankAccount[];
+  highRiskTransactionIds?: string[];
 };
 
 const categoryOptions: { value: "tum" | TransactionCategory; label: string }[] = [
@@ -24,7 +25,11 @@ const categoryOptions: { value: "tum" | TransactionCategory; label: string }[] =
   { value: "diger", label: "Diger" },
 ];
 
-export default function TransactionFilters({ transactions, accounts }: TransactionFiltersProps) {
+export default function TransactionFilters({
+  transactions,
+  accounts,
+  highRiskTransactionIds,
+}: TransactionFiltersProps) {
   const [selectedCategory, setSelectedCategory] = useState<"tum" | TransactionCategory>("tum");
   const [selectedType, setSelectedType] = useState<"tum" | "gelir" | "gider">("tum");
   const [selectedAccount, setSelectedAccount] = useState<"tum" | string>("tum");
@@ -95,6 +100,7 @@ export default function TransactionFilters({ transactions, accounts }: Transacti
       <TransactionTable
         transactions={filteredTransactions}
         accounts={accounts}
+        highRiskTransactionIds={highRiskTransactionIds}
         emptyMessage="Secili filtrelerle eslesen islem bulunamadi."
       />
     </div>
