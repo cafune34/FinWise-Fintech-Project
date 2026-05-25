@@ -18,7 +18,7 @@ export default function Home() {
           href="/dashboard"
           className="inline-flex items-center rounded-lg bg-cyan-500 px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-400"
         >
-          Dashboard'a Git
+          Dashboard&apos;a Git
         </Link>
       </div>
     </main>

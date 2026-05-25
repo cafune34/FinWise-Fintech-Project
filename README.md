@@ -1,26 +1,32 @@
-﻿# FinWise
+# FinWise
 
-## Proje Aciklamasi
-FinWise, **Finansal Teknolojiler** dersi kapsaminda gelistirilen egitim odakli bir fintech demo projesidir. Proje, finansal urun deneyimini guvenli bir simülasyon ortaminda modellemeyi hedefler.
+## Proje Adi
+FinWise - Finansal Teknolojiler dersi icin gelistirilen egitim odakli fintech demo uygulamasi.
 
 ## Ders Baglami
-Bu repo, universite seviyesinde Finansal Teknolojiler dersi sprint calismalari icin hazirlanmistir.
+Bu proje, universite duzeyinde Finansal Teknolojiler dersi kapsaminda sprint mantigiyla gelistirilmistir ve final teslimine hazir hale getirilmistir.
+
+## Proje Amaci
+- Acik bankacilik, kisisel finans, odeme ve robo-danismanlik kavramlarini tek bir demo uygulamada gostermek
+- Gercek sistemlere baglanmadan fintech urun akislarini simule etmek
+- Ders kapsami icin raporlanabilir, sunulabilir ve test edilebilir bir prototip cikarmak
+
+## Ozellikler
+- Dashboard: toplam bakiye, gelir-gider, net nakit akisi ve grafikler
+- Accounts: mock banka hesaplari ve hesap ozeti
+- Transactions: filtrelenebilir islem listesi
+- Budget: kategori bazli butce takibi ve asim uyarisi
+- Forecasting: son 3 ay ortalamasi + kategori katsayisi ile tahminleme
+- RegTech: kural tabanli supheli islem uyari simulasyonu
+- Payments: PISP odeme emri simulasyonu
+- Robo Advisor: risk anketi ve ornek portfoy dagilimi
 
 ## Kullanilan Teknolojiler
-- Next.js App Router
+- Next.js 16 (App Router)
 - TypeScript
-- Tailwind CSS
-
-## Projenin Amaci
-- Fintech urun gelistirme surecini sprint bazli ve kontrollu sekilde deneyimlemek
-- UI/UX, mimari ve dokumantasyon disiplinini erken asamada oturtmak
-- Gercek finansal sistemlere dokunmadan konsept dogrulama yapmak
-
-## Ozellik Plani
-- Kullanici odakli finans paneli temel ekranlari
-- Mock veri ile butce ve harcama simulasyonu
-- Temel portfoy/finansal durum gorunumu
-- Sprint ilerledikce moduler ozellik genisletmeleri
+- Tailwind CSS 4
+- Recharts
+- Zod
 
 ## Kurulum
 ```bash
@@ -37,24 +43,27 @@ npm run dev
 npm run build
 ```
 
-## Egitim ve Guvenlik Notlari
-- Bu proje **egitim amaclidir**.
-- **Gercek banka baglantisi yoktur**.
-- **Gercek odeme yapilmaz**.
-- **Gercek yatirim tavsiyesi degildir**.
-- Uygulamada **mock/simulasyon veri** kullanilacaktir.
+## Sayfa / Modul Listesi
+- `/` Ana sayfa
+- `/dashboard`
+- `/accounts`
+- `/transactions`
+- `/budget`
+- `/regtech`
+- `/payments`
+- `/robo-advisor`
 
-## Sprint 1 Durumu
-Sprint 1 kapsaminda temel UI iskeleti, route yapisi, AppShell navigasyonu, mock veri katmani, tip tanimlari ve format helper fonksiyonlari eklendi.
+## Sprint Ozeti
+- Sprint 0: proje plani, repo ve temel iskelet
+- Sprint 1: App Router sayfalari, AppShell, mock veri ve temel tipler
+- Sprint 2: dashboard, finans hesaplama helper'lari, butce ve islem filtreleri
+- Sprint 3: tahminleme ve RegTech kural motoru
+- Sprint 4: odeme emri simulasyonu ve robo-danismanlik modulu
+- Sprint 5: final dokumantasyon, test senaryolari, demo akisi ve teslim temizligi
 
-## Sprint 2 Durumu
-Sprint 2 ile dashboard kartlari, finans hesaplama helper fonksiyonlari, hesap ozeti, islem tablosu ve filtreler, butce takip bilesenleri ve temel grafik ekranlari eklendi.
-
-
-## Sprint 3 Durumu
-Sprint 3 ile son 3 ay ortalamasi + kategori katsayisi kullanan harcama tahminleme helper'i, butce risk tahmin kartlari, kural tabanli RegTech uyari motoru, dashboard akilli uyarilar bolumu ve islemlerde yuksek risk etiketi eklendi.
-
-
-## Sprint 4 Durumu
-Sprint 4 ile egitim amacli PISP/odeme emri simulasyonu, odeme formu ve sonuc karti; robo-danismanlik risk anketi, risk profili hesaplama ve portfoy dagilimi grafigi eklendi. Gercek odeme ve gercek yatirim tavsiyesi sunulmaz.
-
+## Egitim Amacli Sinirliliklar
+- Proje egitim amaclidir.
+- Gercek banka baglantisi yoktur.
+- Gercek odeme yapilmaz.
+- Gercek yatirim tavsiyesi degildir.
+- Mock/simulasyon veri kullanilir.
