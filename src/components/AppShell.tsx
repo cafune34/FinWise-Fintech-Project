@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,7 +35,7 @@ export default function AppShell({ title, description, children }: AppShellProps
         <aside className="border-b border-slate-800 bg-slate-900/70 p-4 backdrop-blur md:w-72 md:border-r md:border-b-0 md:p-6">
           <div className="mb-5">
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">FinWise</p>
-            <h1 className="mt-1 text-xl font-semibold text-white">Sprint 1 Demo</h1>
+            <h1 className="mt-1 text-xl font-semibold text-white">Sprint 2 Demo</h1>
           </div>
 
           <nav className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible">

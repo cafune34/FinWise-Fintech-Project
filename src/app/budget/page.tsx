@@ -1,26 +1,31 @@
-﻿import AppShell from "@/components/AppShell";
+import AppShell from "@/components/AppShell";
+import BudgetProgress from "@/components/BudgetProgress";
 import { mockBudgets } from "@/data/mockData";
-import { formatCurrencyTRY, formatPercent } from "@/lib/format";
+import { isBudgetExceeded } from "@/lib/finance";
 
 export default function BudgetPage() {
-  return (
-    <AppShell title="Butce" description="Kategori bazli butce takibi icin temel iskelet. Ileri analizler sonraki sprintte ele alinacak.">
-      <div className="grid gap-3">
-        {mockBudgets.map((budget) => {
-          const ratio = budget.spent / budget.limit;
+  const exceededBudgets = mockBudgets.filter((budget) => isBudgetExceeded(budget));
 
-          return (
-            <article key={budget.id} className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="capitalize text-base font-semibold text-white">{budget.category}</h3>
-                <span className="text-sm text-cyan-300">{formatPercent(ratio)}</span>
-              </div>
-              <p className="mt-2 text-sm text-slate-300">
-                {formatCurrencyTRY(budget.spent)} / {formatCurrencyTRY(budget.limit)}
-              </p>
-            </article>
-          );
-        })}
+  return (
+    <AppShell
+      title="Butce"
+      description="Kategori bazli butce takibi mock verilerle yapilir. Bu sprintte tahminleme yoktur, yalnizca mevcut durum gosterilir."
+    >
+      {exceededBudgets.length > 0 ? (
+        <article className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
+          <p className="font-medium">Butce asimi uyarisi</p>
+          <p className="mt-1">{exceededBudgets.length} kategoride harcama limiti asilmis durumda.</p>
+        </article>
+      ) : (
+        <article className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+          Tum kategoriler butce limitleri icinde gorunuyor.
+        </article>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {mockBudgets.map((budget) => (
+          <BudgetProgress key={budget.id} budget={budget} />
+        ))}
       </div>
     </AppShell>
   );
