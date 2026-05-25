@@ -38,6 +38,8 @@ export type PortfolioAllocation = {
 
 export type PaymentType = "fatura" | "transfer" | "abonelik";
 
+export type TransactionType = "gelir" | "gider" | "transfer";
+
 export type User = {
   id: string;
   fullName: string;
@@ -50,11 +52,12 @@ export type BankAccount = {
   id: string;
   userId: string;
   bankName: string;
+  accountName?: string;
   iban: string;
   balance: number;
   currency: "TRY";
   type: "vadesiz" | "birikim";
-  isMock: true;
+  isMock?: true;
 };
 
 export type Transaction = {
@@ -64,9 +67,10 @@ export type Transaction = {
   amount: number;
   category: TransactionCategory;
   direction: "in" | "out";
+  type?: TransactionType;
   occurredAt: string;
   description?: string;
-  isMock: true;
+  isMock?: true;
 };
 
 export type Budget = {
@@ -84,8 +88,22 @@ export type PaymentOrder = {
   payee: string;
   amount: number;
   dueDate: string;
-  status: "planlandi" | "isleme_alindi" | "beklemede" | "tamamlandi";
-  isMock: true;
+  status: "planlandi" | "isleme_alindi" | "beklemede" | "tamamlandi" | "reddedildi";
+  paymentType?: PaymentType;
+  sourceAccountId?: string;
+  referenceNumber?: string;
+  description?: string;
+  createdAt?: string;
+  isMock?: true;
+};
+
+export type RoboProfileResult = {
+  id: string;
+  score: number;
+  profile: RiskProfile;
+  allocation: PortfolioAllocation[];
+  answers: RoboAnswer[];
+  analyzedAt: string;
 };
 
 export type RegTechSeverity = "high" | "medium" | "low";

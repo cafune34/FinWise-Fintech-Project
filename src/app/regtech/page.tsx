@@ -1,17 +1,25 @@
+"use client";
+
+import { useMemo } from "react";
 import AppShell from "@/components/AppShell";
 import RiskAlertCard from "@/components/RiskAlertCard";
 import StatCard from "@/components/StatCard";
-import { mockBudgets, mockTransactions, mockUser } from "@/data/mockData";
 import { generateRegTechAlerts, getAlertSeverityCounts } from "@/lib/regtech";
+import { useFinanceData } from "@/lib/useFinanceData";
 
 export default function RegtechPage() {
-  const alerts = generateRegTechAlerts({
-    transactions: mockTransactions,
-    budgets: mockBudgets,
-    userId: mockUser.id,
-  });
+  const { transactions, budgetsWithSpending, user } = useFinanceData();
+  const alerts = useMemo(
+    () =>
+      generateRegTechAlerts({
+        transactions,
+        budgets: budgetsWithSpending,
+        userId: user.id,
+      }),
+    [budgetsWithSpending, transactions, user.id]
+  );
   const counts = getAlertSeverityCounts(alerts);
-  const transactionById = new Map(mockTransactions.map((transaction) => [transaction.id, transaction]));
+  const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
 
   return (
     <AppShell

@@ -14,7 +14,7 @@ FinWise V2, kişisel finans yönetimini masaüstü webde profesyonel bir kontrol
 
 ## Sprint 6: UI Redesign ve Türkçe Metin Temizliği
 
-Sprint 6, uygulamayı ödev/prototip hissinden çıkarıp kurumsal fintech paneli seviyesine yaklaştırır.
+Sprint 6, uygulamayı kurumsal fintech paneli seviyesine yaklaştırır.
 
 - AppShell masaüstü öncelikli finans paneline dönüştürülür.
 - Sidebar, üst bar, aktif menü ve kullanıcı özeti profesyonel hale getirilir.
@@ -25,13 +25,17 @@ Sprint 6, uygulamayı ödev/prototip hissinden çıkarıp kurumsal fintech panel
 - Kullanıcı arayüzündeki sprint, ders, uyarı ve deneme dili kaldırılır.
 - Recharts container ölçüleri düzenlenerek build uyarıları azaltılır.
 
+## Sprint 7: Veri Girişi ve Yerel Kalıcılık
+
+Sprint 7 tamamlandığında FinWise, tarayıcıda kalıcı veriyle çalışan ve kullanıcı girişi kabul eden ürün prototipine dönüşür.
+
+- LocalStorage tabanlı veri snapshot yapısı eklenir.
+- İşlem ekleme/silme, hesap ekleme ve bütçe limiti düzenleme akışları uygulanır.
+- Dashboard, grafikler, risk sinyalleri ve tahminler güncel yerel veriden hesaplanır.
+- Ödeme talimatı geçmişi ve yatırım profili sonucu kalıcı hale getirilir.
+- AppShell üzerinden başlangıç verisine iki adımlı dönüş kontrolü sunulur.
+
 ## V2 Sonraki Sprintler
-
-### Sprint 7: Veri Girişi ve Yerel Kalıcılık
-
-- Tarayıcı içinde kalıcı veri yönetimi eklenir.
-- İşlem ekleme/silme, hesap ekleme ve bütçe limiti düzenleme akışları tasarlanır.
-- Dashboard hesaplamaları kullanıcı verisine bağlanır.
 
 ### Sprint 8: Modül Derinleştirme
 
@@ -41,7 +45,7 @@ Sprint 6, uygulamayı ödev/prototip hissinden çıkarıp kurumsal fintech panel
 
 ### Sprint 9: Final Sunum Kalitesi
 
-- README, rapor, sunum planı ve demo akışı V2 görünümüne göre güncellenir.
+- README, rapor ve sunum planı V2 görünümüne göre güncellenir.
 - Ekran görüntüleri hazırlanır.
 - Eski V1 dokümanları gerekirse arşivlenir.
 

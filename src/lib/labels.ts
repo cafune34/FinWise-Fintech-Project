@@ -1,4 +1,4 @@
-import type { BankAccount, RegTechSeverity, TransactionCategory } from "@/types/finance";
+import type { BankAccount, PaymentOrder, RegTechSeverity, TransactionCategory } from "@/types/finance";
 
 export const categoryLabels: Record<TransactionCategory, string> = {
   market: "Market",
@@ -18,6 +18,14 @@ export const severityLabels: Record<RegTechSeverity, string> = {
   high: "Yüksek",
   medium: "Orta",
   low: "Düşük",
+};
+
+export const paymentStatusLabels: Record<PaymentOrder["status"], string> = {
+  planlandi: "Planlandı",
+  isleme_alindi: "İşleme Alındı",
+  beklemede: "Beklemede",
+  tamamlandi: "Tamamlandı",
+  reddedildi: "Reddedildi",
 };
 
 export function getAccountTypeLabel(type: BankAccount["type"]): string {

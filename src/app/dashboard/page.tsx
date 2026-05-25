@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
 import { ArrowRight, BadgeCheck, CreditCard, Gauge, ShieldCheck, TrendingUp, WalletCards } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import ChartCard from "@/components/ChartCard";
@@ -8,7 +11,6 @@ import StatCard from "@/components/StatCard";
 import TransactionTable from "@/components/TransactionTable";
 import ExpenseByCategoryChart from "@/components/dashboard/ExpenseByCategoryChart";
 import IncomeExpenseChart from "@/components/dashboard/IncomeExpenseChart";
-import { mockAccounts, mockBudgets, mockTransactions, mockUser } from "@/data/mockData";
 import {
   calculateMonthlyExpense,
   calculateMonthlyIncome,
@@ -21,6 +23,7 @@ import { forecastAllCategories, getRiskyForecastCategories } from "@/lib/forecas
 import { formatCurrencyTRY } from "@/lib/format";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
 import { generateRegTechAlerts } from "@/lib/regtech";
+import { useFinanceData } from "@/lib/useFinanceData";
 import type { TransactionCategory } from "@/types/finance";
 
 const monthLabels = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
@@ -47,25 +50,33 @@ const quickActions = [
 ];
 
 export default function DashboardPage() {
-  const referenceDate = new Date();
-  const totalBalance = calculateTotalBalance(mockAccounts);
-  const monthlyIncome = calculateMonthlyIncome(mockTransactions, referenceDate);
-  const monthlyExpense = calculateMonthlyExpense(mockTransactions, referenceDate);
-  const netCashFlow = calculateNetCashFlow(mockTransactions, referenceDate);
-  const forecastResults = forecastAllCategories(mockTransactions, mockBudgets, { referenceDate });
+  const { accounts, transactions, budgetsWithSpending, user } = useFinanceData();
+  const referenceDate = useMemo(() => new Date(), []);
+  const totalBalance = calculateTotalBalance(accounts);
+  const monthlyIncome = calculateMonthlyIncome(transactions, referenceDate);
+  const monthlyExpense = calculateMonthlyExpense(transactions, referenceDate);
+  const netCashFlow = calculateNetCashFlow(transactions, referenceDate);
+  const forecastResults = useMemo(
+    () => forecastAllCategories(transactions, budgetsWithSpending, { referenceDate }),
+    [budgetsWithSpending, referenceDate, transactions]
+  );
   const riskyForecasts = getRiskyForecastCategories(forecastResults, 3);
-  const regtechAlerts = generateRegTechAlerts({
-    transactions: mockTransactions,
-    budgets: mockBudgets,
-    userId: mockUser.id,
-    referenceDate,
-  });
+  const regtechAlerts = useMemo(
+    () =>
+      generateRegTechAlerts({
+        transactions,
+        budgets: budgetsWithSpending,
+        userId: user.id,
+        referenceDate,
+      }),
+    [budgetsWithSpending, referenceDate, transactions, user.id]
+  );
   const priorityAlerts = regtechAlerts.slice(0, 3);
-  const transactionById = new Map(mockTransactions.map((transaction) => [transaction.id, transaction]));
-  const recentTransactions = getRecentTransactions(mockTransactions, 8);
+  const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
+  const recentTransactions = getRecentTransactions(transactions, 8);
   const healthScore = Math.max(62, Math.min(94, Math.round(78 + (netCashFlow > 0 ? 8 : -6) - riskyForecasts.length * 2)));
 
-  const categoryTotals = getCategoryExpenseTotals(mockTransactions, referenceDate);
+  const categoryTotals = getCategoryExpenseTotals(transactions, referenceDate);
   const categoryExpenseData = Object.entries(categoryTotals)
     .filter(([category, value]) => value > 0 && category !== "maas")
     .map(([category, value]) => ({
@@ -80,8 +91,8 @@ export default function DashboardPage() {
 
     return {
       month: monthLabels[monthDate.getMonth()],
-      gelir: calculateMonthlyIncome(mockTransactions, monthDate),
-      gider: calculateMonthlyExpense(mockTransactions, monthDate),
+      gelir: calculateMonthlyIncome(transactions, monthDate),
+      gider: calculateMonthlyExpense(transactions, monthDate),
     };
   });
 
@@ -97,7 +108,7 @@ export default function DashboardPage() {
               <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Finansal sağlık skoru</p>
               <h3 className="mt-2 text-4xl font-semibold text-white">{healthScore}/100</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300 xl:max-w-4xl">
-                Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde aylık finans görünümü dengeli.
+                Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde aylık finans görünümü izlenebilir durumda.
               </p>
             </div>
             <div className="relative h-36 w-36 shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 p-3">
@@ -170,12 +181,13 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid w-full gap-4 lg:grid-cols-3">
-        {mockAccounts.map((account) => (
+        {accounts.map((account) => (
           <article key={account.id} className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{getAccountTypeLabel(account.type)}</p>
                 <h3 className="mt-1 text-base font-semibold text-white">{account.bankName}</h3>
+                <p className="mt-1 text-sm text-slate-400">{account.accountName}</p>
               </div>
               <WalletCards className="h-5 w-5 text-cyan-300" />
             </div>
@@ -205,7 +217,7 @@ export default function DashboardPage() {
             Tüm işlemler
           </Link>
         </div>
-        <TransactionTable transactions={recentTransactions} accounts={mockAccounts} />
+        <TransactionTable transactions={recentTransactions} accounts={accounts} />
       </section>
 
       <section className="w-full rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">

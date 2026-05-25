@@ -24,7 +24,7 @@ export default function PaymentsPage() {
             <h3 className="text-base font-semibold text-white">Durum takibi</h3>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            İşleme Alındı, Beklemede ve Tamamlandı durumlarıyla operasyonel görünüm korunur.
+            Beklemede, İşleme Alındı, Tamamlandı ve Reddedildi durumlarıyla operasyonel görünüm korunur.
           </p>
         </article>
       </section>

@@ -1,15 +1,25 @@
+"use client";
+
+import { useMemo } from "react";
 import AppShell from "@/components/AppShell";
 import BudgetProgress from "@/components/BudgetProgress";
 import ForecastCard from "@/components/ForecastCard";
 import StatCard from "@/components/StatCard";
-import { mockBudgets, mockTransactions } from "@/data/mockData";
 import { forecastAllCategories, getRiskyForecastCategories } from "@/lib/forecasting";
 import { isBudgetExceeded } from "@/lib/finance";
+import { useFinanceData } from "@/lib/useFinanceData";
 
 export default function BudgetPage() {
-  const exceededBudgets = mockBudgets.filter((budget) => isBudgetExceeded(budget));
-  const forecasts = forecastAllCategories(mockTransactions, mockBudgets);
-  const riskyForecasts = getRiskyForecastCategories(forecasts);
+  const { transactions, budgetsWithSpending, updateBudgetLimit } = useFinanceData();
+  const exceededBudgets = useMemo(
+    () => budgetsWithSpending.filter((budget) => isBudgetExceeded(budget)),
+    [budgetsWithSpending]
+  );
+  const forecasts = useMemo(
+    () => forecastAllCategories(transactions, budgetsWithSpending),
+    [budgetsWithSpending, transactions]
+  );
+  const riskyForecasts = useMemo(() => getRiskyForecastCategories(forecasts), [forecasts]);
 
   return (
     <AppShell
@@ -17,7 +27,7 @@ export default function BudgetPage() {
       description="Kategori limitlerini, kullanım oranlarını ve gelecek ay bütçe sinyallerini izleyin."
     >
       <div className="grid w-full gap-4 md:grid-cols-3">
-        <StatCard title="Aktif kategori" value={String(mockBudgets.length)} description="Takip edilen bütçe alanı" />
+        <StatCard title="Aktif kategori" value={String(budgetsWithSpending.length)} description="Takip edilen bütçe alanı" />
         <StatCard
           title="Limit aşımı"
           value={String(exceededBudgets.length)}
@@ -52,8 +62,13 @@ export default function BudgetPage() {
       </section>
 
       <div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
-        {mockBudgets.map((budget) => (
-          <BudgetProgress key={budget.id} budget={budget} />
+        {budgetsWithSpending.map((budget) => (
+          <BudgetProgress
+            key={`${budget.id}-${budget.limit}`}
+            budget={budget}
+            editable
+            onUpdateLimit={updateBudgetLimit}
+          />
         ))}
       </div>
     </AppShell>

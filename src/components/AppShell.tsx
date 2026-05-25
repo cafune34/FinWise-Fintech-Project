@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
-import type { ComponentType, ReactNode } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
 import {
   Bell,
   ChartPie,
@@ -13,11 +13,15 @@ import {
   Landmark,
   LayoutDashboard,
   ListChecks,
+  RefreshCcw,
   Search,
   ShieldCheck,
   UserRound,
   WalletCards,
 } from "lucide-react";
+import { calculateNetCashFlow, calculateTotalBalance } from "@/lib/finance";
+import { formatCurrencyTRY } from "@/lib/format";
+import { useFinanceData } from "@/lib/useFinanceData";
 
 type NavItem = {
   label: string;
@@ -43,17 +47,31 @@ type AppShellProps = {
 
 export default function AppShell({ title, description, children }: AppShellProps) {
   const pathname = usePathname();
+  const { accounts, transactions, resetToSeed } = useFinanceData();
+  const [confirmReset, setConfirmReset] = useState(false);
   const today = new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   }).format(new Date());
+  const totalBalance = calculateTotalBalance(accounts);
+  const netCashFlow = calculateNetCashFlow(transactions);
+
+  function handleResetClick() {
+    if (!confirmReset) {
+      setConfirmReset(true);
+      return;
+    }
+
+    resetToSeed();
+    setConfirmReset(false);
+  }
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100">
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,#070b14_0%,#0c1220_48%,#111827_100%)]" />
       <div className="flex min-h-screen w-full flex-col lg:flex-row">
-        <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
+        <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/30 bg-cyan-300/10">
               <Landmark className="h-5 w-5 text-cyan-300" />
@@ -69,8 +87,10 @@ export default function AppShell({ title, description, children }: AppShellProps
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Portföy Özeti</p>
               <CircleDollarSign className="h-4 w-4 text-cyan-300" />
             </div>
-            <p className="mt-3 text-2xl font-semibold text-white">156.000 TL</p>
-            <p className="mt-1 text-sm text-emerald-300">Nakit akışı dengeli</p>
+            <p className="mt-3 text-2xl font-semibold text-white">{formatCurrencyTRY(totalBalance)}</p>
+            <p className={clsx("mt-1 text-sm", netCashFlow >= 0 ? "text-emerald-300" : "text-rose-300")}>
+              Nakit akışı {netCashFlow >= 0 ? "pozitif" : "yakın takipte"}
+            </p>
           </div>
 
           <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
@@ -96,7 +116,7 @@ export default function AppShell({ title, description, children }: AppShellProps
             })}
           </nav>
 
-          <div className="mt-5 hidden rounded-xl border border-white/10 bg-[#111827]/80 p-4 lg:mt-auto lg:block">
+          <div className="mt-5 rounded-xl border border-white/10 bg-[#111827]/80 p-4 lg:mt-auto">
             <div className="flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-cyan-300/15 text-sm font-semibold text-cyan-200">
                 AD
@@ -115,6 +135,25 @@ export default function AppShell({ title, description, children }: AppShellProps
                 <p className="text-slate-400">Plan</p>
                 <p className="mt-1 font-semibold text-cyan-300">Aktif</p>
               </div>
+            </div>
+
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={handleResetClick}
+                className={clsx(
+                  "flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium transition",
+                  confirmReset
+                    ? "border-amber-300/50 bg-amber-300/10 text-amber-100 hover:bg-amber-300/15"
+                    : "border-white/10 bg-slate-950/50 text-slate-200 hover:border-cyan-300/40 hover:text-cyan-200"
+                )}
+              >
+                <RefreshCcw className="h-4 w-4" />
+                {confirmReset ? "Onayla ve yenile" : "Verileri başlangıç durumuna al"}
+              </button>
+              <p className="mt-2 text-xs leading-5 text-slate-400">
+                Bu işlem kayıtlı yerel verileri yeniler.
+              </p>
             </div>
           </div>
         </aside>
