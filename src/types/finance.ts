@@ -11,11 +11,38 @@
   | "yatirim"
   | "diger";
 
+export type RiskProfile = "dusuk" | "orta" | "yuksek";
+
+export type RoboAnswerOption = {
+  value: string;
+  label: string;
+  score: 1 | 2 | 3;
+};
+
+export type RoboQuestion = {
+  id: string;
+  question: string;
+  options: RoboAnswerOption[];
+};
+
+export type RoboAnswer = {
+  questionId: string;
+  selectedValue: string;
+  score: number;
+};
+
+export type PortfolioAllocation = {
+  asset: string;
+  percentage: number;
+};
+
+export type PaymentType = "fatura" | "transfer" | "abonelik";
+
 export type User = {
   id: string;
   fullName: string;
   email: string;
-  riskProfile: "dusuk" | "orta" | "yuksek";
+  riskProfile: RiskProfile;
   createdAt: string;
 };
 
@@ -75,7 +102,7 @@ export type RegTechAlert = {
   id: string;
   userId: string;
   transactionId?: string;
-  level: "dusuk" | "orta" | "yuksek";
+  level: RiskProfile;
   severity?: RegTechSeverity;
   ruleCode?: RegTechRuleCode;
   title?: string;
@@ -83,3 +110,4 @@ export type RegTechAlert = {
   createdAt: string;
   resolved: boolean;
 };
+

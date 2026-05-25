@@ -54,3 +54,7 @@ Sprint 2 ile dashboard kartlari, finans hesaplama helper fonksiyonlari, hesap oz
 ## Sprint 3 Durumu
 Sprint 3 ile son 3 ay ortalamasi + kategori katsayisi kullanan harcama tahminleme helper'i, butce risk tahmin kartlari, kural tabanli RegTech uyari motoru, dashboard akilli uyarilar bolumu ve islemlerde yuksek risk etiketi eklendi.
 
+
+## Sprint 4 Durumu
+Sprint 4 ile egitim amacli PISP/odeme emri simulasyonu, odeme formu ve sonuc karti; robo-danismanlik risk anketi, risk profili hesaplama ve portfoy dagilimi grafigi eklendi. Gercek odeme ve gercek yatirim tavsiyesi sunulmaz.
+
