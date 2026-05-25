@@ -26,7 +26,7 @@ const colors = ["#22d3ee", "#60a5fa", "#2dd4bf", "#34d399", "#f59e0b", "#fb7185"
 
 export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartProps) {
   return (
-    <ResponsiveContainer width="100%" height={260} minWidth={280} minHeight={240}>
+    <ResponsiveContainer width="100%" height={300} minWidth={280} minHeight={280}>
       <BarChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />

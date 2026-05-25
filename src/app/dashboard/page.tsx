@@ -90,31 +90,31 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
-      <section className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-        <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/20">
+      <section className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)] 2xl:grid-cols-[minmax(0,1.35fr)_minmax(520px,0.65fr)]">
+        <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Finansal sağlık skoru</p>
               <h3 className="mt-2 text-4xl font-semibold text-white">{healthScore}/100</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde görünüm dengeli.
+              <p className="mt-2 text-sm leading-6 text-slate-300 xl:max-w-4xl">
+                Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde aylık finans görünümü dengeli.
               </p>
             </div>
             <div className="relative h-36 w-36 shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 p-3">
               <div className="grid h-full w-full place-items-center rounded-full bg-slate-950/80">
                 <div className="text-center">
                   <BadgeCheck className="mx-auto h-6 w-6 text-cyan-300" />
-                  <p className="mt-2 text-sm font-semibold text-cyan-200">Güçlü</p>
+                  <p className="mt-2 text-sm font-semibold text-cyan-200">Dengeli</p>
                 </div>
               </div>
             </div>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-white/10 bg-[#0b1220]/80 p-5 shadow-2xl shadow-black/20">
+        <article className="rounded-2xl border border-white/10 bg-[#0b1220]/80 p-6 shadow-2xl shadow-black/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-400">Aylık net görünüm</p>
+              <p className="text-sm text-slate-400">Nakit akışı</p>
               <p className={`mt-2 text-2xl font-semibold ${netCashFlow >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
                 {formatCurrencyTRY(netCashFlow)}
               </p>
@@ -134,7 +134,7 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Toplam Bakiye" value={formatCurrencyTRY(totalBalance)} description="Tüm bağlı hesapların toplam görünümü" />
         <StatCard title="Aylık Gelir" value={formatCurrencyTRY(monthlyIncome)} tone="positive" description="Bu ay hesaba geçen tutar" />
         <StatCard title="Aylık Gider" value={formatCurrencyTRY(monthlyExpense)} tone="negative" description="Bu ay çıkan toplam tutar" />
@@ -146,7 +146,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid w-full gap-4 lg:grid-cols-3 2xl:grid-cols-3">
         {quickActions.map((action) => {
           const Icon = action.icon;
 
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             <Link
               key={action.href}
               href={action.href}
-              className="group rounded-xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-cyan-300/40 hover:bg-cyan-300/10"
+              className="group rounded-xl border border-white/10 bg-white/[0.045] p-5 transition hover:border-cyan-300/40 hover:bg-cyan-300/10"
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="grid h-11 w-11 place-items-center rounded-xl bg-cyan-300/10 text-cyan-300">
@@ -169,9 +169,9 @@ export default function DashboardPage() {
         })}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid w-full gap-4 lg:grid-cols-3">
         {mockAccounts.map((account) => (
-          <article key={account.id} className="rounded-xl border border-white/10 bg-white/[0.045] p-4 shadow-xl shadow-black/10">
+          <article key={account.id} className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{getAccountTypeLabel(account.type)}</p>
@@ -185,7 +185,7 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-2">
+      <section className="grid w-full gap-5 xl:grid-cols-2">
         <ChartCard title="Kategori Bazlı Harcama" description="Bu ay giderlerinin kategori kırılımı.">
           <ExpenseByCategoryChart data={categoryExpenseData} />
         </ChartCard>
@@ -195,7 +195,7 @@ export default function DashboardPage() {
         </ChartCard>
       </section>
 
-      <section className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+      <section className="w-full rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-base font-semibold text-white">Son İşlemler</h3>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         <TransactionTable transactions={recentTransactions} accounts={mockAccounts} />
       </section>
 
-      <section className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+      <section className="w-full rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-semibold text-white">Akıllı Uyarılar</h3>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-slate-200">Öncelikli Risk Uyarıları</h4>
             {priorityAlerts.length > 0 ? (

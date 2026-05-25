@@ -16,7 +16,7 @@ export default function BudgetPage() {
       title="Bütçe Planı"
       description="Kategori limitlerini, kullanım oranlarını ve gelecek ay bütçe sinyallerini izleyin."
     >
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid w-full gap-4 md:grid-cols-3">
         <StatCard title="Aktif kategori" value={String(mockBudgets.length)} description="Takip edilen bütçe alanı" />
         <StatCard
           title="Limit aşımı"
@@ -27,7 +27,7 @@ export default function BudgetPage() {
         <StatCard title="Risk sinyali" value={String(riskyForecasts.length)} description="Gelecek ay için öne çıkan alan" />
       </div>
 
-      <section className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+      <section className="w-full rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-base font-semibold text-white">Gelecek Ay Riskli Kategoriler</h3>
@@ -39,7 +39,7 @@ export default function BudgetPage() {
         </div>
 
         {riskyForecasts.length > 0 ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {riskyForecasts.map((forecast) => (
               <ForecastCard key={forecast.category} forecast={forecast} />
             ))}
@@ -51,7 +51,7 @@ export default function BudgetPage() {
         )}
       </section>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         {mockBudgets.map((budget) => (
           <BudgetProgress key={budget.id} budget={budget} />
         ))}

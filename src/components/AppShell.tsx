@@ -52,8 +52,8 @@ export default function AppShell({ title, description, children }: AppShellProps
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100">
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,#070b14_0%,#0c1220_48%,#111827_100%)]" />
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col lg:flex-row">
-        <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:flex-col lg:border-r lg:border-b-0 lg:p-6">
+      <div className="flex min-h-screen w-full flex-col lg:flex-row">
+        <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/30 bg-cyan-300/10">
               <Landmark className="h-5 w-5 text-cyan-300" />
@@ -70,7 +70,7 @@ export default function AppShell({ title, description, children }: AppShellProps
               <CircleDollarSign className="h-4 w-4 text-cyan-300" />
             </div>
             <p className="mt-3 text-2xl font-semibold text-white">156.000 TL</p>
-            <p className="mt-1 text-sm text-emerald-300">Aylık görünüm güçlü</p>
+            <p className="mt-1 text-sm text-emerald-300">Nakit akışı dengeli</p>
           </div>
 
           <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
@@ -103,7 +103,7 @@ export default function AppShell({ title, description, children }: AppShellProps
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">Ayşe Demir</p>
-                <p className="truncate text-xs text-slate-400">Premium hesap görünümü</p>
+                <p className="truncate text-xs text-slate-400">Hesap özeti</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -119,18 +119,18 @@ export default function AppShell({ title, description, children }: AppShellProps
           </div>
         </aside>
 
-        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-          <header className="mb-7 rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 shadow-2xl shadow-black/20 backdrop-blur">
+        <main className="min-h-screen w-full min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7 xl:px-10 2xl:px-12">
+          <header className="mb-7 w-full rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 shadow-2xl shadow-black/20 backdrop-blur">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Kontrol Merkezi</p>
                 <h2 className="mt-1 text-2xl font-semibold text-white">{title}</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{description}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300 xl:max-w-5xl">{description}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300">
                   <Search className="h-4 w-4 text-slate-500" />
-                  Finansal görünüm
+                  Aylık finans görünümü
                 </div>
                 <div className="flex h-10 items-center rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300">
                   {today}
@@ -153,7 +153,7 @@ export default function AppShell({ title, description, children }: AppShellProps
             </div>
           </header>
 
-          <section className="space-y-5 pb-10">{children}</section>
+          <section className="w-full space-y-5 pb-10">{children}</section>
         </main>
       </div>
     </div>

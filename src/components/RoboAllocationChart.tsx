@@ -11,9 +11,9 @@ const COLORS = ["#22d3ee", "#2dd4bf", "#60a5fa", "#f59e0b"];
 
 export default function RoboAllocationChart({ data }: RoboAllocationChartProps) {
   return (
-    <div className="h-[320px] min-h-[320px] rounded-xl border border-white/10 bg-white/[0.045] p-4 shadow-xl shadow-black/10">
+    <div className="h-[360px] min-h-[360px] rounded-xl border border-white/10 bg-white/[0.045] p-4 shadow-xl shadow-black/10">
       <p className="mb-3 text-sm font-medium text-slate-200">Önerilen Dağılım</p>
-      <ResponsiveContainer width="100%" height={260} minWidth={280} minHeight={240}>
+      <ResponsiveContainer width="100%" height={300} minWidth={280} minHeight={280}>
         <PieChart>
           <Pie
             data={data}

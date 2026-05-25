@@ -23,7 +23,7 @@ export default function TransactionsPage() {
       title="İşlemler"
       description="Gelir, gider ve transfer hareketlerini kategori, hesap ve işlem tipine göre inceleyin."
     >
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid w-full gap-4 md:grid-cols-3">
         <StatCard title="Toplam İşlem" value={String(mockTransactions.length)} description="Listelenen finans hareketi" />
         <StatCard title="Gelir Toplamı" value={formatCurrencyTRY(income)} tone="positive" description="Tüm gelir kayıtları" />
         <StatCard title="Gider Toplamı" value={formatCurrencyTRY(expense)} tone="negative" description="Tüm gider kayıtları" />

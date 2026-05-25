@@ -41,3 +41,11 @@ FinWise arayüzünü masaüstü webde profesyonel görünen kurumsal fintech pan
 - Sprint 7'de veri girişi ve yerel kalıcılık eklenebilir.
 - Ödeme talimat geçmişi, risk aksiyon önerileri ve yatırım profili geçmişi sonraki sprintlerde derinleştirilebilir.
 - V2 final dokümantasyonu ve ekran görüntüleri Sprint 9 kapsamına bırakılabilir.
+
+## Sprint 6.1 - Desktop Layout Refinement
+
+- Desktop layout genişletildi.
+- Sidebar sol sabit panel mantığına çekildi.
+- Ana içerik full-width kullanıma geçirildi.
+- Dashboard ve modül sayfaları dolgun grid yapısına alındı.
+- Landing page iki kolon premium girişe dönüştürüldü.

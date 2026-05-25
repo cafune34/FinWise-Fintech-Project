@@ -18,14 +18,14 @@ export default function RegtechPage() {
       title="Risk İzleme"
       description="Harcama davranışı, bütçe kullanımı ve işlem yoğunluğu üzerinden öncelikli risk sinyallerini takip edin."
     >
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Toplam Uyarı" value={String(counts.total)} />
         <StatCard title="Yüksek" value={String(counts.high)} tone={counts.high > 0 ? "negative" : "neutral"} />
         <StatCard title="Orta" value={String(counts.medium)} tone={counts.medium > 0 ? "neutral" : "positive"} />
         <StatCard title="Düşük" value={String(counts.low)} tone="positive" />
       </section>
 
-      <section className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+      <section className="w-full rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-semibold text-white">Uyarı Listesi</h3>
@@ -36,7 +36,7 @@ export default function RegtechPage() {
           </span>
         </div>
         {alerts.length > 0 ? (
-          <div className="grid gap-3 xl:grid-cols-2">
+          <div className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
             {alerts.map((alert) => (
               <RiskAlertCard
                 key={alert.id}

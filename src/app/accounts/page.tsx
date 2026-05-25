@@ -18,7 +18,7 @@ export default function AccountsPage() {
       title="Hesaplar"
       description="Banka hesapları, bakiye dağılımı ve son hareketler kurumsal bir görünümle izlenir."
     >
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid w-full gap-5 lg:grid-cols-3">
         {mockAccounts.map((account) => {
           const recentForAccount = getRecentTransactions(
             filterTransactionsByAccount(mockTransactions, account.id),
@@ -26,7 +26,7 @@ export default function AccountsPage() {
           );
 
           return (
-            <article key={account.id} className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+            <article key={account.id} className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-xl shadow-black/10">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-cyan-300">{getAccountTypeLabel(account.type)}</p>
@@ -35,7 +35,7 @@ export default function AccountsPage() {
                 <WalletCards className="h-6 w-6 text-cyan-300" />
               </div>
 
-              <div className="mt-5 rounded-xl border border-white/10 bg-slate-950/50 p-4">
+              <div className="mt-6 rounded-xl border border-white/10 bg-slate-950/50 p-5">
                 <p className="text-sm text-slate-400">Kullanılabilir bakiye</p>
                 <p className="mt-2 text-2xl font-semibold text-cyan-200">{formatCurrencyTRY(account.balance)}</p>
                 <p className="mt-3 text-sm text-slate-400">IBAN: {maskIban(account.iban)}</p>

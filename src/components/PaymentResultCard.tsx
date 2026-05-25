@@ -24,11 +24,11 @@ export default function PaymentResultCard({ result, warnings }: PaymentResultCar
   };
 
   return (
-    <article className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
+    <article className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-6 shadow-xl shadow-black/10">
       <h3 className="text-base font-semibold text-emerald-200">Talimat oluşturuldu</h3>
       <p className="mt-2 text-sm font-medium text-white">{result.message}</p>
 
-      <div className="mt-3 grid gap-2 text-sm text-slate-200 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 text-sm text-slate-200 2xl:grid-cols-2">
         <p>
           Referans numarası: <span className="font-medium text-cyan-300">{result.referenceNumber}</span>
         </p>

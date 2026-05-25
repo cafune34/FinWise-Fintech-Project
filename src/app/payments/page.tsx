@@ -8,7 +8,7 @@ export default function PaymentsPage() {
       title="Ödeme Talimatları"
       description="Alıcı, kaynak hesap ve tutar bilgisiyle takip edilebilir ödeme talimatları oluşturun."
     >
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid w-full gap-4 lg:grid-cols-2">
         <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
           <div className="flex items-center gap-3">
             <FileCheck2 className="h-5 w-5 text-cyan-300" />
