@@ -1,23 +1,20 @@
-﻿import AppShell from "@/components/AppShell";
-import { mockPaymentOrders } from "@/data/mockData";
-import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
+import AppShell from "@/components/AppShell";
 
 export default function PaymentsPage() {
   return (
     <AppShell
       title="Odeme Simulasyonu"
-      description="Gercek odeme altyapisi yerine, egitim amacli planli odeme simulasyon kayitlari gosterilir."
+      description="Odeme modulu Sprint 4 kapsaminda detaylandirilacaktir."
     >
-      <div className="grid gap-3">
-        {mockPaymentOrders.map((order) => (
-          <article key={order.id} className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-base font-semibold text-white">{order.payee}</h3>
-            <p className="mt-1 text-sm text-slate-400">Vade: {formatDateTR(order.dueDate)}</p>
-            <p className="mt-2 text-lg font-semibold text-cyan-300">{formatCurrencyTRY(order.amount)}</p>
-            <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">Durum: {order.status}</p>
-          </article>
-        ))}
-      </div>
+      <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h3 className="text-base font-semibold text-white">Yakinda Gelistirilecek</h3>
+        <p className="mt-2 text-sm text-slate-300">
+          Planli odeme akislarinin detay ekranlari bir sonraki asamalarda eklenecektir.
+        </p>
+        <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          Not: Bu projede gercek odeme altyapisi yoktur, islevler egitim amacli simulasyon olarak kalacaktir.
+        </p>
+      </article>
     </AppShell>
   );
 }

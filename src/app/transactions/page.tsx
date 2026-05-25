@@ -1,31 +1,22 @@
-﻿import AppShell from "@/components/AppShell";
-import { mockTransactions } from "@/data/mockData";
-import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
+import AppShell from "@/components/AppShell";
+import TransactionFilters from "@/components/TransactionFilters";
+import { mockAccounts, mockTransactions } from "@/data/mockData";
 
 export default function TransactionsPage() {
-  const preview = mockTransactions.slice(0, 12);
+  const sortedTransactions = [...mockTransactions].sort(
+    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+  );
 
   return (
     <AppShell
       title="Islemler"
-      description="Islem hareketleri simulasyon verisinden beslenir. Sprint 1 kapsaminda sadece temel listeleme sunulur."
+      description="Tum mock islem hareketleri tablo halinde sunulur. Kategori, islem tipi ve hesap bazli filtreleme desteklenir."
     >
-      <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-        <p className="mb-3 text-sm text-slate-400">Toplam {mockTransactions.length} mock islem kaydi bulunuyor.</p>
-        <ul className="space-y-2">
-          {preview.map((txn) => (
-            <li key={txn.id} className="flex items-center justify-between rounded-lg bg-slate-800/70 px-3 py-2 text-sm">
-              <div>
-                <p className="text-white">{txn.title}</p>
-                <p className="text-slate-400">{formatDateTR(txn.occurredAt)} - {txn.category}</p>
-              </div>
-              <p className={txn.direction === "in" ? "font-medium text-emerald-300" : "font-medium text-rose-300"}>
-                {txn.direction === "in" ? "+" : "-"}{formatCurrencyTRY(txn.amount)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <p className="text-sm text-slate-400">
+        Islem tipi filtresinde gelir/gider secilebilir. Transfer kayitlari kategori filtresi ile ayristirilabilir.
+      </p>
+
+      <TransactionFilters transactions={sortedTransactions} accounts={mockAccounts} />
     </AppShell>
   );
 }
