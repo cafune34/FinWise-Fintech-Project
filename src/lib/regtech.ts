@@ -94,8 +94,8 @@ export function generateRegTechAlerts({
           userId,
           severity: "high",
           ruleCode: "LARGE_TRANSACTION",
-          title: "Yuksek Tutarli Islem",
-          reason: `Tek islem tutari 10.000 TL esigini asti (${transaction.amount.toFixed(0)} TL).`,
+          title: "Yüksek Tutarlı İşlem",
+          reason: `Tek işlem tutarı 10.000 TL eşiğini aştı (${transaction.amount.toFixed(0)} TL).`,
           transactionId: transaction.id,
           createdAt: transaction.occurredAt,
         })
@@ -113,8 +113,8 @@ export function generateRegTechAlerts({
         userId,
         severity: "high",
         ruleCode: "MONTHLY_EXPENSE_OVER_INCOME",
-        title: "Nakit Akisi Riski",
-        reason: `Aylik gider (${monthlyExpense.toFixed(0)} TL), aylik geliri (${monthlyIncome.toFixed(0)} TL) asti.`,
+        title: "Nakit Akışı Riski",
+        reason: `Aylık gider (${monthlyExpense.toFixed(0)} TL), aylık geliri (${monthlyIncome.toFixed(0)} TL) aştı.`,
         createdAt: referenceDate.toISOString(),
       })
     );
@@ -128,8 +128,8 @@ export function generateRegTechAlerts({
           userId,
           severity: "medium",
           ruleCode: "BUDGET_EXCEEDED",
-          title: "Butce Asimi",
-          reason: `${budget.category} kategorisinde harcama limiti asildi.`,
+          title: "Bütçe Aşımı",
+          reason: `${budget.category} kategorisinde harcama limiti aşıldı.`,
           createdAt: referenceDate.toISOString(),
         })
       );
@@ -155,8 +155,8 @@ export function generateRegTechAlerts({
           userId,
           severity: "medium",
           ruleCode: "TRANSFER_DENSITY",
-          title: "Yuksek Transfer Yogunlugu",
-          reason: `Ayni gun icinde ${dayTransfers.length} transfer kaydi olustu.`,
+          title: "Yüksek Transfer Yoğunluğu",
+          reason: `Aynı gün içinde ${dayTransfers.length} transfer kaydı oluştu.`,
           transactionId: sample?.id,
           createdAt: sample?.occurredAt ?? `${dateKey}T00:00:00.000Z`,
         })
@@ -175,8 +175,8 @@ export function generateRegTechAlerts({
           userId,
           severity: "medium",
           ruleCode: "NIGHT_HIGH_AMOUNT",
-          title: "Riskli Saatte Yuksek Islem",
-          reason: `00:00-05:00 araliginda 5.000 TL uzeri islem tespit edildi (${transaction.amount.toFixed(0)} TL).`,
+          title: "Riskli Saatte Yüksek İşlem",
+          reason: `00:00-05:00 aralığında 5.000 TL üzeri işlem tespit edildi (${transaction.amount.toFixed(0)} TL).`,
           transactionId: transaction.id,
           createdAt: transaction.occurredAt,
         })
@@ -219,8 +219,8 @@ export function generateRegTechAlerts({
             userId,
             severity,
             ruleCode: "REPEATING_MERCHANT",
-            title: "Tekrarlayan Alici Odemesi",
-            reason: `${merchantName} alicisina 24 saat icinde ${clusterSize} odeme yapildi.`,
+            title: "Tekrarlayan Alıcı Ödemesi",
+            reason: `${merchantName} alıcısına 24 saat içinde ${clusterSize} ödeme yapıldı.`,
             transactionId: firstTransaction.id,
             createdAt: firstTransaction.occurredAt,
           })

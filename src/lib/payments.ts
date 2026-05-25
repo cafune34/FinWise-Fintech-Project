@@ -16,9 +16,9 @@ export type PaymentValidationResult = {
 };
 
 export type PaymentSimulationResult = {
-  status: "simule_edildi";
+  status: "isleme_alindi" | "beklemede" | "tamamlandi";
   referenceNumber: string;
-  simulatedAt: string;
+  createdAt: string;
   paymentType: PaymentType;
   paymentTypeLabel: string;
   sourceAccountId: string;
@@ -62,7 +62,7 @@ export function validatePaymentOrder(input: PaymentOrderInput, accounts: BankAcc
   }
 
   if (sourceAccount && input.amount > sourceAccount.balance) {
-    warnings.push("Girilen tutar kaynak hesap bakiyesinden büyüktür. İşlem simülasyon olarak kaydedilecektir.");
+    warnings.push("Girilen tutar kaynak hesap bakiyesinden büyüktür. Talimat beklemede olarak işaretlendi.");
   }
 
   return {
@@ -74,14 +74,15 @@ export function validatePaymentOrder(input: PaymentOrderInput, accounts: BankAcc
 }
 
 export function simulatePaymentOrder(input: PaymentOrderInput, sourceAccount: BankAccount): PaymentSimulationResult {
-  const referenceNumber = `SIM-${Date.now()}-${Math.floor(Math.random() * 1000)
+  const referenceNumber = `FW-${Date.now()}-${Math.floor(Math.random() * 1000)
     .toString()
     .padStart(3, "0")}`;
+  const status: PaymentSimulationResult["status"] = input.amount > sourceAccount.balance ? "beklemede" : "isleme_alindi";
 
   return {
-    status: "simule_edildi",
+    status,
     referenceNumber,
-    simulatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
     paymentType: input.paymentType,
     paymentTypeLabel: getPaymentTypeLabel(input.paymentType),
     sourceAccountId: sourceAccount.id,
@@ -90,7 +91,7 @@ export function simulatePaymentOrder(input: PaymentOrderInput, sourceAccount: Ba
     amount: input.amount,
     description: input.description?.trim() || undefined,
     isRealPayment: false,
-    message: "Ödeme emri simüle edildi",
+    message: "Talimat oluşturuldu",
   };
 }
 

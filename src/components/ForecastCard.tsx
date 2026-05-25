@@ -1,30 +1,16 @@
 import { formatCurrencyTRY } from "@/lib/format";
+import { categoryLabels } from "@/lib/labels";
 import type { CategoryForecast } from "@/lib/forecasting";
-import type { TransactionCategory } from "@/types/finance";
 
 type ForecastCardProps = {
   forecast: CategoryForecast;
-};
-
-const categoryLabels: Record<TransactionCategory, string> = {
-  market: "Market",
-  ulasim: "Ulasim",
-  fatura: "Fatura",
-  egitim: "Egitim",
-  eglence: "Eglence",
-  saglik: "Saglik",
-  kira: "Kira",
-  maas: "Maas",
-  transfer: "Transfer",
-  yatirim: "Yatirim",
-  diger: "Diger",
 };
 
 export default function ForecastCard({ forecast }: ForecastCardProps) {
   const isRisky = forecast.riskStatus === "budget_risk";
 
   return (
-    <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+    <article className="rounded-xl border border-white/10 bg-slate-950/40 p-4">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-base font-semibold text-white">{categoryLabels[forecast.category]}</h3>
         <span
@@ -46,19 +32,19 @@ export default function ForecastCard({ forecast }: ForecastCardProps) {
           <dd className="text-slate-100">{formatCurrencyTRY(forecast.nextMonthForecast)}</dd>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <dt>Butce limiti</dt>
+          <dt>Bütçe limiti</dt>
           <dd className="text-slate-100">
-            {forecast.budgetLimit === null ? "Tanimsiz" : formatCurrencyTRY(forecast.budgetLimit)}
+            {forecast.budgetLimit === null ? "Tanımsız" : formatCurrencyTRY(forecast.budgetLimit)}
           </dd>
         </div>
       </dl>
 
       {isRisky ? (
         <p className="mt-3 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-          Beklenen asim: {formatCurrencyTRY(forecast.expectedOverrun)}
+          Beklenen aşım: {formatCurrencyTRY(forecast.expectedOverrun)}
         </p>
       ) : (
-        <p className="mt-3 text-sm text-emerald-300">Butce limitine gore risk beklenmiyor.</p>
+        <p className="mt-3 text-sm text-emerald-300">Bütçe limitine göre risk beklenmiyor.</p>
       )}
     </article>
   );

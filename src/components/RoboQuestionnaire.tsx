@@ -52,15 +52,15 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
 
   return (
     <div className="space-y-4">
-      <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">Risk Anketi</h3>
+      <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+        <h3 className="text-base font-semibold text-white">Risk Profili Analizi</h3>
         <p className="mt-2 text-sm text-slate-300">
           Tüm soruları yanıtladığınızda risk profili ve önerilen dağılım otomatik oluşturulur.
         </p>
 
         <div className="mt-4 space-y-4">
           {questions.map((question, index) => (
-            <div key={question.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+            <div key={question.id} className="rounded-lg border border-white/10 bg-slate-950/50 p-4">
               <p className="text-sm font-medium text-slate-100">
                 {index + 1}. {question.question}
               </p>
@@ -73,7 +73,7 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
                     <label
                       key={option.value}
                       htmlFor={inputId}
-                      className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400/60"
+                      className="flex cursor-pointer items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400/60"
                     >
                       <input
                         id={inputId}

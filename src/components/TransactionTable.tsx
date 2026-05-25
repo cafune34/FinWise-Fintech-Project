@@ -1,19 +1,6 @@
-import type { BankAccount, Transaction, TransactionCategory } from "@/types/finance";
+import type { BankAccount, Transaction } from "@/types/finance";
 import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
-
-const categoryLabels: Record<TransactionCategory, string> = {
-  market: "Market",
-  ulasim: "Ulasim",
-  fatura: "Fatura",
-  egitim: "Egitim",
-  eglence: "Eglence",
-  saglik: "Saglik",
-  kira: "Kira",
-  maas: "Maas",
-  transfer: "Transfer",
-  yatirim: "Yatirim",
-  diger: "Diger",
-};
+import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
 
 type TransactionTableProps = {
   transactions: Transaction[];
@@ -26,12 +13,12 @@ type TransactionTableProps = {
 export default function TransactionTable({
   transactions,
   accounts,
-  emptyMessage = "Gosterilecek islem bulunamadi.",
+  emptyMessage = "Gösterilecek işlem bulunamadı.",
   maxRows,
   highRiskTransactionIds = [],
 }: TransactionTableProps) {
   const accountNameById = new Map(
-    (accounts ?? []).map((account) => [account.id, `${account.bankName} (${account.type})`])
+    (accounts ?? []).map((account) => [account.id, `${account.bankName} (${getAccountTypeLabel(account.type)})`])
   );
   const highRiskSet = new Set(highRiskTransactionIds);
 
@@ -46,19 +33,19 @@ export default function TransactionTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-800">
-      <table className="min-w-full divide-y divide-slate-800 text-sm">
-        <thead className="bg-slate-900/80 text-left text-slate-400">
+    <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40 shadow-xl shadow-black/10">
+      <table className="min-w-full divide-y divide-white/10 text-sm">
+        <thead className="bg-white/[0.04] text-left text-slate-400">
           <tr>
-            <th className="px-3 py-2 font-medium">Tarih</th>
-            <th className="px-3 py-2 font-medium">Aciklama</th>
-            <th className="px-3 py-2 font-medium">Kategori</th>
-            <th className="px-3 py-2 font-medium">Hesap</th>
-            <th className="px-3 py-2 font-medium">Tip</th>
-            <th className="px-3 py-2 text-right font-medium">Tutar</th>
+            <th className="px-4 py-3 font-medium">Tarih</th>
+            <th className="px-4 py-3 font-medium">Açıklama</th>
+            <th className="px-4 py-3 font-medium">Kategori</th>
+            <th className="px-4 py-3 font-medium">Hesap</th>
+            <th className="px-4 py-3 font-medium">Tip</th>
+            <th className="px-4 py-3 text-right font-medium">Tutar</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800 bg-slate-900/50 text-slate-200">
+        <tbody className="divide-y divide-white/10 text-slate-200">
           {rows.map((txn) => {
             const amountText = `${txn.direction === "in" ? "+" : "-"}${formatCurrencyTRY(txn.amount)}`;
             const amountClass = txn.direction === "in" ? "text-emerald-300" : "text-rose-300";
@@ -66,8 +53,8 @@ export default function TransactionTable({
 
             return (
               <tr key={txn.id}>
-                <td className="whitespace-nowrap px-3 py-2">{formatDateTR(txn.occurredAt)}</td>
-                <td className="px-3 py-2 text-white">
+                <td className="whitespace-nowrap px-4 py-3">{formatDateTR(txn.occurredAt)}</td>
+                <td className="px-4 py-3 text-white">
                   <div className="flex items-center gap-2">
                     <span>{txn.title}</span>
                     {highRiskSet.has(txn.id) ? (
@@ -77,10 +64,10 @@ export default function TransactionTable({
                     ) : null}
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-3 py-2">{categoryLabels[txn.category]}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-slate-300">{accountLabel}</td>
-                <td className="whitespace-nowrap px-3 py-2">{txn.direction === "in" ? "Gelir" : "Gider"}</td>
-                <td className={`whitespace-nowrap px-3 py-2 text-right font-medium ${amountClass}`}>{amountText}</td>
+                <td className="whitespace-nowrap px-4 py-3">{categoryLabels[txn.category]}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-slate-300">{accountLabel}</td>
+                <td className="whitespace-nowrap px-4 py-3">{txn.direction === "in" ? "Gelir" : "Gider"}</td>
+                <td className={`whitespace-nowrap px-4 py-3 text-right font-medium ${amountClass}`}>{amountText}</td>
               </tr>
             );
           })}

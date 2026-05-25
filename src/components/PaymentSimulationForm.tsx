@@ -66,10 +66,10 @@ export default function PaymentSimulationForm() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">Ödeme Emri Simülasyonu</h3>
+      <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+        <h3 className="text-base font-semibold text-white">Ödeme talimatı oluştur</h3>
         <p className="mt-2 text-sm text-slate-300">
-          Gerçek ödeme yapılmaz. Bu form yalnızca PISP akışını eğitim amaçlı simüle eder.
+          Kaynak hesabı, alıcıyı ve tutarı seçerek takip edilebilir bir ödeme talimatı hazırlayın.
         </p>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -78,7 +78,7 @@ export default function PaymentSimulationForm() {
             <select
               value={form.paymentType}
               onChange={(event) => updateField("paymentType", event.target.value as PaymentType)}
-              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-slate-100"
             >
               <option value="fatura">Fatura Ödeme</option>
               <option value="transfer">Para Transferi</option>
@@ -91,7 +91,7 @@ export default function PaymentSimulationForm() {
             <select
               value={form.sourceAccountId}
               onChange={(event) => updateField("sourceAccountId", event.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-slate-100"
             >
               <option value="">Hesap seçiniz</option>
               {mockAccounts.map((account) => (
@@ -108,7 +108,7 @@ export default function PaymentSimulationForm() {
               type="text"
               value={form.payeeName}
               onChange={(event) => updateField("payeeName", event.target.value)}
-              placeholder="Örn: Elektrik Dağıtım A.Ş."
+              aria-label="Alıcı adı veya kurum adı"
               className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             />
           </label>
@@ -121,7 +121,7 @@ export default function PaymentSimulationForm() {
               step="0.01"
               value={form.amount}
               onChange={(event) => updateField("amount", event.target.value)}
-              placeholder="0.00"
+              aria-label="Tutar"
               className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             />
           </label>
@@ -133,7 +133,7 @@ export default function PaymentSimulationForm() {
             value={form.description}
             onChange={(event) => updateField("description", event.target.value)}
             rows={3}
-            placeholder="İsteğe bağlı not"
+            aria-label="Talimat açıklaması"
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
           />
         </label>
@@ -150,7 +150,7 @@ export default function PaymentSimulationForm() {
           type="submit"
           className="mt-4 inline-flex items-center rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400"
         >
-          Ödeme Emrini Simüle Et
+          Talimat oluştur
         </button>
       </form>
 

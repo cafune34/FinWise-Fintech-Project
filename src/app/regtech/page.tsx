@@ -15,28 +15,28 @@ export default function RegtechPage() {
 
   return (
     <AppShell
-      title="RegTech"
-      description="Kural tabanli uyari motoru ile supheli islem/risk senaryolari egitim amacli olarak simule edilir."
+      title="Risk İzleme"
+      description="Harcama davranışı, bütçe kullanımı ve işlem yoğunluğu üzerinden öncelikli risk sinyallerini takip edin."
     >
-      <article className="rounded-xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-100">
-        <p>
-          {
-            "Bu mod\u00fcl ger\u00e7ek AML/uyum sistemi de\u011fildir. RegTech yakla\u015f\u0131m\u0131n\u0131 g\u00f6stermek i\u00e7in e\u011fitim ama\u00e7l\u0131 kural tabanl\u0131 sim\u00fclasyon yap\u0131lm\u0131\u015ft\u0131r."
-          }
-        </p>
-      </article>
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Toplam Uyari" value={String(counts.total)} />
-        <StatCard title="Yuksek" value={String(counts.high)} tone={counts.high > 0 ? "negative" : "neutral"} />
+        <StatCard title="Toplam Uyarı" value={String(counts.total)} />
+        <StatCard title="Yüksek" value={String(counts.high)} tone={counts.high > 0 ? "negative" : "neutral"} />
         <StatCard title="Orta" value={String(counts.medium)} tone={counts.medium > 0 ? "neutral" : "positive"} />
-        <StatCard title="Dusuk" value={String(counts.low)} tone="positive" />
+        <StatCard title="Düşük" value={String(counts.low)} tone="positive" />
       </section>
 
-      <section className="space-y-3">
-        <h3 className="text-base font-semibold text-white">Uyari Listesi</h3>
+      <section className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-base font-semibold text-white">Uyarı Listesi</h3>
+            <p className="mt-1 text-sm text-slate-400">Öncelik seviyesi ve ilgili işlem bilgisiyle listelenir.</p>
+          </div>
+          <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-medium text-cyan-200">
+            Risk İzleme
+          </span>
+        </div>
         {alerts.length > 0 ? (
-          <div className="space-y-3">
+          <div className="grid gap-3 xl:grid-cols-2">
             {alerts.map((alert) => (
               <RiskAlertCard
                 key={alert.id}
@@ -46,8 +46,8 @@ export default function RegtechPage() {
             ))}
           </div>
         ) : (
-          <p className="rounded-lg border border-dashed border-slate-700 p-3 text-sm text-slate-400">
-            Bu donem icin RegTech uyarisi uretilmedi.
+          <p className="rounded-lg border border-dashed border-white/10 p-3 text-sm text-slate-400">
+            Bu dönem için risk uyarısı bulunmuyor.
           </p>
         )}
       </section>

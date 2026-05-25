@@ -1,25 +1,35 @@
-﻿import AppShell from "@/components/AppShell";
+import { Clock3, FileCheck2 } from "lucide-react";
+import AppShell from "@/components/AppShell";
 import PaymentSimulationForm from "@/components/PaymentSimulationForm";
 
 export default function PaymentsPage() {
   return (
     <AppShell
-      title="Ödeme Simülasyonu"
-      description="PISP (Ödeme Emri Başlatma Hizmeti) mantığını eğitim amaçlı, güvenli bir simülasyon akışıyla deneyimleyin."
+      title="Ödeme Talimatları"
+      description="Alıcı, kaynak hesap ve tutar bilgisiyle takip edilebilir ödeme talimatları oluşturun."
     >
-      <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-        <h3 className="text-base font-semibold text-white">PISP Nedir?</h3>
-        <p className="mt-2 text-sm text-slate-300">
-          PISP, kullanıcı adına ödeme emri başlatma akışını ifade eder. FinWise içinde bu akış yalnızca eğitim amacıyla,
-          mock hesaplar üzerinden simüle edilir.
-        </p>
-        <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-          Bu sayfa eğitim amaçlı ödeme emri simülasyonudur. Gerçek para transferi veya fatura ödemesi yapılmaz.
-        </p>
-      </article>
+      <section className="grid gap-4 lg:grid-cols-2">
+        <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+          <div className="flex items-center gap-3">
+            <FileCheck2 className="h-5 w-5 text-cyan-300" />
+            <h3 className="text-base font-semibold text-white">Talimat akışı</h3>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            Talimatlar referans numarasıyla kayda alınır ve durum bilgisiyle takip edilir.
+          </p>
+        </article>
+        <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
+          <div className="flex items-center gap-3">
+            <Clock3 className="h-5 w-5 text-emerald-300" />
+            <h3 className="text-base font-semibold text-white">Durum takibi</h3>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            İşleme Alındı, Beklemede ve Tamamlandı durumlarıyla operasyonel görünüm korunur.
+          </p>
+        </article>
+      </section>
 
       <PaymentSimulationForm />
     </AppShell>
   );
 }
-
