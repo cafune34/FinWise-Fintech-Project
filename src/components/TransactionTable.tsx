@@ -20,6 +20,7 @@ type TransactionTableProps = {
   accounts?: BankAccount[];
   emptyMessage?: string;
   maxRows?: number;
+  highRiskTransactionIds?: string[];
 };
 
 export default function TransactionTable({
@@ -27,10 +28,12 @@ export default function TransactionTable({
   accounts,
   emptyMessage = "Gosterilecek islem bulunamadi.",
   maxRows,
+  highRiskTransactionIds = [],
 }: TransactionTableProps) {
   const accountNameById = new Map(
     (accounts ?? []).map((account) => [account.id, `${account.bankName} (${account.type})`])
   );
+  const highRiskSet = new Set(highRiskTransactionIds);
 
   const rows = maxRows ? transactions.slice(0, maxRows) : transactions;
 
@@ -64,7 +67,16 @@ export default function TransactionTable({
             return (
               <tr key={txn.id}>
                 <td className="whitespace-nowrap px-3 py-2">{formatDateTR(txn.occurredAt)}</td>
-                <td className="px-3 py-2 text-white">{txn.title}</td>
+                <td className="px-3 py-2 text-white">
+                  <div className="flex items-center gap-2">
+                    <span>{txn.title}</span>
+                    {highRiskSet.has(txn.id) ? (
+                      <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-xs font-medium text-rose-200">
+                        Riskli
+                      </span>
+                    ) : null}
+                  </div>
+                </td>
                 <td className="whitespace-nowrap px-3 py-2">{categoryLabels[txn.category]}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-slate-300">{accountLabel}</td>
                 <td className="whitespace-nowrap px-3 py-2">{txn.direction === "in" ? "Gelir" : "Gider"}</td>

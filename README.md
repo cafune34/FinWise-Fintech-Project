@@ -1,7 +1,7 @@
-# FinWise
+﻿# FinWise
 
 ## Proje Aciklamasi
-FinWise, **Finansal Teknolojiler** dersi kapsaminda gelistirilen egitim odakli bir fintech demo projesidir. Proje, finansal urun deneyimini guvenli bir sim�lasyon ortaminda modellemeyi hedefler.
+FinWise, **Finansal Teknolojiler** dersi kapsaminda gelistirilen egitim odakli bir fintech demo projesidir. Proje, finansal urun deneyimini guvenli bir simülasyon ortaminda modellemeyi hedefler.
 
 ## Ders Baglami
 Bu repo, universite seviyesinde Finansal Teknolojiler dersi sprint calismalari icin hazirlanmistir.
@@ -49,3 +49,8 @@ Sprint 1 kapsaminda temel UI iskeleti, route yapisi, AppShell navigasyonu, mock 
 
 ## Sprint 2 Durumu
 Sprint 2 ile dashboard kartlari, finans hesaplama helper fonksiyonlari, hesap ozeti, islem tablosu ve filtreler, butce takip bilesenleri ve temel grafik ekranlari eklendi.
+
+
+## Sprint 3 Durumu
+Sprint 3 ile son 3 ay ortalamasi + kategori katsayisi kullanan harcama tahminleme helper'i, butce risk tahmin kartlari, kural tabanli RegTech uyari motoru, dashboard akilli uyarilar bolumu ve islemlerde yuksek risk etiketi eklendi.
+
