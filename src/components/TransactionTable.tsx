@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import type { BankAccount, Transaction } from "@/types/finance";
 import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
@@ -8,7 +9,16 @@ type TransactionTableProps = {
   emptyMessage?: string;
   maxRows?: number;
   highRiskTransactionIds?: string[];
+  onDeleteTransaction?: (transactionId: string) => void;
 };
+
+function getTransactionTypeLabel(transaction: Transaction): string {
+  if (transaction.type === "transfer") {
+    return "Transfer";
+  }
+
+  return transaction.direction === "in" ? "Gelir" : "Gider";
+}
 
 export default function TransactionTable({
   transactions,
@@ -16,9 +26,13 @@ export default function TransactionTable({
   emptyMessage = "Gösterilecek işlem bulunamadı.",
   maxRows,
   highRiskTransactionIds = [],
+  onDeleteTransaction,
 }: TransactionTableProps) {
   const accountNameById = new Map(
-    (accounts ?? []).map((account) => [account.id, `${account.bankName} (${getAccountTypeLabel(account.type)})`])
+    (accounts ?? []).map((account) => [
+      account.id,
+      `${account.bankName}${account.accountName ? ` - ${account.accountName}` : ""} (${getAccountTypeLabel(account.type)})`,
+    ])
   );
   const highRiskSet = new Set(highRiskTransactionIds);
 
@@ -43,6 +57,7 @@ export default function TransactionTable({
             <th className="px-4 py-3 font-medium">Hesap</th>
             <th className="px-4 py-3 font-medium">Tip</th>
             <th className="px-4 py-3 text-right font-medium">Tutar</th>
+            {onDeleteTransaction ? <th className="px-4 py-3 text-right font-medium">İşlem</th> : null}
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10 text-slate-200">
@@ -66,8 +81,20 @@ export default function TransactionTable({
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">{categoryLabels[txn.category]}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">{accountLabel}</td>
-                <td className="whitespace-nowrap px-4 py-3">{txn.direction === "in" ? "Gelir" : "Gider"}</td>
+                <td className="whitespace-nowrap px-4 py-3">{getTransactionTypeLabel(txn)}</td>
                 <td className={`whitespace-nowrap px-4 py-3 text-right font-medium ${amountClass}`}>{amountText}</td>
+                {onDeleteTransaction ? (
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onDeleteTransaction(txn.id)}
+                      className="inline-grid h-8 w-8 place-items-center rounded-lg border border-white/10 text-slate-300 transition hover:border-rose-300/50 hover:bg-rose-500/10 hover:text-rose-200"
+                      aria-label={`${txn.title} işlemini sil`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                ) : null}
               </tr>
             );
           })}

@@ -1,4 +1,5 @@
 import { calculateMonthlyExpense, calculateMonthlyIncome, isBudgetExceeded } from "@/lib/finance";
+import { categoryLabels } from "@/lib/labels";
 import type { Budget, RegTechAlert, RegTechSeverity, Transaction } from "@/types/finance";
 
 type GenerateRegTechAlertsInput = {
@@ -129,7 +130,7 @@ export function generateRegTechAlerts({
           severity: "medium",
           ruleCode: "BUDGET_EXCEEDED",
           title: "Bütçe Aşımı",
-          reason: `${budget.category} kategorisinde harcama limiti aşıldı.`,
+          reason: `${categoryLabels[budget.category]} kategorisinde harcama limiti aşıldı.`,
           createdAt: referenceDate.toISOString(),
         })
       );
@@ -273,4 +274,3 @@ export function getHighRiskTransactions(alerts: RegTechAlert[]): string[] {
     )
   );
 }
-

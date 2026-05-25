@@ -1,21 +1,35 @@
-﻿"use client";
+"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import RoboAllocationChart from "@/components/RoboAllocationChart";
 import RoboResultCard from "@/components/RoboResultCard";
 import {
   calculateRiskScore,
   getPortfolioAllocation,
   getRiskProfile,
+  getRiskProfileDescription,
 } from "@/lib/roboAdvisor";
+import { useFinanceData } from "@/lib/useFinanceData";
 import type { RoboAnswer, RoboQuestion } from "@/types/finance";
 
 type RoboQuestionnaireProps = {
   questions: RoboQuestion[];
 };
 
+function formatDateTimeTR(value: string): string {
+  return new Intl.DateTimeFormat("tr-TR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps) {
+  const { lastRoboResult, saveRoboProfileResult } = useFinanceData();
   const [answersByQuestionId, setAnswersByQuestionId] = useState<Record<string, RoboAnswer>>({});
+  const savedSignatureRef = useRef("");
 
   function handleAnswerChange(questionId: string, selectedValue: string, score: 1 | 2 | 3) {
     setAnswersByQuestionId((prev) => ({
@@ -30,15 +44,22 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
 
   const allAnswered = questions.every((question) => Boolean(answersByQuestionId[question.id]));
   const answeredCount = Object.keys(answersByQuestionId).length;
+  const answers = useMemo(
+    () =>
+      questions
+        .map((question) => answersByQuestionId[question.id])
+        .filter((answer): answer is RoboAnswer => Boolean(answer)),
+    [answersByQuestionId, questions]
+  );
+  const answerSignature = useMemo(
+    () => answers.map((answer) => `${answer.questionId}:${answer.selectedValue}`).join("|"),
+    [answers]
+  );
 
   const result = useMemo(() => {
     if (!allAnswered) {
       return null;
     }
-
-    const answers = questions
-      .map((question) => answersByQuestionId[question.id])
-      .filter((answer): answer is RoboAnswer => Boolean(answer));
 
     const score = calculateRiskScore(answers);
     const profile = getRiskProfile(score);
@@ -49,7 +70,21 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
       profile,
       allocation,
     };
-  }, [allAnswered, answersByQuestionId, questions]);
+  }, [allAnswered, answers]);
+
+  useEffect(() => {
+    if (!result || !answerSignature || savedSignatureRef.current === answerSignature) {
+      return;
+    }
+
+    savedSignatureRef.current = answerSignature;
+    saveRoboProfileResult({
+      score: result.score,
+      profile: result.profile,
+      allocation: result.allocation,
+      answers,
+    });
+  }, [answerSignature, answers, result, saveRoboProfileResult]);
 
   return (
     <div className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.72fr)]">
@@ -121,8 +156,22 @@ export default function RoboQuestionnaire({ questions }: RoboQuestionnaireProps)
             </div>
           </article>
         )}
+
+        {lastRoboResult ? (
+          <article className="rounded-xl border border-white/10 bg-slate-950/45 p-5 shadow-xl shadow-black/10">
+            <h3 className="text-base font-semibold text-white">Son profil sonucu</h3>
+            <div className="mt-3 grid gap-2 text-sm text-slate-300">
+              <p>
+                Profil: <span className="font-semibold text-white">{getRiskProfileDescription(lastRoboResult.profile)}</span>
+              </p>
+              <p>
+                Skor: <span className="font-semibold text-white">{lastRoboResult.score}</span> / 15
+              </p>
+              <p>Analiz tarihi: {formatDateTimeTR(lastRoboResult.analyzedAt)}</p>
+            </div>
+          </article>
+        ) : null}
       </aside>
     </div>
   );
 }
-

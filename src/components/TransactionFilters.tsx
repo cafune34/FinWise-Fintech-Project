@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { BankAccount, Transaction, TransactionCategory } from "@/types/finance";
+import type { BankAccount, Transaction, TransactionCategory, TransactionType } from "@/types/finance";
 import TransactionTable from "@/components/TransactionTable";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
 
@@ -9,6 +9,7 @@ type TransactionFiltersProps = {
   transactions: Transaction[];
   accounts: BankAccount[];
   highRiskTransactionIds?: string[];
+  onDeleteTransaction?: (transactionId: string) => void;
 };
 
 const categoryOptions: { value: "tum" | TransactionCategory; label: string }[] = [
@@ -30,18 +31,17 @@ export default function TransactionFilters({
   transactions,
   accounts,
   highRiskTransactionIds,
+  onDeleteTransaction,
 }: TransactionFiltersProps) {
   const [selectedCategory, setSelectedCategory] = useState<"tum" | TransactionCategory>("tum");
-  const [selectedType, setSelectedType] = useState<"tum" | "gelir" | "gider">("tum");
+  const [selectedType, setSelectedType] = useState<"tum" | TransactionType>("tum");
   const [selectedAccount, setSelectedAccount] = useState<"tum" | string>("tum");
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((txn) => {
+      const transactionType = txn.type ?? (txn.direction === "in" ? "gelir" : "gider");
       const categoryMatch = selectedCategory === "tum" || txn.category === selectedCategory;
-      const typeMatch =
-        selectedType === "tum" ||
-        (selectedType === "gelir" && txn.direction === "in") ||
-        (selectedType === "gider" && txn.direction === "out");
+      const typeMatch = selectedType === "tum" || transactionType === selectedType;
       const accountMatch = selectedAccount === "tum" || txn.accountId === selectedAccount;
 
       return categoryMatch && typeMatch && accountMatch;
@@ -71,11 +71,12 @@ export default function TransactionFilters({
           <select
             className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-cyan-400"
             value={selectedType}
-            onChange={(event) => setSelectedType(event.target.value as "tum" | "gelir" | "gider")}
+            onChange={(event) => setSelectedType(event.target.value as "tum" | TransactionType)}
           >
             <option value="tum">Tüm tipler</option>
             <option value="gelir">Gelir</option>
             <option value="gider">Gider</option>
+            <option value="transfer">Transfer</option>
           </select>
         </label>
 
@@ -89,7 +90,7 @@ export default function TransactionFilters({
             <option value="tum">Tüm hesaplar</option>
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
-                {account.bankName} ({getAccountTypeLabel(account.type)})
+                {account.bankName} - {account.accountName ?? getAccountTypeLabel(account.type)}
               </option>
             ))}
           </select>
@@ -103,6 +104,7 @@ export default function TransactionFilters({
         accounts={accounts}
         highRiskTransactionIds={highRiskTransactionIds}
         emptyMessage="Seçili filtrelerle eşleşen işlem bulunamadı."
+        onDeleteTransaction={onDeleteTransaction}
       />
     </div>
   );
