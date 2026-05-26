@@ -1,5 +1,9 @@
+"use client";
+
 import AppShell from "@/components/AppShell";
 import RoboQuestionnaire from "@/components/RoboQuestionnaire";
+import RoboGoalProjection from "@/components/robo-advisor/RoboGoalProjection";
+import { useFinanceData } from "@/lib/useFinanceData";
 import type { RoboQuestion } from "@/types/finance";
 
 const roboQuestions: RoboQuestion[] = [
@@ -51,12 +55,17 @@ const roboQuestions: RoboQuestion[] = [
 ];
 
 export default function RoboAdvisorPage() {
+  const { lastRoboResult } = useFinanceData();
+
   return (
     <AppShell
       title="Yatırım Profili"
       description="Risk profili analizi ve önerilen dağılım görünümüyle finansal tercihlerinizi değerlendirin."
     >
       <RoboQuestionnaire questions={roboQuestions} />
+      {lastRoboResult && (
+        <RoboGoalProjection profile={lastRoboResult.profile} />
+      )}
     </AppShell>
   );
 }
