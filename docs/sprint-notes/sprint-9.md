@@ -38,12 +38,20 @@ Root dizindeki `README.md` dosyası tamamen V2 odaklı ürün ve teknik diliyle 
 
 ---
 
-## 4. Teslim Paketi Notları
+## 4. QA Denetimi
+- Antigravity ile rota bazlı görsel QA yapıldı.
+- Desktop/laptop/mobile ekran görüntüleri alındı.
+- Kritik blocker bulunmadı.
+- Final polish maddeleri uygulandı.
+
+---
+
+## 5. Teslim Paketi Notları
 - Bu sprint sonunda oluşturulan tüm belgeler ve son kararlı kodlar `sprint-9-final-delivery-v2` branch'inde toplanmıştır.
 - `develop` branch'ine birleştirilmek üzere bir Pull Request (PR) açılmıştır.
 
 ---
 
-## 5. Son Durum
+## 6. Son Durum
 * **Durum**: Tamamlandı (Teslime Hazır)
 * **Tarih**: 26 Mayıs 2026

@@ -50,14 +50,14 @@ export default function TransactionTable({
     <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40 shadow-xl shadow-black/10">
       <table className="min-w-full divide-y divide-white/10 text-sm">
         <thead className="bg-white/[0.04] text-left text-slate-400">
-          <tr>
+          <tr className="whitespace-nowrap">
             <th className="px-4 py-3 font-medium">Tarih</th>
-            <th className="px-4 py-3 font-medium">Açıklama</th>
+            <th className="px-4 py-3 font-medium min-w-[150px]">Açıklama</th>
             <th className="px-4 py-3 font-medium">Kategori</th>
-            <th className="px-4 py-3 font-medium">Hesap</th>
+            <th className="px-4 py-3 font-medium min-w-[180px]">Hesap</th>
             <th className="px-4 py-3 font-medium">Tip</th>
             <th className="px-4 py-3 text-right font-medium">Tutar</th>
-            {onDeleteTransaction ? <th className="px-4 py-3 text-right font-medium">İşlem</th> : null}
+            {onDeleteTransaction ? <th className="px-4 py-3 text-right font-medium">Aksiyon</th> : null}
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10 text-slate-200">
