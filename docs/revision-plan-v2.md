@@ -35,13 +35,12 @@ Sprint 7 tamamlandığında FinWise, tarayıcıda kalıcı veriyle çalışan ve
 - Ödeme talimatı geçmişi ve yatırım profili sonucu kalıcı hale getirilir.
 - AppShell üzerinden başlangıç verisine iki adımlı dönüş kontrolü sunulur.
 
-## V2 Sonraki Sprintler
+## Sprint 8: Profesyonel Modüller (Tamamlandı)
 
-### Sprint 8: Modül Derinleştirme
-
-- Ödeme talimat geçmişi ve durum takibi geliştirilir.
-- Risk İzleme ekranında sebep, etki ve aksiyon önerileri güçlendirilir.
-- Yatırım Profili ekranında analiz geçmişi ve dağılım görünümü iyileştirilir.
+- Ödeme Talimatları durum takibi, geçmiş detayları, durum özeti ve silme/güncelleme işlevleri eklendi.
+- Risk İzleme ekranına sebep, etki ve önerilen aksiyon detayları eklenerek grid düzeni ve istatistik özeti getirildi.
+- Yatırım Profili modülünde son analiz, önerilen dağılım grafiği, profil açıklamaları ve analiz geçmişi entegre edildi.
+- Dashboard alanına Bekleyen Talimatlar, Yüksek Riskli Uyarılar ve Son Yatırım Profili metriklerini içeren "Operasyon Özeti" yerleştirildi.
 
 ### Sprint 9: Final Sunum Kalitesi
 

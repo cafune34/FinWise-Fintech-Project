@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -25,8 +26,25 @@ type ExpenseByCategoryChartProps = {
 const colors = ["#22d3ee", "#60a5fa", "#2dd4bf", "#34d399", "#f59e0b", "#fb7185", "#c084fc"];
 
 export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIsClient(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center bg-slate-900/10 rounded-xl">
+        <p className="text-xs text-slate-500">Grafik yükleniyor...</p>
+      </div>
+    );
+  }
+
   return (
-    <ResponsiveContainer width="100%" height={300} minWidth={280} minHeight={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />

@@ -1,4 +1,4 @@
-import type { BankAccount, PaymentOrder, RegTechSeverity, TransactionCategory } from "@/types/finance";
+import type { BankAccount, PaymentOrder, RegTechSeverity, TransactionCategory, RiskProfile, TransactionType } from "@/types/finance";
 
 export const categoryLabels: Record<TransactionCategory, string> = {
   market: "Market",
@@ -28,6 +28,19 @@ export const paymentStatusLabels: Record<PaymentOrder["status"], string> = {
   reddedildi: "Reddedildi",
 };
 
+export const riskProfileLabels: Record<RiskProfile, string> = {
+  dusuk: "Düşük Risk",
+  orta: "Orta Risk",
+  yuksek: "Yüksek Risk",
+};
+
+export const transactionTypeLabels: Record<TransactionType, string> = {
+  gelir: "Gelir",
+  gider: "Gider",
+  transfer: "Para Transferi",
+};
+
 export function getAccountTypeLabel(type: BankAccount["type"]): string {
   return type === "vadesiz" ? "Vadesiz Hesap" : "Birikim Hesabı";
 }
+

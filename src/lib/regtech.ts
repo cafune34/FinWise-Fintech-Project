@@ -60,6 +60,8 @@ function createAlert(
     severity: RegTechSeverity;
     title: string;
     reason: string;
+    impact?: string;
+    recommendedAction?: string;
     ruleCode: NonNullable<RegTechAlert["ruleCode"]>;
     createdAt: string;
     transactionId?: string;
@@ -74,6 +76,8 @@ function createAlert(
     ruleCode: input.ruleCode,
     title: input.title,
     reason: input.reason,
+    impact: input.impact,
+    recommendedAction: input.recommendedAction,
     createdAt: input.createdAt,
     resolved: false,
   };
@@ -97,6 +101,8 @@ export function generateRegTechAlerts({
           ruleCode: "LARGE_TRANSACTION",
           title: "Yüksek Tutarlı İşlem",
           reason: `Tek işlem tutarı 10.000 TL eşiğini aştı (${transaction.amount.toFixed(0)} TL).`,
+          impact: "Büyük miktarda nakit çıkışı veya bütçe dengesinin bozulması.",
+          recommendedAction: "İşlemin kaynağı ve açıklaması kontrol edilmeli.",
           transactionId: transaction.id,
           createdAt: transaction.occurredAt,
         })
@@ -116,6 +122,8 @@ export function generateRegTechAlerts({
         ruleCode: "MONTHLY_EXPENSE_OVER_INCOME",
         title: "Nakit Akışı Riski",
         reason: `Aylık gider (${monthlyExpense.toFixed(0)} TL), aylık geliri (${monthlyIncome.toFixed(0)} TL) aştı.`,
+        impact: "Birikim hedeflerine ulaşılamaması veya kısa vadeli nakit açığı oluşması.",
+        recommendedAction: "Aylık harcama planı ve bütçe limitleri yeniden değerlendirilmeli.",
         createdAt: referenceDate.toISOString(),
       })
     );
@@ -131,6 +139,8 @@ export function generateRegTechAlerts({
           ruleCode: "BUDGET_EXCEEDED",
           title: "Bütçe Aşımı",
           reason: `${categoryLabels[budget.category]} kategorisinde harcama limiti aşıldı.`,
+          impact: "İlgili kategori bütçesinde kontrol kaybı ve genel tasarruf oranının düşmesi.",
+          recommendedAction: "Kategori limiti veya harcama alışkanlığı gözden geçirilmeli.",
           createdAt: referenceDate.toISOString(),
         })
       );
@@ -158,6 +168,8 @@ export function generateRegTechAlerts({
           ruleCode: "TRANSFER_DENSITY",
           title: "Yüksek Transfer Yoğunluğu",
           reason: `Aynı gün içinde ${dayTransfers.length} transfer kaydı oluştu.`,
+          impact: "Hesap hareketlerinde olağandışı artış.",
+          recommendedAction: "Gönderilen hesaplar ve transfer nedenleri doğrulanmalı.",
           transactionId: sample?.id,
           createdAt: sample?.occurredAt ?? `${dateKey}T00:00:00.000Z`,
         })
@@ -178,6 +190,8 @@ export function generateRegTechAlerts({
           ruleCode: "NIGHT_HIGH_AMOUNT",
           title: "Riskli Saatte Yüksek İşlem",
           reason: `00:00-05:00 aralığında 5.000 TL üzeri işlem tespit edildi (${transaction.amount.toFixed(0)} TL).`,
+          impact: "Yetkisiz veya şüpheli işlem riski.",
+          recommendedAction: "İşlem zamanı ve alıcı bilgisi doğrulanmalı.",
           transactionId: transaction.id,
           createdAt: transaction.occurredAt,
         })
@@ -222,6 +236,8 @@ export function generateRegTechAlerts({
             ruleCode: "REPEATING_MERCHANT",
             title: "Tekrarlayan Alıcı Ödemesi",
             reason: `${merchantName} alıcısına 24 saat içinde ${clusterSize} ödeme yapıldı.`,
+            impact: "Mükerrer çekim veya hatalı transfer riski.",
+            recommendedAction: "Aynı alıcıya yapılan tekrar eden ödemeler kontrol edilmeli.",
             transactionId: firstTransaction.id,
             createdAt: firstTransaction.occurredAt,
           })

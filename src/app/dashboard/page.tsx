@@ -50,7 +50,7 @@ const quickActions = [
 ];
 
 export default function DashboardPage() {
-  const { accounts, transactions, budgetsWithSpending, user } = useFinanceData();
+  const { accounts, transactions, budgetsWithSpending, user, paymentOrders, lastRoboResult } = useFinanceData();
   const referenceDate = useMemo(() => new Date(), []);
   const totalBalance = calculateTotalBalance(accounts);
   const monthlyIncome = calculateMonthlyIncome(transactions, referenceDate);
@@ -75,6 +75,23 @@ export default function DashboardPage() {
   const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
   const recentTransactions = getRecentTransactions(transactions, 8);
   const healthScore = Math.max(62, Math.min(94, Math.round(78 + (netCashFlow > 0 ? 8 : -6) - riskyForecasts.length * 2)));
+
+  const pendingPaymentsCount = useMemo(() => {
+    return (paymentOrders || []).filter((order) => order.status === "beklemede").length;
+  }, [paymentOrders]);
+
+  const highRiskAlertsCount = useMemo(() => {
+    return regtechAlerts.filter((alert) => {
+      const severity = alert.severity ?? (alert.level === "yuksek" ? "high" : alert.level === "orta" ? "medium" : "low");
+      return severity === "high";
+    }).length;
+  }, [regtechAlerts]);
+
+  const lastProfileText = useMemo(() => {
+    if (!lastRoboResult) return "Belirlenmedi";
+    const profileLabel = lastRoboResult.profile === "yuksek" ? "Yüksek Risk" : lastRoboResult.profile === "orta" ? "Orta Risk" : "Düşük Risk";
+    return `${profileLabel} (${lastRoboResult.score}/15)`;
+  }, [lastRoboResult]);
 
   const categoryTotals = getCategoryExpenseTotals(transactions, referenceDate);
   const categoryExpenseData = Object.entries(categoryTotals)
@@ -101,7 +118,7 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
-      <section className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)] 2xl:grid-cols-[minmax(0,1.35fr)_minmax(520px,0.65fr)]">
+      <section className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.7fr)_minmax(320px,0.7fr)] 2xl:grid-cols-[minmax(0,1.3fr)_minmax(360px,0.75fr)_minmax(360px,0.75fr)]">
         <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
@@ -140,6 +157,39 @@ export default function DashboardPage() {
             <div className="rounded-xl bg-white/[0.04] p-3">
               <p className="text-slate-400">Gider</p>
               <p className="mt-1 font-semibold text-rose-300">{formatCurrencyTRY(monthlyExpense)}</p>
+            </div>
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-white/10 bg-[#0e1726]/80 p-6 shadow-2xl shadow-black/20 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-400">Operasyon Özeti</p>
+              <Gauge className="h-5 w-5 text-cyan-300" />
+            </div>
+            <p className="mt-2 text-xs text-slate-400">LocalStorage aktif sistem durumları özeti</p>
+          </div>
+
+          <div className="mt-4 space-y-3.5 text-xs">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-slate-400">Bekleyen Ödeme Talimatı</span>
+              <span className={`rounded-full border px-2 py-0.5 font-bold ${pendingPaymentsCount > 0 ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-slate-500/20 bg-slate-900 text-slate-400"}`}>
+                {pendingPaymentsCount} Adet
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-slate-400">Yüksek Riskli Uyarı</span>
+              <span className={`rounded-full border px-2 py-0.5 font-bold ${highRiskAlertsCount > 0 ? "border-rose-500/30 bg-rose-500/10 text-rose-300" : "border-slate-500/20 bg-slate-900 text-slate-400"}`}>
+                {highRiskAlertsCount} Adet
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-slate-400">Son Yatırım Profili</span>
+              <span className="font-semibold text-white truncate max-w-[155px]" title={lastProfileText}>
+                {lastProfileText}
+              </span>
             </div>
           </div>
         </article>
