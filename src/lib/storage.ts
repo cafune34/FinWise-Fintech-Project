@@ -11,6 +11,7 @@ import type {
   PaymentOrder,
   RoboProfileResult,
   Transaction,
+  TransactionCategory,
 } from "@/types/finance";
 
 export const FINWISE_STORAGE_KEY = "finwise:v2:sprint7";
@@ -113,12 +114,46 @@ export function readFinanceSnapshot(): FinanceSnapshot {
       return seed;
     }
 
+    const nextTransactions = normalizeTransactions(parsed.transactions);
+    const nextAccounts = normalizeAccounts(parsed.accounts);
+    let nextOrders = normalizePaymentOrders(parsed.paymentOrders);
+
+    nextOrders = nextOrders.map((order) => {
+      if (order.status === "tamamlandi" && !order.postedTransactionId) {
+        const txnId = `txn-pay-${order.id}`;
+        order.postedTransactionId = txnId;
+
+        const exists = nextTransactions.some((t) => t.id === txnId);
+        if (!exists) {
+          const category = order.paymentType === "fatura" ? "fatura" : order.paymentType === "transfer" ? "transfer" : "eglence";
+          const newTxn: Transaction = {
+            id: txnId,
+            accountId: order.sourceAccountId || nextAccounts[0]?.id || "",
+            title: `${order.payee} Ödemesi (Geçmiş)`,
+            amount: order.amount,
+            category: category as TransactionCategory,
+            direction: "out",
+            type: "gider",
+            occurredAt: order.createdAt || new Date().toISOString(),
+            description: order.description || "Geçmiş ödeme talimatı onayı",
+          };
+          nextTransactions.push(newTxn);
+
+          const acc = nextAccounts.find((a) => a.id === newTxn.accountId);
+          if (acc) {
+            acc.balance -= newTxn.amount;
+          }
+        }
+      }
+      return order;
+    });
+
     return {
       ...seed,
       ...parsed,
-      accounts: normalizeAccounts(parsed.accounts),
-      transactions: normalizeTransactions(parsed.transactions),
-      paymentOrders: normalizePaymentOrders(parsed.paymentOrders),
+      accounts: nextAccounts,
+      transactions: nextTransactions,
+      paymentOrders: nextOrders,
       roboResults: parsed.roboResults ?? [],
       updatedAt: parsed.updatedAt ?? seed.updatedAt,
     };

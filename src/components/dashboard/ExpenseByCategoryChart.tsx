@@ -72,7 +72,7 @@ export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartP
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />
         <YAxis stroke="#94a3b8" tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`} tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255, 255, 255, 0.04)" }} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
         <Legend />
         <Bar dataKey="value" name="Harcama" radius={[6, 6, 0, 0]} activeBar={false}>
           {data.map((entry, index) => (

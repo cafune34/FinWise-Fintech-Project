@@ -200,15 +200,17 @@ export const mockPaymentOrders: PaymentOrder[] = [
   {
     id: "pay-1",
     userId: mockUser.id,
+    sourceAccountId: "acc-akbank",
     payee: "Elektrik Faturasi",
     amount: 1450,
     dueDate: "2026-05-29",
-    status: "planlandi",
+    status: "beklemede",
     isMock: true,
   },
   {
     id: "pay-2",
     userId: mockUser.id,
+    sourceAccountId: "acc-ziraat",
     payee: "Internet Faturasi",
     amount: 790,
     dueDate: "2026-05-30",

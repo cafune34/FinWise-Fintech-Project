@@ -462,36 +462,76 @@ export default function AppShell({ title, description, children }: AppShellProps
 
             <div className="space-y-3 text-xs text-slate-200 max-h-[360px] overflow-y-auto pr-1">
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">1. Genel Bakış ile Sağlık Skoru Analizi</p>
-                <p className="text-slate-400 mt-1">Dashboard üzerinde dinamik bütçe, risk ve yatırım verilerine bağlı Sağlık Skoru kırılımı incelenir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">1. Genel Bakış ile Sağlık Skoru Analizi</p>
+                    <p className="text-slate-400 mt-1">Dashboard üzerinde dinamik bütçe, risk ve yatırım verilerine bağlı Sağlık Skoru kırılımı incelenir.</p>
+                  </div>
+                  <Link href="/dashboard" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">2. Portföy Dağılımı (Hesaplar)</p>
-                <p className="text-slate-400 mt-1">Aktif hesap durumları, bakiyeler ve hesap pasifleştirme özellikleri gösterilir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">2. Portföy Dağılımı (Hesaplar)</p>
+                    <p className="text-slate-400 mt-1">Aktif hesap durumları, bakiyeler ve hesap pasifleştirme özellikleri gösterilir.</p>
+                  </div>
+                  <Link href="/accounts" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">3. Finansal Hareketler (İşlemler)</p>
-                <p className="text-slate-400 mt-1">Tüm gelir-gider hareketleri, kategori filtreleri ve dinamik bakiye güncellemeleri yönetilir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">3. Finansal Hareketler (İşlemler)</p>
+                    <p className="text-slate-400 mt-1">Tüm gelir-gider hareketleri, kategori filtreleri ve dinamik bakiye güncellemeleri yönetilir.</p>
+                  </div>
+                  <Link href="/transactions" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">4. Kategori Bütçe Limitleri (Bütçe Planı)</p>
-                <p className="text-slate-400 mt-1">Akıllı Kategori İçgörüleri ile limit kullanım seviyeleri takip edilir ve bütçe tahminleri izlenir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">4. Kategori Bütçe Limitleri (Bütçe Planı)</p>
+                    <p className="text-slate-400 mt-1">Akıllı Kategori İçgörüleri ile limit kullanım seviyeleri takip edilir ve bütçe tahminleri izlenir.</p>
+                  </div>
+                  <Link href="/budget" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">5. Ödeme Güvenliği (Ödeme Talimatları)</p>
-                <p className="text-slate-400 mt-1">Canlı Ödeme Güven Skoru ile hatalı veya yetersiz bakiyeli talimat riskleri simüle edilir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">5. Ödeme Güvenliği (Ödeme Talimatları)</p>
+                    <p className="text-slate-400 mt-1">Canlı Ödeme Güven Skoru ile hatalı veya yetersiz bakiyeli talimat riskleri simüle edilir.</p>
+                  </div>
+                  <Link href="/payments" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">6. Akıllı Risk Yönetimi (Risk İzleme)</p>
-                <p className="text-slate-400 mt-1">Detaylı RegTech uyarıları, varyasyonlu sebepler ve önerilen aksiyonlar değerlendirilir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">6. Akıllı Risk Yönetimi (Risk İzleme)</p>
+                    <p className="text-slate-400 mt-1">Detaylı RegTech uyarıları, varyasyonlu sebepler ve önerilen aksiyonlar değerlendirilir.</p>
+                  </div>
+                  <Link href="/regtech" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                <p className="font-semibold text-cyan-300">7. Robo-Advisor ile Yatırım Profili</p>
-                <p className="text-slate-400 mt-1">Skorlama anketine göre otomatik risk profili ve varlık dağılım önerileri gösterilir.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">7. Robo-Advisor ile Yatırım Profili</p>
+                    <p className="text-slate-400 mt-1">Skorlama anketine göre otomatik risk profili ve varlık dağılım önerileri gösterilir.</p>
+                  </div>
+                  <Link href="/robo-advisor" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
               <div className="rounded-lg bg-white/[0.03] p-3 border border-cyan-500/20 bg-cyan-500/5">
-                <p className="font-semibold text-cyan-300">8. Finansal Aksiyon Merkezi</p>
-                <p className="text-slate-400 mt-1">Verilerden otomatik üretilen aksiyon önerileri ile karar destek ve yönlendirme akışı tamamlanır.</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-cyan-300">8. Finansal Aksiyon Merkezi</p>
+                    <p className="text-slate-400 mt-1">Verilerden otomatik üretilen aksiyon önerileri ile karar destek ve yönlendirme akışı tamamlanır.</p>
+                  </div>
+                  <Link href="/dashboard" onClick={() => setIsPresentationModalOpen(false)} className="shrink-0 rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20 transition">Bu ekrana git</Link>
+                </div>
               </div>
             </div>
 

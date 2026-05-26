@@ -91,7 +91,9 @@ export default function DashboardPage() {
 
   const nakitAkisiPuan = netCashFlow > 0 ? 30 : 10;
   const bütcePuan = exceededBudgetsCount === 0 ? 25 : exceededBudgetsCount === 1 ? 18 : exceededBudgetsCount === 2 ? 12 : 5;
-  const riskPuan = highRiskAlertsCount === 0 ? 20 : highRiskAlertsCount === 1 ? 12 : highRiskAlertsCount === 2 ? 6 : 0;
+  const regtechRiskScore = Math.max(0, 15 - (highRiskAlertsCount * 5));
+  const profileRiskScore = lastRoboResult?.profile === "dusuk" ? 5 : lastRoboResult?.profile === "orta" ? 3 : lastRoboResult?.profile === "yuksek" ? 0 : 5;
+  const riskPuan = regtechRiskScore + profileRiskScore;
   const odemePuan = pendingPaymentsCount === 0 ? 15 : pendingPaymentsCount <= 2 ? 10 : 5;
   const yatirimPuan = lastRoboResult ? 10 : 5;
 
@@ -216,7 +218,7 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
-      <section className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.7fr)_minmax(320px,0.7fr)] 2xl:grid-cols-[minmax(0,1.3fr)_minmax(360px,0.75fr)_minmax(360px,0.75fr)]">
+      <section className="grid w-full gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">
         <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 flex flex-col justify-between">
           <div>
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -242,24 +244,24 @@ export default function DashboardPage() {
             {/* Skor Kırılımı */}
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Skor Kırılımı</p>
-              <div className="grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-5">
-                <div className="rounded-lg bg-slate-900/60 p-2 border border-white/5">
+              <div className="flex flex-wrap gap-2 text-[10px]">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
                   <span className="text-slate-400 block mb-0.5">Nakit Akışı</span>
                   <span className="font-bold text-white">{nakitAkisiPuan}/30</span>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
                   <span className="text-slate-400 block mb-0.5">Bütçe Disiplini</span>
                   <span className="font-bold text-white">{bütcePuan}/25</span>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
                   <span className="text-slate-400 block mb-0.5">Risk Seviyesi</span>
                   <span className="font-bold text-white">{riskPuan}/20</span>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
                   <span className="text-slate-400 block mb-0.5">Ödeme Düzeni</span>
                   <span className="font-bold text-white">{odemePuan}/15</span>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
                   <span className="text-slate-400 block mb-0.5">Yatırım Uyumu</span>
                   <span className="font-bold text-white">{yatirimPuan}/10</span>
                 </div>

@@ -74,7 +74,7 @@ export default function IncomeExpenseChart({ data }: IncomeExpenseChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
         <YAxis stroke="#94a3b8" tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`} tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} cursor={false} />
         <Legend />
         <Line name="Gelir" type="monotone" dataKey="gelir" stroke="#34d399" strokeWidth={2.5} dot={false} />
         <Line name="Gider" type="monotone" dataKey="gider" stroke="#fb7185" strokeWidth={2.5} dot={false} />
