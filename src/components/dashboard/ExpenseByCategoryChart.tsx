@@ -25,6 +25,29 @@ type ExpenseByCategoryChartProps = {
 
 const colors = ["#22d3ee", "#60a5fa", "#2dd4bf", "#34d399", "#f59e0b", "#fb7185", "#c084fc"];
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+  }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#0b1220]/95 border border-white/10 rounded-xl p-3 shadow-xl backdrop-blur-md">
+        <p className="text-xs font-semibold text-slate-400 mb-1">{label}</p>
+        <p className="text-sm font-bold text-cyan-300">
+          {formatCurrencyTRY(Number(payload[0].value ?? 0))}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -49,13 +72,9 @@ export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartP
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />
         <YAxis stroke="#94a3b8" tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`} tickLine={false} axisLine={false} />
-        <Tooltip
-          formatter={(value) => formatCurrencyTRY(Number(value ?? 0))}
-          contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "0.5rem" }}
-          labelStyle={{ color: "#cbd5e1" }}
-        />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
         <Legend />
-        <Bar dataKey="value" name="Harcama" radius={[6, 6, 0, 0]}>
+        <Bar dataKey="value" name="Harcama" radius={[6, 6, 0, 0]} activeBar={false}>
           {data.map((entry, index) => (
             <Cell key={`${entry.name}-${index}`} fill={colors[index % colors.length]} />
           ))}

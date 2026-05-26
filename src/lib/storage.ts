@@ -11,6 +11,7 @@ import type {
   PaymentOrder,
   RoboProfileResult,
   Transaction,
+  TransactionCategory,
 } from "@/types/finance";
 
 export const FINWISE_STORAGE_KEY = "finwise:v2:sprint7";
@@ -58,8 +59,61 @@ function normalizePaymentOrders(paymentOrders: PaymentOrder[]): PaymentOrder[] {
   });
 }
 
-export function createSeedSnapshot(): FinanceSnapshot {
+export function reconcileCompletedPaymentOrders(snapshot: FinanceSnapshot): FinanceSnapshot {
+  const nextTransactions = [...snapshot.transactions];
+  const nextAccounts = [...snapshot.accounts];
+
+  const nextOrders = snapshot.paymentOrders.map((order) => {
+    if (order.status === "tamamlandi" && !order.postedTransactionId) {
+      const txnId = `txn-pay-${order.id}`;
+
+      const exists = nextTransactions.some((t) => t.id === txnId);
+      if (!exists) {
+        const category = order.paymentType === "fatura" ? "fatura" : order.paymentType === "transfer" ? "transfer" : "eglence";
+        const accountId = order.sourceAccountId || (nextAccounts.length > 0 ? nextAccounts[0].id : "");
+        
+        if (!accountId) return order;
+
+        const newTxn: Transaction = {
+          id: txnId,
+          accountId: accountId,
+          title: `${order.payee} Ödemesi`,
+          amount: order.amount,
+          category: category as TransactionCategory,
+          direction: "out",
+          type: "gider",
+          occurredAt: order.createdAt || new Date().toISOString(),
+          description: order.description || "Geçmiş ödeme talimatı onayı",
+        };
+        nextTransactions.push(newTxn);
+
+        const accIndex = nextAccounts.findIndex((a) => a.id === accountId);
+        if (accIndex !== -1) {
+          nextAccounts[accIndex] = {
+            ...nextAccounts[accIndex],
+            balance: Number((nextAccounts[accIndex].balance - newTxn.amount).toFixed(2)),
+          };
+        }
+      }
+
+      return {
+        ...order,
+        postedTransactionId: txnId,
+      };
+    }
+    return order;
+  });
+
   return {
+    ...snapshot,
+    accounts: nextAccounts,
+    transactions: nextTransactions,
+    paymentOrders: nextOrders,
+  };
+}
+
+export function createSeedSnapshot(): FinanceSnapshot {
+  const base: FinanceSnapshot = {
     version: STORAGE_VERSION,
     user: clone(mockUser),
     accounts: normalizeAccounts(clone(mockAccounts)),
@@ -69,6 +123,7 @@ export function createSeedSnapshot(): FinanceSnapshot {
     roboResults: [],
     updatedAt: new Date().toISOString(),
   };
+  return reconcileCompletedPaymentOrders(base);
 }
 
 function isFinanceSnapshot(value: unknown): value is FinanceSnapshot {
@@ -113,7 +168,7 @@ export function readFinanceSnapshot(): FinanceSnapshot {
       return seed;
     }
 
-    return {
+    const baseSnapshot: FinanceSnapshot = {
       ...seed,
       ...parsed,
       accounts: normalizeAccounts(parsed.accounts),
@@ -122,6 +177,8 @@ export function readFinanceSnapshot(): FinanceSnapshot {
       roboResults: parsed.roboResults ?? [],
       updatedAt: parsed.updatedAt ?? seed.updatedAt,
     };
+
+    return reconcileCompletedPaymentOrders(baseSnapshot);
   } catch {
     writeFinanceSnapshot(seed);
     return seed;

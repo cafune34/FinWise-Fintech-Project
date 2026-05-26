@@ -139,7 +139,19 @@ Bu döküman, FinWise V2 projesinin akademik jüriye / ders sorumlusuna sunulmas
 
 ---
 
-### Slayt 14: Sonuç ve Gelecek Geliştirmeler
+### Slayt 14: Karar Destek Yeteneği (Fark Yaratan Özellikler)
+* **Slayt Başlığı**: FinWise Karar Destek Gücü ve Fark Yaratan Özellikler
+* **Slayt İçeriği**:
+  * **Finansal Aksiyon Merkezi**: Bütçe, risk ve ödeme verilerinden otomatik eyleme geçirilebilir aksiyonlar üretme.
+  * **Açıklanabilir Sağlık Skoru**: 5 boyutta dinamik puanlama ve iyileştirme önerileri.
+  * **Akıllı Bütçe İçgörüleri**: Limit doluluk oranlarına göre değişen karar destek yönlendirmeleri.
+  * **Ödeme Güven Skoru**: Kaynak hesap bakiyesi ve IBAN doğruluğunu denetleyen risk analizi.
+  * **Sunum Modu**: Jüri sunumu için 8 adımlı interaktif demo rehberi.
+* **Konuşma Notu**: "FinWise'ı sıradan bir bütçe izleme panelinden ayıran en önemli yönü, kullanıcılara sunduğu bu Karar Destek mekanizmalarıdır. Sistem sadece veri göstermekle kalmaz; Güven Skoru, Aksiyon Önerileri ve Bütçe İçgörüleri ile kullanıcıya rehberlik eder."
+
+---
+
+### Slayt 15: Sonuç ve Gelecek Geliştirmeler
 * **Slayt Başlığı**: Sonuç ve Gelecek Vizyonu
 * **Slayt İçeriği**:
   * **Kazanımlar**: Fintech dersi teorik kazanımlarının profesyonel UI ve çalışan kod ile pratikleştirilmesi.

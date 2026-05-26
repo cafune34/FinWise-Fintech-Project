@@ -30,7 +30,9 @@ function sortByOccurredAtDesc(transactions: Transaction[]): Transaction[] {
 }
 
 export function calculateTotalBalance(accounts: BankAccount[]): number {
-  return accounts.reduce((sum, account) => sum + account.balance, 0);
+  return accounts
+    .filter((account) => account.status !== "pasif")
+    .reduce((sum, account) => sum + account.balance, 0);
 }
 
 export function calculateMonthlyIncome(
@@ -38,7 +40,7 @@ export function calculateMonthlyIncome(
   referenceDate: Date = new Date()
 ): number {
   return transactions
-    .filter((txn) => txn.direction === "in" && isSameMonth(txn.occurredAt, referenceDate))
+    .filter((txn) => txn.type === "gelir" && isSameMonth(txn.occurredAt, referenceDate))
     .reduce((sum, txn) => sum + txn.amount, 0);
 }
 
@@ -47,7 +49,7 @@ export function calculateMonthlyExpense(
   referenceDate: Date = new Date()
 ): number {
   return transactions
-    .filter((txn) => txn.direction === "out" && isSameMonth(txn.occurredAt, referenceDate))
+    .filter((txn) => txn.type === "gider" && isSameMonth(txn.occurredAt, referenceDate))
     .reduce((sum, txn) => sum + txn.amount, 0);
 }
 

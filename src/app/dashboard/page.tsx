@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowRight, BadgeCheck, CreditCard, Gauge, ShieldCheck, TrendingUp, WalletCards } from "lucide-react";
+import { ArrowRight, BadgeCheck, CreditCard, Gauge, ShieldCheck, TrendingUp, WalletCards, Sparkles } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import ChartCard from "@/components/ChartCard";
 import ForecastCard from "@/components/ForecastCard";
@@ -74,8 +74,6 @@ export default function DashboardPage() {
   const priorityAlerts = regtechAlerts.slice(0, 3);
   const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
   const recentTransactions = getRecentTransactions(transactions, 8);
-  const healthScore = Math.max(62, Math.min(94, Math.round(78 + (netCashFlow > 0 ? 8 : -6) - riskyForecasts.length * 2)));
-
   const pendingPaymentsCount = useMemo(() => {
     return (paymentOrders || []).filter((order) => order.status === "beklemede").length;
   }, [paymentOrders]);
@@ -86,6 +84,108 @@ export default function DashboardPage() {
       return severity === "high";
     }).length;
   }, [regtechAlerts]);
+
+  const exceededBudgetsCount = useMemo(() => {
+    return budgetsWithSpending.filter((b) => b.spent > b.limit).length;
+  }, [budgetsWithSpending]);
+
+  const nakitAkisiPuan = netCashFlow > 0 ? 30 : 10;
+  const bütcePuan = exceededBudgetsCount === 0 ? 25 : exceededBudgetsCount === 1 ? 18 : exceededBudgetsCount === 2 ? 12 : 5;
+  const regtechRiskScore = Math.max(0, 15 - (highRiskAlertsCount * 5));
+  const profileRiskScore = lastRoboResult?.profile === "dusuk" ? 5 : lastRoboResult?.profile === "orta" ? 3 : lastRoboResult?.profile === "yuksek" ? 0 : 5;
+  const riskPuan = regtechRiskScore + profileRiskScore;
+  const odemePuan = pendingPaymentsCount === 0 ? 15 : pendingPaymentsCount <= 2 ? 10 : 5;
+  const yatirimPuan = lastRoboResult ? 10 : 5;
+
+  const healthScore = nakitAkisiPuan + bütcePuan + riskPuan + odemePuan + yatirimPuan;
+
+  const suggestions = useMemo(() => {
+    const list: string[] = [];
+    if (netCashFlow < 0) {
+      list.push("Net nakit akışını pozitife geçirmek için harcamalarınızı optimize edin.");
+    }
+    if (exceededBudgetsCount > 0) {
+      list.push("Bütçe aşımlarını durdurmak için aktif limitlerinizi ve harcama hızınızı kontrol edin.");
+    }
+    if (highRiskAlertsCount > 0) {
+      list.push("Yüksek öncelikli risk uyarılarını Risk İzleme panelinden inceleyin.");
+    }
+    if (pendingPaymentsCount > 0) {
+      list.push("Bekleyen ödeme talimatlarını onaylayarak ödeme düzeni puanınızı artırın.");
+    }
+    if (!lastRoboResult) {
+      list.push("Yatırım Profili anketini çözerek portföy dağılımınızı belirleyin (+5 puan).");
+    }
+    return list.slice(0, 3);
+  }, [netCashFlow, exceededBudgetsCount, highRiskAlertsCount, pendingPaymentsCount, lastRoboResult]);
+
+  const actionItems = useMemo(() => {
+    const list: Array<{
+      id: string;
+      title: string;
+      desc: string;
+      priority: "Yüksek" | "Orta" | "Düşük";
+      module: "Bütçe" | "Risk" | "Ödeme" | "Yatırım" | "Nakit Akışı";
+      href: string;
+    }> = [];
+
+    if (netCashFlow < 0) {
+      list.push({
+        id: "action-cashflow",
+        title: "Nakit Akışı İyileştirme",
+        desc: "Net nakit akışınız negatif seyrediyor. Sabit giderler ve kategori limitleri gözden geçirilmeli.",
+        priority: "Yüksek",
+        module: "Nakit Akışı",
+        href: "/dashboard",
+      });
+    }
+
+    if (exceededBudgetsCount > 0) {
+      list.push({
+        id: "action-budget",
+        title: "Bütçe Disiplini Kontrolü",
+        desc: "Kategori bütçe aşımı tespit edildi. Aşım yapan alanlar için harcama planı düzenlenmeli.",
+        priority: "Yüksek",
+        module: "Bütçe",
+        href: "/budget",
+      });
+    }
+
+    if (highRiskAlertsCount > 0) {
+      list.push({
+        id: "action-risk",
+        title: "Yüksek Öncelikli Risk Kontrolü",
+        desc: "Uyum motoru tarafından kritik risk tespit edildi. Riskli işlemleri acilen denetleyin.",
+        priority: "Yüksek",
+        module: "Risk",
+        href: "/regtech",
+      });
+    }
+
+    if (pendingPaymentsCount > 0) {
+      list.push({
+        id: "action-payment",
+        title: "Ödeme Talimatları Onayı",
+        desc: "Onay bekleyen ödeme talimatlarınız mevcut. İşlemleri tamamlamak için inceleyin.",
+        priority: "Orta",
+        module: "Ödeme",
+        href: "/payments",
+      });
+    }
+
+    if (lastRoboResult?.profile === "yuksek" || lastRoboResult?.profile === "orta") {
+      list.push({
+        id: "action-robo",
+        title: "Yatırım Uyumu Değerlendirmesi",
+        desc: "Yatırım profiliniz riskli grupta. Nakit ihtiyaçlarınız ve varlık dağılımınızı optimize edin.",
+        priority: "Orta",
+        module: "Yatırım",
+        href: "/robo-advisor",
+      });
+    }
+
+    return list;
+  }, [netCashFlow, exceededBudgetsCount, highRiskAlertsCount, pendingPaymentsCount, lastRoboResult]);
 
   const lastProfileText = useMemo(() => {
     if (!lastRoboResult) return "Belirlenmedi";
@@ -118,25 +218,68 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
-      <section className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.7fr)_minmax(320px,0.7fr)] 2xl:grid-cols-[minmax(0,1.3fr)_minmax(360px,0.75fr)_minmax(360px,0.75fr)]">
-        <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Finansal sağlık skoru</p>
-              <h3 className="mt-2 text-4xl font-semibold text-white">{healthScore}/100</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300 xl:max-w-4xl">
-                Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde aylık finans görünümü izlenebilir durumda.
-              </p>
+      <section className="grid w-full items-start gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">
+        <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Finansal sağlık skoru</p>
+                <h3 className="mt-2 text-4xl font-semibold text-white">{healthScore}/100</h3>
+                <p className="mt-2 text-xs leading-5 text-slate-300 xl:max-w-4xl">
+                  Nakit akışı, bütçe kullanımı ve öncelikli riskler birlikte değerlendirildiğinde aylık finans görünümü izlenebilir durumda.
+                </p>
+              </div>
+              <div className="relative h-24 w-24 md:h-28 md:w-28 shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 p-2">
+                <div className="grid h-full w-full place-items-center rounded-full bg-slate-950/80">
+                  <div className="text-center">
+                    <BadgeCheck className="mx-auto h-5 w-5 text-cyan-300" />
+                    <p className="mt-1 text-xs font-semibold text-cyan-200">
+                      {healthScore >= 80 ? "Güçlü" : healthScore >= 60 ? "Dengeli" : "Zayıf"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="relative h-36 w-36 shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 p-3">
-              <div className="grid h-full w-full place-items-center rounded-full bg-slate-950/80">
-                <div className="text-center">
-                  <BadgeCheck className="mx-auto h-6 w-6 text-cyan-300" />
-                  <p className="mt-2 text-sm font-semibold text-cyan-200">Dengeli</p>
+
+            {/* Skor Kırılımı */}
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Skor Kırılımı</p>
+              <div className="flex flex-wrap gap-2 text-[10px]">
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                  <span className="text-slate-400 block mb-0.5">Nakit Akışı</span>
+                  <span className="font-bold text-white">{nakitAkisiPuan}/30</span>
+                </div>
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                  <span className="text-slate-400 block mb-0.5">Bütçe Disiplini</span>
+                  <span className="font-bold text-white">{bütcePuan}/25</span>
+                </div>
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                  <span className="text-slate-400 block mb-0.5">Risk Seviyesi</span>
+                  <span className="font-bold text-white">{riskPuan}/20</span>
+                </div>
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                  <span className="text-slate-400 block mb-0.5">Ödeme Düzeni</span>
+                  <span className="font-bold text-white">{odemePuan}/15</span>
+                </div>
+                <div className="flex-1 min-w-[90px] rounded-lg bg-slate-900/60 p-2 border border-white/5">
+                  <span className="text-slate-400 block mb-0.5">Yatırım Uyumu</span>
+                  <span className="font-bold text-white">{yatirimPuan}/10</span>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Skoru artırmak için */}
+          {suggestions.length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Skoru Artırmak İçin Öneriler</p>
+              <ul className="list-disc pl-4 text-[11px] text-cyan-200/90 space-y-1">
+                {suggestions.map((s, idx) => (
+                  <li key={idx} className="leading-relaxed">{s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </article>
 
         <article className="rounded-2xl border border-white/10 bg-[#0b1220]/80 p-6 shadow-2xl shadow-black/20">
@@ -228,6 +371,62 @@ export default function DashboardPage() {
             </Link>
           );
         })}
+      </section>
+
+      {/* Finansal Aksiyon Merkezi */}
+      <section className="w-full rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-xl shadow-black/10">
+        <div>
+          <h3 className="text-base font-semibold text-white flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-cyan-300" />
+            Finansal Aksiyon Merkezi
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Aktif bütçe, nakit akışı, risk ve yatırım verilerinizden derlenen karar destek kararları
+          </p>
+        </div>
+
+        {actionItems.length > 0 ? (
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {actionItems.map((action) => (
+              <article
+                key={action.id}
+                className="relative flex flex-col justify-between rounded-xl border border-white/10 bg-slate-950/40 p-4 transition duration-200 hover:border-cyan-300/30"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                      {action.module}
+                    </span>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+                        action.priority === "Yüksek"
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                          : "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                      }`}
+                    >
+                      {action.priority} Öncelik
+                    </span>
+                  </div>
+                  <h4 className="font-semibold text-white text-sm">{action.title}</h4>
+                  <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">{action.desc}</p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-white/5 flex justify-end">
+                  <Link
+                    href={action.href}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-300 hover:text-cyan-200 transition"
+                  >
+                    İncele
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-lg border border-dashed border-white/10 p-5 text-center">
+            <p className="text-sm text-slate-400">Finansal görünüm dengeli. Kritik aksiyon bulunmuyor.</p>
+          </div>
+        )}
       </section>
 
       <section className="grid w-full gap-4 lg:grid-cols-3">
