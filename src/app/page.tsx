@@ -62,16 +62,76 @@ export default function Home() {
                   </div>
                   <WalletCards className="h-9 w-9 text-cyan-300" />
                 </div>
-                <div className="mt-8 h-72 rounded-xl border border-white/10 bg-[#090f1d] p-5">
-                  <div className="flex h-full items-end gap-3">
-                    {[42, 58, 46, 68, 64, 82, 74, 88, 79, 93].map((height, index) => (
-                      <div key={index} className="flex flex-1 items-end rounded-full bg-slate-800/80">
-                        <div
-                          className="w-full rounded-full bg-cyan-300"
-                          style={{ height: `${height}%`, opacity: 0.48 + index * 0.045 }}
-                        />
+                <div className="mt-8 h-72 rounded-xl border border-white/10 bg-[#090f1d] p-4 flex flex-col justify-between text-xs">
+                  {/* Gelir / Gider ve Nakit Akışı */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Gelir / Gider Küçük Barları */}
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+                          <span>Aylık Gelir</span>
+                          <span className="text-emerald-400 font-semibold">+45.200 TL</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-slate-800">
+                          <div className="h-full w-[78%] rounded-full bg-emerald-400" />
+                        </div>
                       </div>
-                    ))}
+                      <div>
+                        <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+                          <span>Aylık Gider</span>
+                          <span className="text-rose-400 font-semibold">-31.780 TL</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-slate-800">
+                          <div className="h-full w-[55%] rounded-full bg-rose-400" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Basit Nakit Akışı Progress/Görünümü */}
+                    <div className="rounded-lg bg-slate-950/40 p-2 border border-white/5 flex flex-col justify-between">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-slate-400">Nakit Akış Dengesi</span>
+                        <span className="text-emerald-400 text-[10px] font-semibold">+13.420 TL</span>
+                      </div>
+                      <div className="flex items-end justify-between gap-1 h-10 mt-1">
+                        {[30, 45, 35, 60, 50, 75, 65, 85].map((h, i) => (
+                          <div key={i} className="flex-1 bg-cyan-950/30 rounded-t h-full flex items-end">
+                            <div
+                              className="w-full rounded-t bg-cyan-400"
+                              style={{ height: `${h}%`, opacity: 0.5 + i * 0.05 }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Son 3 İşlem Satırı */}
+                  <div className="mt-2 border-t border-white/5 pt-3">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-2 font-medium">Son İşlemler</p>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center rounded-lg bg-slate-950/30 px-2.5 py-1.5 border border-white/5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="font-medium text-slate-200">Maaş Ödemesi</span>
+                        </div>
+                        <span className="text-emerald-400 font-semibold">+35.000 TL</span>
+                      </div>
+                      <div className="flex justify-between items-center rounded-lg bg-slate-950/30 px-2.5 py-1.5 border border-white/5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                          <span className="font-medium text-slate-200">Kira Ödemesi</span>
+                        </div>
+                        <span className="text-slate-300 font-semibold">-12.000 TL</span>
+                      </div>
+                      <div className="flex justify-between items-center rounded-lg bg-slate-950/30 px-2.5 py-1.5 border border-white/5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                          <span className="font-medium text-slate-200">Market Harcaması</span>
+                        </div>
+                        <span className="text-slate-300 font-semibold">-850 TL</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

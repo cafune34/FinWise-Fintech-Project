@@ -93,28 +93,32 @@ export default function AppShell({ title, description, children }: AppShellProps
             </p>
           </div>
 
-          <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
-            {navItems.map((item) => {
-              const active = pathname === item.href;
-              const Icon = item.icon;
+          <div className="relative mt-5 lg:mt-6">
+            {/* Mobile horizontal scroll indicator (fade overlay) */}
+            <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-12 bg-gradient-to-l from-[#0b1220]/95 to-transparent lg:hidden z-10" />
+            <nav className="flex gap-1.5 overflow-x-auto pb-1.5 pr-10 lg:flex-col lg:overflow-visible lg:pr-0 scrollbar-none">
+              {navItems.map((item) => {
+                const active = pathname === item.href;
+                const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={clsx(
-                    "group flex min-h-11 items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium transition",
-                    active
-                      ? "bg-cyan-300 text-slate-950 shadow-[0_12px_30px_rgba(34,211,238,0.22)]"
-                      : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
-                  )}
-                >
-                  <Icon className={clsx("h-4 w-4", active ? "text-slate-950" : "text-cyan-200/80")} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={clsx(
+                      "group flex min-h-10 items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-medium transition lg:min-h-11 lg:gap-3 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-sm",
+                      active
+                        ? "bg-cyan-300 text-slate-950 shadow-[0_12px_30px_rgba(34,211,238,0.22)]"
+                        : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                    )}
+                  >
+                    <Icon className={clsx("h-3.5 w-3.5 lg:h-4 lg:w-4", active ? "text-slate-950" : "text-cyan-200/80")} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
           <div className="mt-5 rounded-xl border border-white/10 bg-[#111827]/80 p-4 lg:mt-auto">
             <div className="flex items-center gap-3">
@@ -149,10 +153,10 @@ export default function AppShell({ title, description, children }: AppShellProps
                 )}
               >
                 <RefreshCcw className="h-4 w-4" />
-                {confirmReset ? "Onayla ve yenile" : "Verileri başlangıç durumuna al"}
+                {confirmReset ? "Onayla ve yenile" : "Verileri Sıfırla"}
               </button>
               <p className="mt-2 text-xs leading-5 text-slate-400">
-                Bu işlem kayıtlı yerel verileri yeniler.
+                Yerel verileri yeniler.
               </p>
             </div>
           </div>

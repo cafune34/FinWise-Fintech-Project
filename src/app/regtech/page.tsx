@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import RiskAlertCard from "@/components/RiskAlertCard";
 import StatCard from "@/components/StatCard";
@@ -10,6 +10,7 @@ import { Award } from "lucide-react";
 
 export default function RegtechPage() {
   const { transactions, budgetsWithSpending, user } = useFinanceData();
+  const [showAll, setShowAll] = useState(false);
   const alerts = useMemo(
     () =>
       generateRegTechAlerts({
@@ -29,6 +30,11 @@ export default function RegtechPage() {
   }, [alerts]);
 
   const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
+
+  const displayedAlerts = useMemo(() => {
+    if (showAll) return alerts;
+    return alerts.slice(0, 9);
+  }, [alerts, showAll]);
 
   return (
     <AppShell
@@ -61,14 +67,27 @@ export default function RegtechPage() {
         </div>
 
         {alerts.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {alerts.map((alert) => (
-              <RiskAlertCard
-                key={alert.id}
-                alert={alert}
-                transaction={alert.transactionId ? transactionById.get(alert.transactionId) : undefined}
-              />
-            ))}
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {displayedAlerts.map((alert) => (
+                <RiskAlertCard
+                  key={alert.id}
+                  alert={alert}
+                  transaction={alert.transactionId ? transactionById.get(alert.transactionId) : undefined}
+                />
+              ))}
+            </div>
+            {alerts.length > 9 && (
+              <div className="flex justify-center mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAll(!showAll)}
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-slate-950/60 px-5 text-sm font-medium text-slate-200 transition hover:border-cyan-300/40 hover:text-cyan-200"
+                >
+                  {showAll ? "Daha az göster" : `Tüm riskleri göster (${alerts.length})`}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center rounded-lg border border-dashed border-white/10">
