@@ -199,7 +199,7 @@ export default function PaymentSimulationForm() {
                 className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none"
               >
                 <option value="">Hesap seçiniz</option>
-                {accounts.map((account) => (
+                {accounts.filter((a) => a.status !== "pasif").map((account) => (
                   <option key={account.id} value={account.id}>
                     {account.bankName} - {formatCurrencyTRY(account.balance)}
                   </option>
@@ -335,40 +335,45 @@ export default function PaymentSimulationForm() {
             </article>
           )}
 
-          <article className="rounded-xl border border-white/10 bg-slate-950/45 p-5">
+          <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
             <div className="flex items-center gap-3">
-              <Clock3 className="h-5 w-5 text-emerald-300" />
+              <Clock3 className="h-5 w-5 text-cyan-300" />
               <h3 className="text-sm font-semibold text-white">Talimat Akışı Detayı</h3>
             </div>
-            <div className="mt-4 space-y-3 text-xs">
-              <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                <div className="h-2 w-2 rounded-full bg-amber-400" />
+            <div className="mt-4 space-y-3.5 text-xs">
+              <div className="flex items-center gap-3.5 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
+                <div className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-200">Beklemede</p>
-                  <p className="text-slate-400 text-[10px]">Hesap bakiyesinin yetersiz olması durumunda atanır.</p>
+                  <p className="font-semibold text-amber-200">Beklemede</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Hesap bakiyesinin yetersiz olması durumunda atanır.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                <div className="h-2 w-2 rounded-full bg-cyan-400" />
+              <div className="flex items-center gap-3.5 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5">
+                <div className="h-2 w-2 rounded-full bg-cyan-400 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-200">İşleme Alındı</p>
-                  <p className="text-slate-400 text-[10px]">Talimat başarıyla planlandı ve işlem sırasına eklendi.</p>
+                  <p className="font-semibold text-cyan-200">İşleme Alındı</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Talimat başarıyla planlandı ve işlem sırasına eklendi.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-400" />
+              <div className="flex items-center gap-3.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-200">Tamamlandı</p>
-                  <p className="text-slate-400 text-[10px]">Ödeme gerçekleştirildi ve alıcı hesaba transfer edildi.</p>
+                  <p className="font-semibold text-emerald-200">Tamamlandı</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Ödeme gerçekleştirildi ve alıcı hesaba transfer edildi.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                <div className="h-2 w-2 rounded-full bg-rose-400" />
+              <div className="flex items-center gap-3.5 rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2.5">
+                <div className="h-2 w-2 rounded-full bg-rose-400 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-200">Reddedildi</p>
-                  <p className="text-slate-400 text-[10px]">Talimat güvenlik veya limit aşımı nedeniyle iptal edildi.</p>
+                  <p className="font-semibold text-rose-200">Reddedildi</p>
+                  <p className="text-slate-400 text-xs mt-0.5">Talimat güvenlik veya limit aşımı nedeniyle iptal edildi.</p>
                 </div>
               </div>
+            </div>
+            <div className="mt-4 rounded-lg border border-cyan-500/10 bg-cyan-950/20 p-3 text-center">
+              <p className="text-xs font-medium text-cyan-200">
+                💡 Tamamlanan talimatlar işlem geçmişine yansır.
+              </p>
             </div>
           </article>
         </aside>

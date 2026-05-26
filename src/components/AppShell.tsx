@@ -18,9 +18,17 @@ import {
   ShieldCheck,
   UserRound,
   WalletCards,
+  ChevronDown,
+  Calendar,
 } from "lucide-react";
-import { calculateNetCashFlow, calculateTotalBalance } from "@/lib/finance";
+import {
+  calculateMonthlyExpense,
+  calculateMonthlyIncome,
+  calculateNetCashFlow,
+  calculateTotalBalance,
+} from "@/lib/finance";
 import { formatCurrencyTRY } from "@/lib/format";
+import { generateRegTechAlerts } from "@/lib/regtech";
 import { useFinanceData } from "@/lib/useFinanceData";
 
 type NavItem = {
@@ -47,15 +55,34 @@ type AppShellProps = {
 
 export default function AppShell({ title, description, children }: AppShellProps) {
   const pathname = usePathname();
-  const { accounts, transactions, resetToSeed } = useFinanceData();
+  const { accounts, transactions, budgetsWithSpending, paymentOrders, resetToSeed } = useFinanceData();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [activePanel, setActivePanel] = useState<"finance" | "date" | "bell" | "profile" | null>(null);
+
   const today = new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   }).format(new Date());
+
   const totalBalance = calculateTotalBalance(accounts);
   const netCashFlow = calculateNetCashFlow(transactions);
+  const monthlyIncome = calculateMonthlyIncome(transactions);
+  const monthlyExpense = calculateMonthlyExpense(transactions);
+
+  const regtechAlerts = generateRegTechAlerts({
+    transactions,
+    budgets: budgetsWithSpending,
+    userId: "user-1",
+  });
+
+  const highRiskAlertsCount = regtechAlerts.filter(
+    (alert) => (alert.severity ?? (alert.level === "yuksek" ? "high" : "low")) === "high"
+  ).length;
+
+  const pendingPaymentsCount = (paymentOrders || []).filter((order) => order.status === "beklemede").length;
+  const exceededBudgetsCount = budgetsWithSpending.filter((b) => b.spent > b.limit).length;
+  const totalNotificationsCount = pendingPaymentsCount + highRiskAlertsCount + exceededBudgetsCount;
 
   function handleResetClick() {
     if (!confirmReset) {
@@ -67,8 +94,20 @@ export default function AppShell({ title, description, children }: AppShellProps
     setConfirmReset(false);
   }
 
+  const togglePanel = (panel: "finance" | "date" | "bell" | "profile") => {
+    setActivePanel((current) => (current === panel ? null : panel));
+  };
+
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100">
+      {/* Click outside backdrop overlay */}
+      {activePanel && (
+        <div
+          className="fixed inset-0 z-40 bg-transparent"
+          onClick={() => setActivePanel(null)}
+        />
+      )}
+
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,#070b14_0%,#0c1220_48%,#111827_100%)]" />
       <div className="flex min-h-screen w-full flex-col lg:flex-row">
         <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
@@ -170,33 +209,161 @@ export default function AppShell({ title, description, children }: AppShellProps
                 <h2 className="mt-1 text-2xl font-semibold text-white">{title}</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-300 xl:max-w-5xl">{description}</p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300">
-                  <Search className="h-4 w-4 text-slate-500" />
-                  Aylık finans görünümü
+              <div className="flex flex-wrap items-center gap-2 relative">
+                {/* 1. Aylık Finans Görünümü */}
+                <div className="relative z-50">
+                  <button
+                    type="button"
+                    onClick={() => togglePanel("finance")}
+                    className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300 hover:border-cyan-300/40 hover:text-white transition cursor-pointer"
+                  >
+                    <Search className="h-4 w-4 text-slate-500" />
+                    Aylık finans görünümü
+                    <ChevronDown className="h-3 w-3 text-slate-500" />
+                  </button>
+                  {activePanel === "finance" && (
+                    <div className="absolute right-0 mt-2 w-72 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
+                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Bu Ayın Özeti</h4>
+                      <div className="space-y-2.5 text-xs text-slate-200">
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Gelir:</span>
+                          <span className="font-semibold text-emerald-300">+{formatCurrencyTRY(monthlyIncome)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Gider:</span>
+                          <span className="font-semibold text-rose-300">-{formatCurrencyTRY(monthlyExpense)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Net Nakit Akışı:</span>
+                          <span className={clsx("font-semibold", netCashFlow >= 0 ? "text-emerald-300" : "text-rose-300")}>
+                            {formatCurrencyTRY(netCashFlow)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Risk Durumu:</span>
+                          <span className={clsx("font-semibold", highRiskAlertsCount > 0 ? "text-rose-300" : "text-emerald-300")}>
+                            {highRiskAlertsCount > 0 ? `${highRiskAlertsCount} Riskli Uyarı` : "Dengeli / Güvenli"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex h-10 items-center rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300">
-                  {today}
+
+                {/* 2. Tarih Görünümü */}
+                <div className="relative z-50">
+                  <button
+                    type="button"
+                    onClick={() => togglePanel("date")}
+                    className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-3 text-sm text-slate-300 hover:border-cyan-300/40 hover:text-white transition cursor-pointer"
+                  >
+                    <Calendar className="h-4 w-4 text-cyan-300" />
+                    {today}
+                  </button>
+                  {activePanel === "date" && (
+                    <div className="absolute right-0 mt-2 w-64 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
+                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Bugünün Görünümü</h4>
+                      <p className="text-xs text-slate-300 leading-5">
+                        Tarih: <span className="text-white font-medium">{today}</span>
+                      </p>
+                      <p className="text-xs text-slate-400 leading-relaxed mt-2 border-t border-white/5 pt-2">
+                        Finansal kontrol merkezi aktif durumda. Bugün gerçekleşen işlemler ve bildirimler anlık izleniyor.
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-slate-950/60 text-slate-300 transition hover:border-cyan-300/50 hover:text-cyan-200"
-                  aria-label="Bildirimler"
-                >
-                  <Bell className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-cyan-300 text-slate-950 transition hover:bg-cyan-200"
-                  aria-label="Profil"
-                >
-                  <UserRound className="h-4 w-4" />
-                </button>
+
+                {/* 3. Bildirimler */}
+                <div className="relative z-50">
+                  <button
+                    type="button"
+                    onClick={() => togglePanel("bell")}
+                    className={clsx(
+                      "grid h-10 w-10 place-items-center rounded-xl border transition relative",
+                      activePanel === "bell"
+                        ? "border-cyan-300 bg-cyan-300/10 text-cyan-300"
+                        : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-cyan-300/50 hover:text-cyan-200"
+                    )}
+                    aria-label="Bildirimler"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {totalNotificationsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white">
+                        {totalNotificationsCount}
+                      </span>
+                    )}
+                  </button>
+                  {activePanel === "bell" && (
+                    <div className="absolute right-0 mt-2 w-72 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
+                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Sistem Bildirimleri</h4>
+                      <div className="space-y-2.5 text-xs">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-300">Bekleyen ödeme talimatı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", pendingPaymentsCount > 0 ? "bg-amber-500/10 text-amber-300 border border-amber-500/20" : "text-slate-400")}>
+                            {pendingPaymentsCount} Adet
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-300">Yüksek riskli uyarı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", highRiskAlertsCount > 0 ? "bg-rose-500/10 text-rose-300 border border-rose-500/20" : "text-slate-400")}>
+                            {highRiskAlertsCount} Adet
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-300">Bütçe aşımı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", exceededBudgetsCount > 0 ? "bg-rose-500/10 text-rose-300 border border-rose-500/20" : "text-slate-400")}>
+                            {exceededBudgetsCount} Kategori
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Profil */}
+                <div className="relative z-50">
+                  <button
+                    type="button"
+                    onClick={() => togglePanel("profile")}
+                    className={clsx(
+                      "grid h-10 w-10 place-items-center rounded-xl border transition",
+                      activePanel === "profile"
+                        ? "border-cyan-300 bg-cyan-300/10 text-cyan-300"
+                        : "border-white/10 bg-cyan-300 text-slate-950 hover:bg-cyan-200"
+                    )}
+                    aria-label="Profil"
+                  >
+                    <UserRound className="h-4 w-4" />
+                  </button>
+                  {activePanel === "profile" && (
+                    <div className="absolute right-0 mt-2 w-64 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
+                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Kullanıcı Özeti</h4>
+                      <div className="space-y-2 text-xs text-slate-200">
+                        <p className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Ad Soyad:</span>
+                          <span className="font-semibold text-white">Ayşe Demir</span>
+                        </p>
+                        <p className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Risk Profili:</span>
+                          <span className="font-semibold text-emerald-300">Dengeli</span>
+                        </p>
+                        <p className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Plan:</span>
+                          <span className="font-semibold text-cyan-300">Aktif</span>
+                        </p>
+                        <p className="flex justify-between">
+                          <span className="text-slate-400">Veri Depolama:</span>
+                          <span className="font-medium text-slate-300">Yerel (LocalStorage)</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </header>
 
-          <section className="w-full space-y-5 pb-10">{children}</section>
+          <section className="w-full space-y-5 pb-10 animate-fade-in-slide">{children}</section>
         </main>
       </div>
     </div>

@@ -58,6 +58,7 @@ export type BankAccount = {
   currency: "TRY";
   type: "vadesiz" | "birikim";
   isMock?: true;
+  status?: "aktif" | "pasif";
 };
 
 export type Transaction = {
@@ -96,6 +97,7 @@ export type PaymentOrder = {
   description?: string;
   createdAt?: string;
   isMock?: true;
+  postedTransactionId?: string;
 };
 
 export type RoboProfileResult = {

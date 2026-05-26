@@ -52,6 +52,19 @@ Root dizindeki `README.md` dosyası tamamen V2 odaklı ürün ve teknik diliyle 
 
 ---
 
-## 6. Son Durum
-* **Durum**: Tamamlandı (Teslime Hazır)
+## 6. Sprint 9.2 - Final Fixes Güncellemeleri
+Sprint 9.2 kapsamında teslim öncesi son kullanıcı testlerindeki tüm bulgular giderilmiştir:
+1. **Rota Düzeltmeleri**: `/transactions` ve `/robo-advisor` rotalarındaki Next.js derleme ve yönlendirme durumları kontrol edildi. Tüm dashboard ve menü linkleri doğru şekilde yönlendirildi.
+2. **Sağ Üst Aksiyon Panelleri**: Arama/Aylık görünüm, Tarih, Bildirimler ve Profil butonları etkileşimli dropdown panellere dönüştürüldü ve güncel state verileriyle beslendi.
+3. **Grafik Tooltipleri**: Recharts grafiklerine koyu premium tema ile uyumlu, cyan/pembe vurgulu özel tooltipler eklendi. Legend alanındaki küçük "gelir/gider" yazıları "Gelir" ve "Gider" olarak düzeltildi.
+4. **Hesap İşlemleri (Edit/Deactivate/Delete)**: Banka hesaplarına düzenleme, pasifleştirme ve silme özellikleri eklendi. Hesaba bağlı işlem varsa pasifleştirme öneren uyarı mekanizması kuruldu. Pasif hesapların formlarda seçilmesi engellendi.
+5. **Finans Hesaplama Mantığı**: Toplam bakiye aktif hesaplarla sınırlandırıldı. Aylık gelir ve giderler yön (direction) yerine işlem tipine (type) göre ayrılarak transferlerin bakiye ve akışı bozması engellendi.
+6. **Ödeme Talimatı Entegrasyonu**: Tamamlanan ödeme talimatlarının otomatik olarak gider işlemi olarak kaydedilmesi ve hesap bakiyesini düşürmesi sağlandı.
+7. **Toast Bildirim Sistemi**: Kütüphanesiz, hafif ve koyu temayla uyumlu ToastProvider yazılarak tüm ekleme/silme/güncelleme aksiyonlarına bildirimler eklendi.
+8. **Geçiş Animasyonları**: CSS transition ve keyframe animasyonları eklenerek sayfalara yumuşak fade-in geçişleri kazandırıldı.
+
+---
+
+## 7. Son Durum
+* **Durum**: Sprint 9.2 Tamamlandı (Teslime Hazır)
 * **Tarih**: 26 Mayıs 2026

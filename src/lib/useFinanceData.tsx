@@ -16,6 +16,7 @@ import {
   writeFinanceSnapshot,
   type FinanceSnapshot,
 } from "@/lib/storage";
+import { useToast } from "@/components/Toast";
 import type {
   BankAccount,
   Budget,
@@ -71,6 +72,8 @@ type FinanceDataContextValue = FinanceSnapshot & {
   addTransaction: (input: AddTransactionInput) => Transaction;
   deleteTransaction: (transactionId: string) => void;
   addAccount: (input: AddAccountInput) => BankAccount;
+  updateAccount: (accountId: string, input: Partial<AddAccountInput> & { status?: BankAccount["status"] }) => void;
+  deleteAccount: (accountId: string) => void;
   updateBudgetLimit: (budgetId: string, limit: number) => void;
   createPaymentOrder: (input: CreatePaymentOrderInput) => PaymentOrder;
   updatePaymentOrderStatus: (orderId: string, status: PaymentOrder["status"]) => void;
@@ -122,7 +125,7 @@ function getBudgetsWithSpending(budgets: Budget[], transactions: Transaction[]):
 
   return budgets.map((budget) => {
     const spent = transactions
-      .filter((transaction) => transaction.direction === "out")
+      .filter((transaction) => transaction.type === "gider")
       .filter((transaction) => transaction.category === budget.category)
       .filter((transaction) => isSameMonth(transaction.occurredAt, referenceDate))
       .reduce((sum, transaction) => sum + transaction.amount, 0);
@@ -137,6 +140,7 @@ function getBudgetsWithSpending(budgets: Budget[], transactions: Transaction[]):
 export function FinanceDataProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<FinanceSnapshot>(() => createSeedSnapshot());
   const [hydrated, setHydrated] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const hydrateTimer = window.setTimeout(() => {
@@ -185,9 +189,10 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         transactions: [transaction, ...current.transactions],
       }));
 
+      showToast("İşlem başarıyla eklendi.", "success");
       return transaction;
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const deleteTransaction = useCallback(
@@ -205,8 +210,10 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
           transactions: current.transactions.filter((item) => item.id !== transactionId),
         };
       });
+
+      showToast("İşlem kaldırıldı.", "info");
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const addAccount = useCallback(
@@ -220,6 +227,7 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         balance: Number(input.balance.toFixed(2)),
         currency: input.currency,
         type: input.type,
+        status: "aktif",
       };
 
       updateSnapshot((current) => ({
@@ -227,9 +235,62 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         accounts: [account, ...current.accounts],
       }));
 
+      showToast("Hesap portföye eklendi.", "success");
       return account;
     },
-    [snapshot.user.id, updateSnapshot]
+    [snapshot.user.id, updateSnapshot, showToast]
+  );
+
+  const updateAccount = useCallback(
+    (accountId: string, input: Partial<AddAccountInput> & { status?: BankAccount["status"] }) => {
+      updateSnapshot((current) => {
+        const account = current.accounts.find((item) => item.id === accountId);
+        if (!account) return current;
+
+        const updated = current.accounts.map((acc) => {
+          if (acc.id === accountId) {
+            const next = {
+              ...acc,
+              bankName: input.bankName?.trim() ?? acc.bankName,
+              accountName: input.accountName?.trim() ?? acc.accountName,
+              type: input.type ?? acc.type,
+              iban: input.iban?.trim() ?? acc.iban,
+              balance: input.balance !== undefined ? Number(input.balance.toFixed(2)) : acc.balance,
+              currency: input.currency ?? acc.currency,
+              status: input.status ?? acc.status ?? "aktif",
+            };
+            return next;
+          }
+          return acc;
+        });
+
+        return {
+          ...current,
+          accounts: updated,
+        };
+      });
+
+      if (input.status === "pasif") {
+        showToast("Hesap pasifleştirildi.", "info");
+      } else {
+        showToast("Hesap bilgileri güncellendi.", "success");
+      }
+    },
+    [updateSnapshot, showToast]
+  );
+
+  const deleteAccount = useCallback(
+    (accountId: string) => {
+      updateSnapshot((current) => ({
+        ...current,
+        accounts: current.accounts.filter((item) => item.id !== accountId),
+        transactions: current.transactions.filter((item) => item.accountId !== accountId),
+        paymentOrders: current.paymentOrders.filter((item) => item.sourceAccountId !== accountId),
+      }));
+
+      showToast("Hesap kaldırıldı.", "info");
+    },
+    [updateSnapshot, showToast]
   );
 
   const updateBudgetLimit = useCallback(
@@ -240,15 +301,72 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
           budget.id === budgetId ? { ...budget, limit: Number(limit.toFixed(2)) } : budget
         ),
       }));
+
+      showToast("Bütçe limiti güncellendi.", "success");
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const createPaymentOrder = useCallback(
     (input: CreatePaymentOrderInput) => {
       const ref = `FW-${Date.now()}`;
-      const order: PaymentOrder = {
-        id: createId("pay"),
+      const orderId = createId("pay");
+      
+      updateSnapshot((current) => {
+        let postedTransactionId: string | undefined;
+        let nextTransactions = [...current.transactions];
+        let nextAccounts = [...current.accounts];
+
+        if (input.status === "tamamlandi") {
+          const newTxnId = createId("txn");
+          postedTransactionId = newTxnId;
+
+          const category = input.paymentType === "fatura" ? "fatura" : input.paymentType === "transfer" ? "transfer" : "eglence";
+          const transaction: Transaction = {
+            id: newTxnId,
+            accountId: input.sourceAccountId,
+            title: `${input.payee} Ödemesi`,
+            amount: input.amount,
+            category: category as TransactionCategory,
+            direction: "out",
+            type: "gider",
+            occurredAt: new Date().toISOString(),
+            description: input.description || `${ref} referanslı talimat ödemesi`,
+          };
+
+          nextTransactions = [transaction, ...nextTransactions];
+          nextAccounts = applyBalanceEffect(nextAccounts, transaction, "add");
+        }
+
+        const order: PaymentOrder = {
+          id: orderId,
+          userId: snapshot.user.id,
+          payee: input.payee.trim(),
+          amount: Number(input.amount.toFixed(2)),
+          dueDate: input.dueDate,
+          status: input.status,
+          paymentType: input.paymentType,
+          sourceAccountId: input.sourceAccountId,
+          referenceNumber: ref,
+          referenceNo: ref,
+          description: input.description?.trim() || undefined,
+          createdAt: new Date().toISOString(),
+          postedTransactionId,
+        };
+
+        return {
+          ...current,
+          paymentOrders: [order, ...current.paymentOrders],
+          transactions: nextTransactions,
+          accounts: nextAccounts,
+        };
+      });
+
+      showToast("Talimat oluşturuldu.", "success");
+
+      // Build return object
+      return {
+        id: orderId,
         userId: snapshot.user.id,
         payee: input.payee.trim(),
         amount: Number(input.amount.toFixed(2)),
@@ -261,27 +379,68 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         description: input.description?.trim() || undefined,
         createdAt: new Date().toISOString(),
       };
-
-      updateSnapshot((current) => ({
-        ...current,
-        paymentOrders: [order, ...current.paymentOrders],
-      }));
-
-      return order;
     },
-    [snapshot.user.id, updateSnapshot]
+    [snapshot.user.id, updateSnapshot, showToast]
   );
 
   const updatePaymentOrderStatus = useCallback(
     (orderId: string, status: PaymentOrder["status"]) => {
-      updateSnapshot((current) => ({
-        ...current,
-        paymentOrders: current.paymentOrders.map((order) =>
-          order.id === orderId ? { ...order, status } : order
-        ),
-      }));
+      let isCompletedNow = false;
+
+      updateSnapshot((current) => {
+        const orderIndex = current.paymentOrders.findIndex((order) => order.id === orderId);
+        if (orderIndex === -1) return current;
+
+        const order = current.paymentOrders[orderIndex];
+        const nextOrders = [...current.paymentOrders];
+        let nextTransactions = [...current.transactions];
+        let nextAccounts = [...current.accounts];
+
+        let postedTransactionId = order.postedTransactionId;
+
+        if (status === "tamamlandi" && !postedTransactionId) {
+          const newTxnId = createId("txn");
+          postedTransactionId = newTxnId;
+          isCompletedNow = true;
+
+          const category = order.paymentType === "fatura" ? "fatura" : order.paymentType === "transfer" ? "transfer" : "eglence";
+          const transaction: Transaction = {
+            id: newTxnId,
+            accountId: order.sourceAccountId || "",
+            title: `${order.payee} Ödemesi`,
+            amount: order.amount,
+            category: category as TransactionCategory,
+            direction: "out",
+            type: "gider",
+            occurredAt: new Date().toISOString(),
+            description: order.description || `${order.referenceNo} referanslı talimat ödemesi`,
+          };
+
+          nextTransactions = [transaction, ...nextTransactions];
+          nextAccounts = applyBalanceEffect(nextAccounts, transaction, "add");
+        }
+
+        nextOrders[orderIndex] = {
+          ...order,
+          status,
+          postedTransactionId,
+        };
+
+        return {
+          ...current,
+          paymentOrders: nextOrders,
+          transactions: nextTransactions,
+          accounts: nextAccounts,
+        };
+      });
+
+      if (isCompletedNow) {
+        showToast("Tamamlanan talimat işlem geçmişine yansıtıldı.", "success");
+      } else {
+        showToast("Talimat durumu güncellendi.", "success");
+      }
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const deletePaymentOrder = useCallback(
@@ -290,8 +449,10 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         ...current,
         paymentOrders: current.paymentOrders.filter((order) => order.id !== orderId),
       }));
+
+      showToast("Talimat silindi.", "info");
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const saveRoboProfileResult = useCallback(
@@ -310,14 +471,16 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         roboResults: [result, ...current.roboResults],
       }));
 
+      showToast("Risk profili kaydedildi.", "success");
       return result;
     },
-    [updateSnapshot]
+    [updateSnapshot, showToast]
   );
 
   const resetToSeed = useCallback(() => {
     setSnapshot(resetFinanceSnapshot());
-  }, []);
+    showToast("Veriler başlangıç durumuna sıfırlandı.", "info");
+  }, [showToast]);
 
   const budgetsWithSpending = useMemo(
     () => getBudgetsWithSpending(snapshot.budgets, snapshot.transactions),
@@ -335,6 +498,8 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
       addTransaction,
       deleteTransaction,
       addAccount,
+      updateAccount,
+      deleteAccount,
       updateBudgetLimit,
       createPaymentOrder,
       updatePaymentOrderStatus,
@@ -344,6 +509,8 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
     }),
     [
       addAccount,
+      updateAccount,
+      deleteAccount,
       addTransaction,
       budgetsWithSpending,
       createPaymentOrder,

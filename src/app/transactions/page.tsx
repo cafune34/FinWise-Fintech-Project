@@ -68,8 +68,8 @@ export default function TransactionsPage() {
     [budgetsWithSpending, transactions, user.id]
   );
   const highRiskTransactionIds = useMemo(() => getHighRiskTransactions(alerts), [alerts]);
-  const income = transactions.filter((txn) => txn.direction === "in").reduce((sum, txn) => sum + txn.amount, 0);
-  const expense = transactions.filter((txn) => txn.direction === "out").reduce((sum, txn) => sum + txn.amount, 0);
+  const income = transactions.filter((txn) => txn.type === "gelir").reduce((sum, txn) => sum + txn.amount, 0);
+  const expense = transactions.filter((txn) => txn.type === "gider").reduce((sum, txn) => sum + txn.amount, 0);
 
   function updateField<K extends keyof TransactionFormState>(field: K, value: TransactionFormState[K]) {
     setForm((prev) => ({
@@ -182,7 +182,7 @@ export default function TransactionsPage() {
               className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-cyan-400"
             >
               <option value="">Hesap seçiniz</option>
-              {accounts.map((account) => (
+              {accounts.filter((a) => a.status !== "pasif").map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.bankName} - {account.accountName ?? getAccountTypeLabel(account.type)}
                 </option>

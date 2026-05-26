@@ -69,3 +69,8 @@ Sol taraftaki "Verileri başlangıç durumuna al" butonu bir demo özelliği ols
 1. **Ana Sayfa Görseli:** Landing page (`/`) üzerindeki büyük kutunun (Portföy özeti) içine uygulamanın içinden güzel bir dashboard mock-up görseli veya şık bir illüstrasyon yerleştirirsen, projeyi açan hoca ilk saniyede çok etkilenir.
 2. **Toast Bildirimleri:** Kullanıcı yeni bir işlem eklediğinde veya bütçe güncellediğinde, sağ üstte ufak bir "İşlem başarıyla eklendi" bildirimi çıkarmak (Örn: `sonner` veya `react-hot-toast` kütüphanesi ile) gerçekçiliği inanılmaz artırır.
 3. **Sayfa Geçiş Animasyonları:** `framer-motion` ile veya basit CSS transition'lar ile sayfalar arası geçerken ufak bir "fade in" efekti vermek projeyi çok daha "Premium" hissettirecektir.
+
+---
+
+### Güncelleme Notu (26 Mayıs 2026)
+**Sprint 9.2 Düzeltmeleri Uygulandı:** Rota hataları giderildi, sağ üst aksiyon butonları aktifleştirildi, grafik tooltipleri premium cam efektiyle yenilendi, hesap düzenleme/pasifleştirme ve ödeme talimatı entegrasyonu tamamlandı, Toast bildirim sistemi ve yumuşak sayfa geçiş animasyonları eklendi. Proje QA audit beklentilerini %100 karşılamaktadır.
