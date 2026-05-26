@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   BankAccount,
   Budget,
   PaymentOrder,
@@ -10,8 +10,8 @@
 
 export const mockUser: User = {
   id: "user-1",
-  fullName: "Ayşe Demir",
-  email: "ayse.demir@finwise.app",
+  fullName: "Hakan Dolay",
+  email: "hakan.dolay@finwise.app",
   riskProfile: "orta",
   createdAt: "2026-05-01T09:00:00.000Z",
 };

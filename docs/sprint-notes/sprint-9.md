@@ -65,6 +65,15 @@ Sprint 9.2 kapsamında teslim öncesi son kullanıcı testlerindeki tüm bulgula
 
 ---
 
-## 7. Son Durum
-* **Durum**: Sprint 9.2 Tamamlandı (Teslime Hazır)
+## 7. Sprint 9.3 - Final Critical Polish Güncellemeleri
+Sprint 9.3 kapsamında, teslim öncesi son kullanıcı testlerindeki tüm kritik bulgular başarıyla çözülmüştür:
+1. **Sağ Üst Dropdown Panelleri z-index Çakışması**: Header elementine `relative z-40` atanarak dropdown pencerelerin diğer kartların altında kalma sorunu giderildi.
+2. **Kategori Bazlı Harcama Grafiği Hover Tasarımı**: Recharts `BarChart` hover efekti iyileştirildi; hover esnasında arkada beliren beyaz dikdörtgen kaldırıldı (`cursor` rengi koyu premium tema uyumlu yapıldı) ve `<Bar>` hover beyazlığı (`activeBar={false}`) engellendi.
+3. **Ödeme Talimatı Finans Mantığı**: Tamamlanan ödeme talimatlarının bakiye ve işlem geçmişi entegrasyonu tamamen düzeltildi. Talimat "Tamamlandı" yapıldığında bakiyenin düşmesi ve gider oluşması; "Beklemede/İşleme Alındı/Reddedildi" durumuna geri çekildiğinde ya da talimat silindiğinde gider işleminin iptal edilip bakiyenin iade edilmesi sağlandı.
+4. **Kullanıcı Adı Güncellemesi**: Sistemdeki kullanıcı adı "Hakan Dolay" (Initials: HD) olarak güncellendi. Profil paneli "Son kontrol: Bugün" satırı ile zenginleştirildi.
+
+---
+
+## 8. Son Durum
+* **Durum**: Sprint 9.3 Tamamlandı (Teslime Hazır)
 * **Tarih**: 26 Mayıs 2026

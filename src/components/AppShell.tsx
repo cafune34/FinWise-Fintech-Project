@@ -162,10 +162,10 @@ export default function AppShell({ title, description, children }: AppShellProps
           <div className="mt-5 rounded-xl border border-white/10 bg-[#111827]/80 p-4 lg:mt-auto">
             <div className="flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-cyan-300/15 text-sm font-semibold text-cyan-200">
-                AD
+                HD
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">Ayşe Demir</p>
+                <p className="truncate text-sm font-semibold text-white">Hakan Dolay</p>
                 <p className="truncate text-xs text-slate-400">Hesap özeti</p>
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function AppShell({ title, description, children }: AppShellProps
         </aside>
 
         <main className="min-h-screen w-full min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7 xl:px-10 2xl:px-12">
-          <header className="mb-7 w-full rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 shadow-2xl shadow-black/20 backdrop-blur">
+          <header className="relative z-40 mb-7 w-full rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 shadow-2xl shadow-black/20 backdrop-blur">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Kontrol Merkezi</p>
@@ -341,7 +341,7 @@ export default function AppShell({ title, description, children }: AppShellProps
                       <div className="space-y-2 text-xs text-slate-200">
                         <p className="flex justify-between border-b border-white/5 pb-2">
                           <span className="text-slate-400">Ad Soyad:</span>
-                          <span className="font-semibold text-white">Ayşe Demir</span>
+                          <span className="font-semibold text-white">Hakan Dolay</span>
                         </p>
                         <p className="flex justify-between border-b border-white/5 pb-2">
                           <span className="text-slate-400">Risk Profili:</span>
@@ -351,9 +351,13 @@ export default function AppShell({ title, description, children }: AppShellProps
                           <span className="text-slate-400">Plan:</span>
                           <span className="font-semibold text-cyan-300">Aktif</span>
                         </p>
-                        <p className="flex justify-between">
+                        <p className="flex justify-between border-b border-white/5 pb-2">
                           <span className="text-slate-400">Veri Depolama:</span>
-                          <span className="font-medium text-slate-300">Yerel (LocalStorage)</span>
+                          <span className="font-semibold text-slate-300">Yerel</span>
+                        </p>
+                        <p className="flex justify-between">
+                          <span className="text-slate-400">Son kontrol:</span>
+                          <span className="font-semibold text-slate-300">Bugün</span>
                         </p>
                       </div>
                     </div>

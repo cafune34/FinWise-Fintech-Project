@@ -385,7 +385,8 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
 
   const updatePaymentOrderStatus = useCallback(
     (orderId: string, status: PaymentOrder["status"]) => {
-      let isCompletedNow = false;
+      let toastMsg = "Talimat durumu güncellendi.";
+      let toastType: "success" | "info" = "success";
 
       updateSnapshot((current) => {
         const orderIndex = current.paymentOrders.findIndex((order) => order.id === orderId);
@@ -396,28 +397,45 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         let nextTransactions = [...current.transactions];
         let nextAccounts = [...current.accounts];
 
+        const oldStatus = order.status;
         let postedTransactionId = order.postedTransactionId;
 
-        if (status === "tamamlandi" && !postedTransactionId) {
-          const newTxnId = createId("txn");
-          postedTransactionId = newTxnId;
-          isCompletedNow = true;
+        // Transition 1: Moving to completed
+        if (status === "tamamlandi" && oldStatus !== "tamamlandi") {
+          if (!postedTransactionId) {
+            const newTxnId = createId("txn");
+            postedTransactionId = newTxnId;
 
-          const category = order.paymentType === "fatura" ? "fatura" : order.paymentType === "transfer" ? "transfer" : "eglence";
-          const transaction: Transaction = {
-            id: newTxnId,
-            accountId: order.sourceAccountId || "",
-            title: `${order.payee} Ödemesi`,
-            amount: order.amount,
-            category: category as TransactionCategory,
-            direction: "out",
-            type: "gider",
-            occurredAt: new Date().toISOString(),
-            description: order.description || `${order.referenceNo} referanslı talimat ödemesi`,
-          };
+            const category = order.paymentType === "fatura" ? "fatura" : order.paymentType === "transfer" ? "transfer" : "eglence";
+            const transaction: Transaction = {
+              id: newTxnId,
+              accountId: order.sourceAccountId || "",
+              title: `${order.payee} Ödemesi`,
+              amount: order.amount,
+              category: category as TransactionCategory,
+              direction: "out",
+              type: "gider",
+              occurredAt: new Date().toISOString(),
+              description: order.description || `${order.referenceNo} referanslı talimat ödemesi`,
+            };
 
-          nextTransactions = [transaction, ...nextTransactions];
-          nextAccounts = applyBalanceEffect(nextAccounts, transaction, "add");
+            nextTransactions = [transaction, ...nextTransactions];
+            nextAccounts = applyBalanceEffect(nextAccounts, transaction, "add"); // reduces balance
+            toastMsg = "Talimat tamamlandı ve işlem geçmişine yansıtıldı.";
+          }
+        }
+        // Transition 2: Moving away from completed
+        else if (status !== "tamamlandi" && oldStatus === "tamamlandi") {
+          if (postedTransactionId) {
+            const txn = nextTransactions.find((t) => t.id === postedTransactionId);
+            if (txn) {
+              nextAccounts = applyBalanceEffect(nextAccounts, txn, "remove"); // restores balance
+              nextTransactions = nextTransactions.filter((t) => t.id !== postedTransactionId);
+            }
+            postedTransactionId = undefined;
+            toastMsg = "Talimat geri alındı ve bakiye güncellendi.";
+            toastType = "info";
+          }
         }
 
         nextOrders[orderIndex] = {
@@ -434,21 +452,35 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      if (isCompletedNow) {
-        showToast("Tamamlanan talimat işlem geçmişine yansıtıldı.", "success");
-      } else {
-        showToast("Talimat durumu güncellendi.", "success");
-      }
+      showToast(toastMsg, toastType);
     },
     [updateSnapshot, showToast]
   );
 
   const deletePaymentOrder = useCallback(
     (orderId: string) => {
-      updateSnapshot((current) => ({
-        ...current,
-        paymentOrders: current.paymentOrders.filter((order) => order.id !== orderId),
-      }));
+      updateSnapshot((current) => {
+        const order = current.paymentOrders.find((o) => o.id === orderId);
+        if (!order) return current;
+
+        let nextTransactions = [...current.transactions];
+        let nextAccounts = [...current.accounts];
+
+        if (order.status === "tamamlandi" && order.postedTransactionId) {
+          const txn = nextTransactions.find((t) => t.id === order.postedTransactionId);
+          if (txn) {
+            nextAccounts = applyBalanceEffect(nextAccounts, txn, "remove"); // restores balance
+            nextTransactions = nextTransactions.filter((t) => t.id !== order.postedTransactionId);
+          }
+        }
+
+        return {
+          ...current,
+          paymentOrders: current.paymentOrders.filter((o) => o.id !== orderId),
+          transactions: nextTransactions,
+          accounts: nextAccounts,
+        };
+      });
 
       showToast("Talimat silindi.", "info");
     },

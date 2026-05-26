@@ -473,6 +473,15 @@ export default function PaymentSimulationForm() {
                     <option value="tamamlandi">Tamamlandı</option>
                     <option value="reddedildi">Reddedildi</option>
                   </select>
+                  {order.status === "tamamlandi" ? (
+                    <p className="mt-2 text-[10px] leading-relaxed text-emerald-300 font-medium">
+                      ✓ Tamamlanan talimat gider işlemi olarak yansıtıldı.
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+                      * &quot;Tamamlandı&quot; seçimi bakiye düşürür ve işlem geçmişine kaydeder.
+                    </p>
+                  )}
                 </div>
               </article>
             ))}
@@ -556,6 +565,15 @@ export default function PaymentSimulationForm() {
                   <option value="tamamlandi">Tamamlandı</option>
                   <option value="reddedildi">Reddedildi</option>
                 </select>
+                {selectedOrder.status === "tamamlandi" ? (
+                  <p className="mt-2 text-[11px] leading-relaxed text-emerald-300 font-medium">
+                    ✓ Tamamlanan talimat gider işlemi olarak yansıtıldı.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                    * &quot;Tamamlandı&quot; seçimi bakiye düşürür ve işlem geçmişine kaydeder.
+                  </p>
+                )}
               </div>
             </div>
 
