@@ -74,6 +74,17 @@ Sprint 9.3 kapsamında, teslim öncesi son kullanıcı testlerindeki tüm kritik
 
 ---
 
-## 8. Son Durum
-* **Durum**: Sprint 9.3 Tamamlandı (Teslime Hazır)
+## 8. Sprint 9.4 - Differentiator Features (Karar Destek Sistemi)
+Sprint 9.4 kapsamında platform, bütçe takip paneli olmaktan çıkarılarak fintech dersinin kazanımlarını karar destek düzeyinde sunan differentiator (farklılaştırıcı) özelliklerle donatılmıştır:
+1. **Finansal Aksiyon Merkezi**: Bütçe aşımı, negatif nakit akışı, yüksek risk ve bekleyen talimat verilerinden dinamik aksiyon kartları üreten ve ilgili modüle yönlendiren yeni bir premium yönetim bölümü eklendi.
+2. **Dinamik Sağlık Skoru Kırılımı**: Sağlık skoru 5 boyutta (Nakit Akışı, Bütçe, Risk, Ödeme, Yatırım) dinamik puanlanarak açıklanabilir hale getirildi ve skoru artırmak için 3 adet dinamik karar destek önerisi listelendi.
+3. **Entegre Finans Özeti (Dropdown)**: Sağ üstteki aylık özet paneli; en çok harcanan kategori, en riskli kategori, sağlık skoru ve bakiye yorumunu barındıran mini bir finans raporuna dönüştürüldü.
+4. **Akıllı Bütçe İçgörüleri**: Her bütçe limit kartının altına, harcama limit aşımı ve doluluk oranına göre değişen karar destek içgörü satırları eklendi.
+5. **Ödeme Güven Skoru**: Ödeme talimatları için bakiye kontrolü, hesap/tutar doğrulamaları ve tarih geçerliliğini analiz ederek 100 üzerinden güven skoru üreten canlı analiz mekanizması kuruldu.
+6. **Sunum Modu**: Jüri sunumunda platformun tüm fintech karar destek yeteneklerini sırasıyla gösteren 8 adımlı interaktif bir sunum akışı modalı ve butonu eklendi.
+
+---
+
+## 9. Son Durum
+* **Durum**: Sprint 9.4 Tamamlandı (Final Teslimine Hazır)
 * **Tarih**: 26 Mayıs 2026

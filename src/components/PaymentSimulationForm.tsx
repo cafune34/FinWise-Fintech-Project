@@ -6,7 +6,7 @@ import { formatCurrencyTRY } from "@/lib/format";
 import { getPaymentTypeLabel } from "@/lib/payments";
 import { paymentStatusLabels } from "@/lib/labels";
 import { useFinanceData } from "@/lib/useFinanceData";
-import type { PaymentOrder, PaymentType } from "@/types/finance";
+import type { BankAccount, PaymentOrder, PaymentType } from "@/types/finance";
 
 type FormState = {
   paymentType: PaymentType;
@@ -44,6 +44,72 @@ function formatDateOnlyTR(value: string): string {
   }).format(new Date(value));
 }
 
+function calculatePaymentTrustScore(
+  data: { sourceAccountId: string; payee: string; amount: number; dueDate: string },
+  accounts: BankAccount[]
+) {
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (data.sourceAccountId) {
+    score += 20;
+  } else {
+    reasons.push("Kaynak hesap seçilmemiş.");
+  }
+
+  if (data.payee && data.payee.trim() !== "") {
+    score += 20;
+  } else {
+    reasons.push("Alıcı / Kurum adı girilmemiş.");
+  }
+
+  if (data.amount > 0) {
+    score += 20;
+  } else {
+    reasons.push("Tutar sıfır veya negatif.");
+  }
+
+  const account = accounts.find((a) => a.id === data.sourceAccountId);
+  if (account) {
+    if (data.amount <= account.balance) {
+      score += 25;
+    } else {
+      reasons.push("Bakiye yetersizliği nedeniyle kontrol önerilir.");
+    }
+  } else if (data.sourceAccountId) {
+    reasons.push("Hesap bulunamadı.");
+  } else {
+    reasons.push("Kaynak hesap belirlenmediği için bakiye kontrol edilemedi.");
+  }
+
+  if (data.dueDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const valDate = new Date(data.dueDate);
+    valDate.setHours(0, 0, 0, 0);
+
+    if (!isNaN(valDate.getTime()) && valDate.getTime() >= today.getTime()) {
+      score += 15;
+    } else {
+      reasons.push("Tarih geçmiş bir güne ait.");
+    }
+  } else {
+    reasons.push("Tarih girilmemiş.");
+  }
+
+  let label: "Güvenli" | "Kontrol Önerilir" | "Riskli" = "Riskli";
+  let colorClass = "text-rose-400 border-rose-500/20 bg-rose-500/10";
+  if (score >= 80) {
+    label = "Güvenli";
+    colorClass = "text-emerald-400 border-emerald-500/20 bg-emerald-500/10";
+  } else if (score >= 50) {
+    label = "Kontrol Önerilir";
+    colorClass = "text-amber-400 border-amber-500/20 bg-amber-500/10";
+  }
+
+  return { score, label, colorClass, reasons };
+}
+
 export default function PaymentSimulationForm() {
   const {
     accounts,
@@ -67,6 +133,26 @@ export default function PaymentSimulationForm() {
     () => paymentOrders.find((order) => order.id === selectedOrderId) ?? null,
     [selectedOrderId, paymentOrders]
   );
+
+  const liveTrust = useMemo(() => {
+    const amt = Number(form.amount) || 0;
+    return calculatePaymentTrustScore({
+      sourceAccountId: form.sourceAccountId,
+      payee: form.payeeName,
+      amount: amt,
+      dueDate: form.dueDate,
+    }, accounts);
+  }, [form.sourceAccountId, form.payeeName, form.amount, form.dueDate, accounts]);
+
+  const selectedOrderTrust = useMemo(() => {
+    if (!selectedOrder) return null;
+    return calculatePaymentTrustScore({
+      sourceAccountId: selectedOrder.sourceAccountId || "",
+      payee: selectedOrder.payee,
+      amount: selectedOrder.amount,
+      dueDate: selectedOrder.dueDate
+    }, accounts);
+  }, [selectedOrder, accounts]);
 
   // Status Summary Stats
   const statusStats = useMemo(() => {
@@ -272,6 +358,21 @@ export default function PaymentSimulationForm() {
             </div>
           ) : null}
 
+          {/* Canlı Güven Skoru */}
+          <div className="mt-5 rounded-xl border border-white/10 bg-slate-950/60 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Canlı Güven Skoru</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  {liveTrust.reasons.length > 0 ? liveTrust.reasons[0] : "Tüm ödeme parametreleri doğrulanmış durumda."}
+                </p>
+              </div>
+              <span className={`px-2.5 py-1 rounded-full border text-xs font-bold ${liveTrust.colorClass}`}>
+                {liveTrust.score}/100 - {liveTrust.label}
+              </span>
+            </div>
+          </div>
+
           <button
             type="submit"
             className="mt-5 inline-flex items-center rounded-lg bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 shadow-md shadow-cyan-300/10"
@@ -456,6 +557,29 @@ export default function PaymentSimulationForm() {
                       <span>Oluşturulma:</span>
                       <span className="text-slate-300">{formatDateOnlyTR(order.createdAt ?? order.dueDate)}</span>
                     </p>
+                    {(() => {
+                      const trust = calculatePaymentTrustScore({
+                        sourceAccountId: order.sourceAccountId || "",
+                        payee: order.payee,
+                        amount: order.amount,
+                        dueDate: order.dueDate
+                      }, accounts);
+                      return (
+                        <>
+                          <div className="flex justify-between items-center border-t border-white/5 pt-2 mt-2">
+                            <span>Güven Skoru:</span>
+                            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-bold ${trust.colorClass}`}>
+                              {trust.score}/100 - {trust.label}
+                            </span>
+                          </div>
+                          {trust.reasons.includes("Bakiye yetersizliği nedeniyle kontrol önerilir.") && (
+                            <p className="mt-2 text-[10px] leading-relaxed text-amber-300 bg-amber-500/5 border border-amber-500/20 rounded p-1.5 font-medium">
+                              ⚠️ Bakiye yetersizliği nedeniyle kontrol önerilir.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -543,6 +667,24 @@ export default function PaymentSimulationForm() {
                   {formatDateTimeTR(selectedOrder.createdAt ?? selectedOrder.dueDate)}
                 </span>
               </div>
+              
+              {selectedOrderTrust && (
+                <>
+                  <div className="flex justify-between border-b border-white/5 pb-2.5 items-center">
+                    <span className="text-slate-400">Ödeme Güven Skoru:</span>
+                    <span className={`px-2 py-0.5 rounded border text-xs font-bold ${selectedOrderTrust.colorClass}`}>
+                      {selectedOrderTrust.score}/100 - {selectedOrderTrust.label}
+                    </span>
+                  </div>
+                  {selectedOrderTrust.reasons.length > 0 && (
+                    <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5 text-xs text-amber-300 space-y-1">
+                      {selectedOrderTrust.reasons.map((r, i) => (
+                        <p key={i}>⚠️ {r}</p>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
               
               <div className="border-b border-white/5 pb-2.5">
                 <span className="text-slate-400 block mb-1">Açıklama:</span>

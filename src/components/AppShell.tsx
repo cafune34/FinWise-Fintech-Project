@@ -20,16 +20,20 @@ import {
   WalletCards,
   ChevronDown,
   Calendar,
+  X,
 } from "lucide-react";
 import {
   calculateMonthlyExpense,
   calculateMonthlyIncome,
   calculateNetCashFlow,
   calculateTotalBalance,
+  getCategoryExpenseTotals,
 } from "@/lib/finance";
 import { formatCurrencyTRY } from "@/lib/format";
 import { generateRegTechAlerts } from "@/lib/regtech";
 import { useFinanceData } from "@/lib/useFinanceData";
+import { categoryLabels } from "@/lib/labels";
+import type { TransactionCategory } from "@/types/finance";
 
 type NavItem = {
   label: string;
@@ -55,9 +59,10 @@ type AppShellProps = {
 
 export default function AppShell({ title, description, children }: AppShellProps) {
   const pathname = usePathname();
-  const { accounts, transactions, budgetsWithSpending, paymentOrders, resetToSeed } = useFinanceData();
+  const { accounts, transactions, budgetsWithSpending, paymentOrders, resetToSeed, lastRoboResult } = useFinanceData();
   const [confirmReset, setConfirmReset] = useState(false);
   const [activePanel, setActivePanel] = useState<"finance" | "date" | "bell" | "profile" | null>(null);
+  const [isPresentationModalOpen, setIsPresentationModalOpen] = useState(false);
 
   const today = new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
@@ -83,6 +88,28 @@ export default function AppShell({ title, description, children }: AppShellProps
   const pendingPaymentsCount = (paymentOrders || []).filter((order) => order.status === "beklemede").length;
   const exceededBudgetsCount = budgetsWithSpending.filter((b) => b.spent > b.limit).length;
   const totalNotificationsCount = pendingPaymentsCount + highRiskAlertsCount + exceededBudgetsCount;
+
+  const nakitAkisiPuan = netCashFlow > 0 ? 30 : 10;
+  const bütcePuan = exceededBudgetsCount === 0 ? 25 : exceededBudgetsCount === 1 ? 18 : exceededBudgetsCount === 2 ? 12 : 5;
+  const riskPuan = highRiskAlertsCount === 0 ? 20 : highRiskAlertsCount === 1 ? 12 : highRiskAlertsCount === 2 ? 6 : 0;
+  const odemePuan = pendingPaymentsCount === 0 ? 15 : pendingPaymentsCount <= 2 ? 10 : 5;
+  const yatirimPuan = lastRoboResult ? 10 : 5;
+  const healthScore = nakitAkisiPuan + bütcePuan + riskPuan + odemePuan + yatirimPuan;
+
+  // En çok harcanan kategori
+  const categoryTotals = getCategoryExpenseTotals(transactions, new Date());
+  const sortedCategories = Object.entries(categoryTotals)
+    .filter(([category, value]) => value > 0 && category !== "maas")
+    .sort((a, b) => b[1] - a[1]);
+  const enCokHarcananKategori = sortedCategories.length > 0 ? categoryLabels[sortedCategories[0][0] as TransactionCategory] : "Bulunmuyor";
+
+  // En riskli kategori
+  const sortedRiskCategories = [...budgetsWithSpending]
+    .filter(b => b.limit > 0)
+    .sort((a, b) => (b.spent / b.limit) - (a.spent / a.limit));
+  const enRiskliKategori = sortedRiskCategories.length > 0 && (sortedRiskCategories[0].spent / sortedRiskCategories[0].limit) > 0.8
+    ? categoryLabels[sortedRiskCategories[0].category as TransactionCategory]
+    : "Bulunmuyor";
 
   function handleResetClick() {
     if (!confirmReset) {
@@ -197,6 +224,13 @@ export default function AppShell({ title, description, children }: AppShellProps
               <p className="mt-2 text-xs leading-5 text-slate-400">
                 Yerel verileri yeniler.
               </p>
+              <button
+                type="button"
+                onClick={() => setIsPresentationModalOpen(true)}
+                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
+              >
+                <span>🎬 Sunum Modu</span>
+              </button>
             </div>
           </div>
         </aside>
@@ -221,16 +255,16 @@ export default function AppShell({ title, description, children }: AppShellProps
                     Aylık finans görünümü
                     <ChevronDown className="h-3 w-3 text-slate-500" />
                   </button>
-                  {activePanel === "finance" && (
-                    <div className="absolute right-0 mt-2 w-72 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-4 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
-                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Bu Ayın Özeti</h4>
+                   {activePanel === "finance" && (
+                    <div className="absolute right-0 mt-2 w-80 z-50 rounded-xl border border-white/10 bg-[#0b1220]/95 p-5 shadow-2xl backdrop-blur-xl animate-fade-in-slide">
+                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Mayıs 2026 Finans Özeti</h4>
                       <div className="space-y-2.5 text-xs text-slate-200">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                          <span className="text-slate-400">Gelir:</span>
+                          <span className="text-slate-400">Toplam Gelir:</span>
                           <span className="font-semibold text-emerald-300">+{formatCurrencyTRY(monthlyIncome)}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                          <span className="text-slate-400">Gider:</span>
+                          <span className="text-slate-400">Toplam Gider:</span>
                           <span className="font-semibold text-rose-300">-{formatCurrencyTRY(monthlyExpense)}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
@@ -239,13 +273,49 @@ export default function AppShell({ title, description, children }: AppShellProps
                             {formatCurrencyTRY(netCashFlow)}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Risk Durumu:</span>
-                          <span className={clsx("font-semibold", highRiskAlertsCount > 0 ? "text-rose-300" : "text-emerald-300")}>
-                            {highRiskAlertsCount > 0 ? `${highRiskAlertsCount} Riskli Uyarı` : "Dengeli / Güvenli"}
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">En Çok Harcanan:</span>
+                          <span className="font-semibold text-white truncate max-w-[140px] text-right" title={enCokHarcananKategori}>
+                            {enCokHarcananKategori}
                           </span>
                         </div>
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">En Riskli Kategori:</span>
+                          <span className="font-semibold text-rose-300 truncate max-w-[140px] text-right" title={enRiskliKategori}>
+                            {enRiskliKategori}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Bekleyen Talimat:</span>
+                          <span className={clsx("font-semibold", pendingPaymentsCount > 0 ? "text-amber-300" : "text-slate-300")}>
+                            {pendingPaymentsCount} Adet
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-400">Sağlık Skoru:</span>
+                          <span className="font-bold text-cyan-300">{healthScore}/100</span>
+                        </div>
                       </div>
+                      <div className="mt-3.5 rounded-lg bg-white/[0.03] p-2.5 text-[10px] leading-relaxed text-slate-300 border border-white/5">
+                        {netCashFlow < 0 ? (
+                          <p className="text-rose-300">⚠️ Bu ay harcama baskısı yüksek görünüyor.</p>
+                        ) : (
+                          <p className="text-emerald-300">✓ Bu ay nakit akışı dengeli ilerliyor.</p>
+                        )}
+                        {exceededBudgetsCount > 0 && (
+                          <p className="mt-1 text-amber-300">⚠️ Bütçe aşımı olan kategoriler takip edilmeli.</p>
+                        )}
+                        {highRiskAlertsCount === 0 && exceededBudgetsCount === 0 && netCashFlow >= 0 && (
+                          <p className="mt-1 text-slate-400">✓ Kritik risk sinyali bulunmuyor.</p>
+                        )}
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setActivePanel(null)}
+                        className="mt-4 block w-full rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 py-2 text-center text-xs font-semibold text-cyan-300 transition"
+                      >
+                        Detayları Genel Bakışta İncele
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -370,6 +440,76 @@ export default function AppShell({ title, description, children }: AppShellProps
           <section className="w-full space-y-5 pb-10 animate-fade-in-slide">{children}</section>
         </main>
       </div>
+
+      {isPresentationModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0e1726]/95 p-6 shadow-2xl relative">
+            <button
+              type="button"
+              onClick={() => setIsPresentationModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
+              title="Kapat"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              🎬 FinWise Sunum Akışı
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Jüri ve sunum esnasında FinWise karar destek süreçlerini ve projenin öne çıkan özelliklerini bu adımlarla takip edebilirsiniz.
+            </p>
+
+            <div className="space-y-3 text-xs text-slate-200 max-h-[360px] overflow-y-auto pr-1">
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">1. Genel Bakış ile Sağlık Skoru Analizi</p>
+                <p className="text-slate-400 mt-1">Dashboard üzerinde dinamik bütçe, risk ve yatırım verilerine bağlı Sağlık Skoru kırılımı incelenir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">2. Portföy Dağılımı (Hesaplar)</p>
+                <p className="text-slate-400 mt-1">Aktif hesap durumları, bakiyeler ve hesap pasifleştirme özellikleri gösterilir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">3. Finansal Hareketler (İşlemler)</p>
+                <p className="text-slate-400 mt-1">Tüm gelir-gider hareketleri, kategori filtreleri ve dinamik bakiye güncellemeleri yönetilir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">4. Kategori Bütçe Limitleri (Bütçe Planı)</p>
+                <p className="text-slate-400 mt-1">Akıllı Kategori İçgörüleri ile limit kullanım seviyeleri takip edilir ve bütçe tahminleri izlenir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">5. Ödeme Güvenliği (Ödeme Talimatları)</p>
+                <p className="text-slate-400 mt-1">Canlı Ödeme Güven Skoru ile hatalı veya yetersiz bakiyeli talimat riskleri simüle edilir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">6. Akıllı Risk Yönetimi (Risk İzleme)</p>
+                <p className="text-slate-400 mt-1">Detaylı RegTech uyarıları, varyasyonlu sebepler ve önerilen aksiyonlar değerlendirilir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-white/5">
+                <p className="font-semibold text-cyan-300">7. Robo-Advisor ile Yatırım Profili</p>
+                <p className="text-slate-400 mt-1">Skorlama anketine göre otomatik risk profili ve varlık dağılım önerileri gösterilir.</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] p-3 border border-cyan-500/20 bg-cyan-500/5">
+                <p className="font-semibold text-cyan-300">8. Finansal Aksiyon Merkezi</p>
+                <p className="text-slate-400 mt-1">Verilerden otomatik üretilen aksiyon önerileri ile karar destek ve yönlendirme akışı tamamlanır.</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPresentationModalOpen(false);
+                  window.location.href = "/dashboard";
+                }}
+                className="rounded-lg bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 transition"
+              >
+                Sunuma Başla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
