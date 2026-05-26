@@ -218,7 +218,7 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
-      <section className="grid w-full gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">
+      <section className="grid w-full items-start gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">
         <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 flex flex-col justify-between">
           <div>
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
