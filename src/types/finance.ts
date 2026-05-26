@@ -1,4 +1,4 @@
-﻿export type TransactionCategory =
+export type TransactionCategory =
   | "market"
   | "ulasim"
   | "fatura"
@@ -92,6 +92,7 @@ export type PaymentOrder = {
   paymentType?: PaymentType;
   sourceAccountId?: string;
   referenceNumber?: string;
+  referenceNo?: string;
   description?: string;
   createdAt?: string;
   isMock?: true;
@@ -125,6 +126,8 @@ export type RegTechAlert = {
   ruleCode?: RegTechRuleCode;
   title?: string;
   reason: string;
+  impact?: string;
+  recommendedAction?: string;
   createdAt: string;
   resolved: boolean;
 };

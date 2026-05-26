@@ -246,6 +246,7 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
 
   const createPaymentOrder = useCallback(
     (input: CreatePaymentOrderInput) => {
+      const ref = `FW-${Date.now()}`;
       const order: PaymentOrder = {
         id: createId("pay"),
         userId: snapshot.user.id,
@@ -255,7 +256,8 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
         status: input.status,
         paymentType: input.paymentType,
         sourceAccountId: input.sourceAccountId,
-        referenceNumber: `FW-${Date.now()}`,
+        referenceNumber: ref,
+        referenceNo: ref,
         description: input.description?.trim() || undefined,
         createdAt: new Date().toISOString(),
       };

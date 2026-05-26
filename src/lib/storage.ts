@@ -46,12 +46,16 @@ function normalizeAccounts(accounts: BankAccount[]): BankAccount[] {
 }
 
 function normalizePaymentOrders(paymentOrders: PaymentOrder[]): PaymentOrder[] {
-  return paymentOrders.map((order) => ({
-    ...order,
-    createdAt: order.createdAt ?? `${order.dueDate}T09:00:00.000Z`,
-    referenceNumber: order.referenceNumber ?? order.id.toUpperCase(),
-    paymentType: order.paymentType ?? "fatura",
-  }));
+  return paymentOrders.map((order) => {
+    const ref = order.referenceNumber ?? order.referenceNo ?? order.id.toUpperCase();
+    return {
+      ...order,
+      createdAt: order.createdAt ?? `${order.dueDate}T09:00:00.000Z`,
+      referenceNumber: ref,
+      referenceNo: ref,
+      paymentType: order.paymentType ?? "fatura",
+    };
+  });
 }
 
 export function createSeedSnapshot(): FinanceSnapshot {
