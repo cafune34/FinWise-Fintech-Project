@@ -22,10 +22,13 @@ export default function SavingsTargetBox() {
         <div>
           <h3 className="text-base font-semibold text-white flex items-center gap-2">
             <Target className="h-5 w-5 text-cyan-300" />
-            Finansal Hedefler
+            Önerilen Finansal Hedefler
           </h3>
-          <p className="mt-1 text-xs text-slate-400">Aktif birikim planlarınız</p>
+          <p className="mt-1 text-xs text-slate-400">Finansal planlama için önerilen hedefler</p>
         </div>
+        <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-medium text-cyan-300 border border-cyan-500/20">
+          Örnek Plan
+        </span>
       </div>
 
       <div className="space-y-4">
@@ -48,12 +51,16 @@ export default function SavingsTargetBox() {
                 />
               </div>
               <div className="flex justify-between text-[10px] text-slate-400">
-                <span>%Math.floor(progress) tamamlandı</span>
+                <span>%{Math.floor(progress)} tamamlandı</span>
                 <span>{formatCurrencyTRY(remaining)} kaldı</span>
               </div>
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-4 border-t border-white/5 pt-3 text-[10px] text-slate-500 text-center">
+        Hedefler portföy sunumu için öneri olarak gösterilir.
       </div>
     </article>
   );

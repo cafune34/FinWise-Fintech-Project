@@ -73,26 +73,37 @@ export default function ScenarioAnalysisCard() {
         </div>
 
         <div className="p-4 rounded-lg bg-slate-900/50 border border-white/5 space-y-3">
-          <div className="flex justify-between items-end">
-            <span className="text-xs text-slate-400">Bu ayki harcama:</span>
-            <span className="text-sm font-medium text-slate-200">{formatCurrencyTRY(categoryExpense)}</span>
-          </div>
-          
-          <div className="flex justify-between items-end">
-            <span className="text-xs text-slate-400">Beklenen Tasarruf:</span>
-            <span className="text-lg font-semibold text-emerald-400">+{formatCurrencyTRY(savedAmount)}</span>
-          </div>
+          {categoryExpense === 0 ? (
+            <div className="text-xs text-slate-400 text-center py-2">
+              Bu ay seçili kategoride harcama bulunamadı.
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-end">
+                <span className="text-xs text-slate-400">Seçili kategori harcaması:</span>
+                <span className="text-sm font-medium text-slate-200">{formatCurrencyTRY(categoryExpense)}</span>
+              </div>
+              
+              <div className="flex justify-between items-end">
+                <span className="text-xs text-slate-400">Tahmini Tasarruf (%{reductionPercent}):</span>
+                <span className="text-lg font-semibold text-emerald-400">+{formatCurrencyTRY(savedAmount)}</span>
+              </div>
+            </>
+          )}
 
           <div className="h-px w-full bg-white/5 my-2"></div>
 
-          <div className="flex justify-between items-end">
-            <span className="text-xs text-slate-400">Yeni Net Nakit Akışı:</span>
-            <div className="text-right">
-              <span className={`text-sm font-bold flex items-center gap-1 justify-end ${newNetFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs text-slate-400">
+              <span>Mevcut Net Akış (Aylık):</span>
+              <span className="font-semibold text-slate-200">{formatCurrencyTRY(currentNetFlow)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-400">Senaryo Sonrası Net Akış:</span>
+              <span className={`text-sm font-bold flex items-center gap-1 ${newNetFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 <TrendingUp className="h-3 w-3" />
                 {formatCurrencyTRY(newNetFlow)}
               </span>
-              <span className="text-[10px] text-slate-500 line-through">Eski: {formatCurrencyTRY(currentNetFlow)}</span>
             </div>
           </div>
         </div>

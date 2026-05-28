@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FinWise",
   description: "Kişisel finans yönetimi ve risk izleme paneli",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
