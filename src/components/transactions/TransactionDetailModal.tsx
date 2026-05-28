@@ -2,7 +2,9 @@ import { X, FileText, Download, CheckCircle2 } from "lucide-react";
 import type { BankAccount, Transaction } from "@/types/finance";
 import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { jsPDF } from "jspdf";
 
 type TransactionDetailModalProps = {
   transaction: Transaction;
@@ -10,8 +12,32 @@ type TransactionDetailModalProps = {
   onClose: () => void;
 };
 
+const toSafePdfText = (str: string): string => {
+  return str
+    .replace(/ğ/g, "g")
+    .replace(/Ğ/g, "G")
+    .replace(/ü/g, "u")
+    .replace(/Ü/g, "U")
+    .replace(/ş/g, "s")
+    .replace(/Ş/g, "S")
+    .replace(/ı/g, "i")
+    .replace(/İ/g, "I")
+    .replace(/ö/g, "o")
+    .replace(/Ö/g, "O")
+    .replace(/ç/g, "c")
+    .replace(/Ç/g, "C");
+};
+
 export default function TransactionDetailModal({ transaction, account, onClose }: TransactionDetailModalProps) {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     
@@ -24,196 +50,148 @@ export default function TransactionDetailModal({ transaction, account, onClose }
       document.body.style.overflow = originalOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, mounted]);
+
+  if (!mounted) return null;
 
   const handleDownloadReceipt = () => {
-    const amountText = `${transaction.direction === "in" ? "+" : "-"}${formatCurrencyTRY(transaction.amount)}`;
-    const categoryText = categoryLabels[transaction.category] || transaction.category;
-    const accountText = account 
-      ? `${account.bankName} - ${getAccountTypeLabel(account.type)}` 
-      : transaction.accountId;
-    const dateText = formatDateTR(transaction.occurredAt);
-    
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>FinWise İşlem Dekontu - ${transaction.id}</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #ffffff;
-      color: #0f172a;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .receipt {
-      width: 100%;
-      max-width: 600px;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    }
-    .header {
-      text-align: center;
-      border-bottom: 2px dashed #e2e8f0;
-      padding-bottom: 24px;
-      margin-bottom: 24px;
-    }
-    .brand {
-      font-size: 24px;
-      font-weight: 800;
-      color: #0ea5e9;
-      letter-spacing: -0.025em;
-      margin: 0 0 4px 0;
-    }
-    .title {
-      font-size: 14px;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 0;
-    }
-    .amount-box {
-      text-align: center;
-      margin: 24px 0;
-    }
-    .amount-label {
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 4px;
-    }
-    .amount-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: ${transaction.direction === "in" ? "#10b981" : "#ef4444"};
-    }
-    .status-badge {
-      display: inline-block;
-      background-color: #ecfdf5;
-      color: #047857;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      margin-top: 8px;
-    }
-    .details {
-      margin-top: 24px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 14px;
-    }
-    .row:last-child {
-      border-bottom: none;
-    }
-    .label {
-      color: #64748b;
-    }
-    .value {
-      font-weight: 600;
-      color: #0f172a;
-    }
-    .ref-no {
-      font-family: monospace;
-      font-size: 12px;
-    }
-    .footer-note {
-      text-align: center;
-      margin-top: 32px;
-      font-size: 11px;
-      color: #94a3b8;
-    }
-    @media print {
-      body {
-        padding: 0;
-      }
-      .receipt {
-        border: none;
-        box-shadow: none;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="receipt">
-    <div class="header">
-      <h1 class="brand">FinWise</h1>
-      <p class="title">İşlem Dekontu</p>
-    </div>
-    
-    <div class="amount-box">
-      <p class="amount-label">${transaction.title}</p>
-      <div class="amount-value">${amountText}</div>
-      <span class="status-badge">İşlem Kaydı Tamamlandı</span>
-    </div>
-    
-    <div class="details">
-      <div class="row">
-        <span class="label">Tarih</span>
-        <span class="value">${dateText}</span>
-      </div>
-      <div class="row">
-        <span class="label">Kategori</span>
-        <span class="value">${categoryText}</span>
-      </div>
-      <div class="row">
-        <span class="label">Kaynak Hesap</span>
-        <span class="value">${accountText}</span>
-      </div>
-      <div class="row">
-        <span class="label">Referans Numarası</span>
-        <span class="value ref-no">${transaction.id}</span>
-      </div>
-    </div>
-    
-    <div class="footer-note">
-      Bu belge FinWise uygulaması tarafından üretilmiştir. Bilgilendirme amaçlıdır.
-    </div>
-  </div>
-</body>
-</html>
-    `.trim();
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
 
-    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    
-    let safeDate = "islem";
-    try {
-      safeDate = new Date(transaction.occurredAt).toISOString().split("T")[0];
-    } catch {
-      safeDate = transaction.occurredAt.replace(/[^a-zA-Z0-9-]/g, "-");
+    const safeTitle = toSafePdfText(transaction.title);
+    const safeAmount = formatCurrencyTRY(transaction.amount);
+    const safeCategory = toSafePdfText(categoryLabels[transaction.category] || transaction.category);
+    const safeAccount = toSafePdfText(
+      account 
+        ? `${account.bankName} - ${getAccountTypeLabel(account.type)}` 
+        : transaction.accountId
+    );
+    const safeDate = toSafePdfText(formatDateTR(transaction.occurredAt));
+    const safeRef = toSafePdfText(transaction.id);
+    const direction = transaction.direction;
+
+    // Header Background
+    doc.setFillColor(15, 23, 42); // slate-900
+    doc.rect(0, 0, 210, 50, "F");
+
+    // Header Branding
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(26);
+    doc.setTextColor(34, 211, 238); // Cyan
+    doc.text("FinWise", 105, 22, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(148, 163, 184); // slate-400
+    doc.text("ISLEM DEKONTU", 105, 32, { align: "center" });
+
+    // Dashed line spacer
+    doc.setDrawColor(226, 232, 240); // slate-200
+    doc.setLineDashPattern([2, 2], 0);
+    doc.line(20, 60, 190, 60);
+    doc.setLineDashPattern([], 0); // reset dash
+
+    // Transaction title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text(safeTitle, 105, 75, { align: "center" });
+
+    // Amount
+    doc.setFontSize(28);
+    if (direction === "in") {
+      doc.setTextColor(16, 185, 129); // emerald-500
+      doc.text(`+${safeAmount}`, 105, 92, { align: "center" });
+    } else {
+      doc.setTextColor(239, 68, 68); // rose-500
+      doc.text(`-${safeAmount}`, 105, 92, { align: "center" });
     }
+
+    // Status badge
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(4, 120, 87); // emerald-700
+    doc.setFillColor(236, 253, 245); // emerald-50
+    doc.roundedRect(65, 100, 80, 8, 4, 4, "FD");
+    doc.text("Islem Kaydi Tamamlandi", 105, 105.5, { align: "center" });
+
+    // Details Grid box
+    doc.setDrawColor(241, 245, 249);
+    doc.setFillColor(248, 250, 252);
+    doc.rect(20, 120, 170, 60, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.rect(20, 120, 170, 60, "S");
+
+    // Table rows
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
     
-    a.href = url;
-    a.download = `FinWise-Dekont-${safeDate}-${transaction.id}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Row 1: Tarih
+    doc.setTextColor(100, 116, 139);
+    doc.text("Tarih", 25, 132);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.text(safeDate, 185, 132, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.line(25, 136, 185, 136);
+
+    // Row 2: Kategori
+    doc.setTextColor(100, 116, 139);
+    doc.text("Kategori", 25, 146);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.text(safeCategory, 185, 146, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.line(25, 150, 185, 150);
+
+    // Row 3: Kaynak Hesap
+    doc.setTextColor(100, 116, 139);
+    doc.text("Kaynak Hesap", 25, 160);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.text(safeAccount, 185, 160, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.line(25, 164, 185, 164);
+
+    // Row 4: Referans No
+    doc.setTextColor(100, 116, 139);
+    doc.text("Referans Numarasi", 25, 174);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("courier", "bold");
+    doc.setFontSize(10);
+    doc.text(safeRef, 185, 174, { align: "right" });
+
+    // Footer
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Bu belge FinWise uygulamasi tarafindan uretilmistir.", 105, 260, { align: "center" });
+
+    // Safe File Name
+    let safeFileDate = "islem";
+    try {
+      safeFileDate = new Date(transaction.occurredAt).toISOString().split("T")[0];
+    } catch {
+      safeFileDate = transaction.occurredAt.replace(/[^a-zA-Z0-9-]/g, "-");
+    }
+    doc.save(`FinWise-Dekont-${safeFileDate}-${transaction.id}.pdf`);
   };
 
   const amountClass = transaction.direction === "in" ? "text-emerald-400" : "text-rose-400";
   const amountPrefix = transaction.direction === "in" ? "+" : "-";
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto min-h-screen"
+      className="fixed inset-0 z-[9999] grid h-dvh w-screen place-items-center bg-slate-950/80 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0e1726] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-md max-h-[90dvh] overflow-hidden flex flex-col bg-[#0e1726] border border-white/10 rounded-2xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -276,7 +254,7 @@ export default function TransactionDetailModal({ transaction, account, onClose }
             className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 transition"
           >
             <Download className="h-4 w-4" />
-            Dekontu Kaydet
+            PDF Dekont İndir
           </button>
           <button
             onClick={onClose}
@@ -289,4 +267,6 @@ export default function TransactionDetailModal({ transaction, account, onClose }
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

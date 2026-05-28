@@ -74,36 +74,49 @@ export default function ScenarioAnalysisCard() {
 
         <div className="p-4 rounded-lg bg-slate-900/50 border border-white/5 space-y-3">
           {categoryExpense === 0 ? (
-            <div className="text-xs text-slate-400 text-center py-2">
+            <div className="text-xs text-slate-400 text-center py-2 border-b border-white/5 pb-3">
               Bu ay seçili kategoride harcama bulunamadı.
             </div>
           ) : (
-            <>
-              <div className="flex justify-between items-end">
-                <span className="text-xs text-slate-400">Seçili kategori harcaması:</span>
-                <span className="text-sm font-medium text-slate-200">{formatCurrencyTRY(categoryExpense)}</span>
+            <div className="space-y-2 pb-2 border-b border-white/5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Seçili kategori harcaması:</span>
+                <span className="font-medium text-slate-200">{formatCurrencyTRY(categoryExpense)}</span>
               </div>
-              
-              <div className="flex justify-between items-end">
-                <span className="text-xs text-slate-400">Tahmini Tasarruf (%{reductionPercent}):</span>
-                <span className="text-lg font-semibold text-emerald-400">+{formatCurrencyTRY(savedAmount)}</span>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Senaryo sonrası kategori harcaması:</span>
+                <span className="font-medium text-slate-300">{formatCurrencyTRY(categoryExpense - savedAmount)}</span>
               </div>
-            </>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Tahmini tasarruf (%{reductionPercent}):</span>
+                <span className="font-medium text-emerald-400">{formatCurrencyTRY(savedAmount)}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Net akışa katkı:</span>
+                <span className="font-semibold text-emerald-400">+{formatCurrencyTRY(savedAmount)}</span>
+              </div>
+            </div>
           )}
 
-          <div className="h-px w-full bg-white/5 my-2"></div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs text-slate-400">
-              <span>Mevcut Net Akış (Aylık):</span>
-              <span className="font-semibold text-slate-200">{formatCurrencyTRY(currentNetFlow)}</span>
-            </div>
+          <div className="space-y-3 pt-1">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Senaryo Sonrası Net Akış:</span>
-              <span className={`text-sm font-bold flex items-center gap-1 ${newNetFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                <TrendingUp className="h-3 w-3" />
+              <span className="text-xs font-medium text-slate-300">Senaryo Sonrası Net Akış:</span>
+              <span className={`text-base font-extrabold flex items-center gap-1 ${newNetFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <TrendingUp className="h-4 w-4" />
                 {formatCurrencyTRY(newNetFlow)}
               </span>
+            </div>
+
+            <div className="h-px w-full bg-white/5 my-1"></div>
+
+            <div className="space-y-1 bg-white/[0.02] p-2.5 rounded-md border border-white/5">
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-400">Baz alınan aylık net akış:</span>
+                <span className="font-medium text-slate-300">{formatCurrencyTRY(currentNetFlow)}</span>
+              </div>
+              <p className="text-[9px] text-slate-500 leading-normal">
+                * Bu değer genel aylık gelir-gider farkıdır; kategori seçimine göre değişmez.
+              </p>
             </div>
           </div>
         </div>
