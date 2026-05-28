@@ -1,4 +1,4 @@
-import { X, FileText, Download, CheckCircle2 } from "lucide-react";
+import { X, FileText, Printer, CheckCircle2 } from "lucide-react";
 import type { BankAccount, Transaction } from "@/types/finance";
 import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
@@ -52,7 +52,7 @@ export default function TransactionDetailModal({ transaction, account, onClose }
             </p>
             <p className="text-xs text-slate-400 mt-2 flex items-center justify-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              Tamamlandı
+              İşlem Kaydı Tamamlandı
             </p>
           </div>
 
@@ -84,8 +84,8 @@ export default function TransactionDetailModal({ transaction, account, onClose }
             onClick={() => window.print()}
             className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 transition"
           >
-            <Download className="h-4 w-4" />
-            PDF İndir
+            <Printer className="h-4 w-4" />
+            Yazdır / Kaydet
           </button>
           <button
             onClick={onClose}

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { TrendingUp, AlertTriangle } from "lucide-react";
+import { TrendingUp, Info } from "lucide-react";
 import { formatCurrencyTRY } from "@/lib/format";
 
 type RoboGoalProjectionProps = {
@@ -103,10 +103,10 @@ export default function RoboGoalProjection({ profile, baseAmount = 10000 }: Robo
         </div>
       </div>
 
-      <div className="mt-4 flex items-start gap-2 text-[10px] text-slate-500 bg-slate-900/30 p-3 rounded border border-white/5">
-        <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500/70" />
+      <div className="mt-4 flex items-start gap-1.5 text-[10px] text-slate-500">
+        <Info className="h-3.5 w-3.5 shrink-0 text-slate-500 mt-0.5" />
         <p>
-          <strong>Bilgilendirme amaçlı ön izleme:</strong> Bu grafik tamamen yapay senaryolara dayalı olarak oluşturulmuştur ve kesinlikle yatırım tavsiyesi niteliği taşımaz. Gerçek piyasa koşulları farklılık gösterebilir.
+          Bilgilendirme amaçlı ön izleme: Bu grafik risk profiline göre oluşturulan varsayımsal birikim rotasıdır; gerçek piyasa koşulları değişebilir.
         </p>
       </div>
     </article>

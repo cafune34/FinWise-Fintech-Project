@@ -70,15 +70,18 @@ export function detectSubscriptions(transactions: Transaction[], paymentOrders: 
  * Önümüzdeki X gün içerisindeki bekleyen ödeme talimatlarının toplam çıkışını hesaplar.
  */
 export function calculateUpcomingCashOutflow(paymentOrders: PaymentOrder[], days: number = 7): number {
-  const now = new Date();
-  const targetDate = new Date();
-  targetDate.setDate(now.getDate() + days);
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const endOfTargetDate = new Date();
+  endOfTargetDate.setDate(startOfToday.getDate() + days);
+  endOfTargetDate.setHours(23, 59, 59, 999);
 
   return paymentOrders
-    .filter((order) => order.status === "beklemede")
+    .filter((order) => order.status === "beklemede" || order.status === "isleme_alindi")
     .filter((order) => {
       const orderDate = new Date(order.dueDate);
-      return orderDate >= now && orderDate <= targetDate;
+      return orderDate >= startOfToday && orderDate <= endOfTargetDate;
     })
     .reduce((sum, order) => sum + order.amount, 0);
 }

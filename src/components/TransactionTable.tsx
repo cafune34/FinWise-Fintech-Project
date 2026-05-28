@@ -40,6 +40,10 @@ export default function TransactionTable({
   );
   const highRiskSet = new Set(highRiskTransactionIds);
 
+  const selectedTransaction = selectedTxnId
+    ? transactions.find((t) => t.id === selectedTxnId)
+    : undefined;
+
   const rows = maxRows ? transactions.slice(0, maxRows) : transactions;
 
   if (rows.length === 0) {
@@ -115,10 +119,10 @@ export default function TransactionTable({
         </tbody>
       </table>
 
-      {selectedTxnId && (
+      {selectedTransaction && (
         <TransactionDetailModal
-          transaction={transactions.find((t) => t.id === selectedTxnId)!}
-          account={accounts?.find((a) => a.id === transactions.find((t) => t.id === selectedTxnId)?.accountId)}
+          transaction={selectedTransaction}
+          account={accounts?.find((a) => a.id === selectedTransaction.accountId)}
           onClose={() => setSelectedTxnId(null)}
         />
       )}
