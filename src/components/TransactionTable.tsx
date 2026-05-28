@@ -1,7 +1,9 @@
-import { Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
+import { useState } from "react";
 import type { BankAccount, Transaction } from "@/types/finance";
 import { formatCurrencyTRY, formatDateTR } from "@/lib/format";
 import { categoryLabels, getAccountTypeLabel } from "@/lib/labels";
+import TransactionDetailModal from "@/components/transactions/TransactionDetailModal";
 
 type TransactionTableProps = {
   transactions: Transaction[];
@@ -28,6 +30,8 @@ export default function TransactionTable({
   highRiskTransactionIds = [],
   onDeleteTransaction,
 }: TransactionTableProps) {
+  const [selectedTxnId, setSelectedTxnId] = useState<string | null>(null);
+
   const accountNameById = new Map(
     (accounts ?? []).map((account) => [
       account.id,
@@ -35,6 +39,10 @@ export default function TransactionTable({
     ])
   );
   const highRiskSet = new Set(highRiskTransactionIds);
+
+  const selectedTransaction = selectedTxnId
+    ? transactions.find((t) => t.id === selectedTxnId)
+    : undefined;
 
   const rows = maxRows ? transactions.slice(0, maxRows) : transactions;
 
@@ -57,7 +65,7 @@ export default function TransactionTable({
             <th className="px-4 py-3 font-medium min-w-[180px]">Hesap</th>
             <th className="px-4 py-3 font-medium">Tip</th>
             <th className="px-4 py-3 text-right font-medium">Tutar</th>
-            {onDeleteTransaction ? <th className="px-4 py-3 text-right font-medium">Aksiyon</th> : null}
+            <th className="px-4 py-3 text-right font-medium">İşlem</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10 text-slate-200">
@@ -83,23 +91,41 @@ export default function TransactionTable({
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">{accountLabel}</td>
                 <td className="whitespace-nowrap px-4 py-3">{getTransactionTypeLabel(txn)}</td>
                 <td className={`whitespace-nowrap px-4 py-3 text-right font-medium ${amountClass}`}>{amountText}</td>
-                {onDeleteTransaction ? (
-                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                <td className="whitespace-nowrap px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
                     <button
                       type="button"
-                      onClick={() => onDeleteTransaction(txn.id)}
-                      className="inline-grid h-8 w-8 place-items-center rounded-lg border border-white/10 text-slate-300 transition hover:border-rose-300/50 hover:bg-rose-500/10 hover:text-rose-200"
-                      aria-label={`${txn.title} işlemini sil`}
+                      onClick={() => setSelectedTxnId(txn.id)}
+                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-white/10 px-2 text-slate-300 transition hover:border-cyan-300/50 hover:bg-cyan-500/10 hover:text-cyan-200"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
+                      <span className="text-[10px] uppercase font-bold">Detay</span>
                     </button>
-                  </td>
-                ) : null}
+                    {onDeleteTransaction ? (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteTransaction(txn.id)}
+                        className="inline-grid h-8 w-8 place-items-center rounded-lg border border-white/10 text-slate-300 transition hover:border-rose-300/50 hover:bg-rose-500/10 hover:text-rose-200"
+                        aria-label={`${txn.title} işlemini sil`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    ) : null}
+                  </div>
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+
+      {selectedTransaction && (
+        <TransactionDetailModal
+          transaction={selectedTransaction}
+          account={accounts?.find((a) => a.id === selectedTransaction.accountId)}
+          onClose={() => setSelectedTxnId(null)}
+        />
+      )}
     </div>
   );
 }

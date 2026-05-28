@@ -11,6 +11,10 @@ import StatCard from "@/components/StatCard";
 import TransactionTable from "@/components/TransactionTable";
 import ExpenseByCategoryChart from "@/components/dashboard/ExpenseByCategoryChart";
 import IncomeExpenseChart from "@/components/dashboard/IncomeExpenseChart";
+import SavingsTargetBox from "@/components/dashboard/SavingsTargetBox";
+import CashFlowForecastStrip from "@/components/dashboard/CashFlowForecastStrip";
+import SubscriptionAlert from "@/components/dashboard/SubscriptionAlert";
+import FinancialCalendar from "@/components/dashboard/FinancialCalendar";
 import {
   calculateMonthlyExpense,
   calculateMonthlyIncome,
@@ -218,6 +222,10 @@ export default function DashboardPage() {
       title="Genel Bakış"
       description="Hesap bakiyeleri, nakit akışı, risk uyarıları ve bütçe görünümü tek ekranda izlenir."
     >
+      <div className="mb-5 w-full">
+        <CashFlowForecastStrip />
+      </div>
+
       <section className="grid w-full items-start gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">
         <article className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 flex flex-col justify-between">
           <div>
@@ -371,6 +379,12 @@ export default function DashboardPage() {
             </Link>
           );
         })}
+      </section>
+
+      <section className="grid w-full gap-4 lg:grid-cols-3">
+        <SavingsTargetBox />
+        <SubscriptionAlert />
+        <FinancialCalendar />
       </section>
 
       {/* Finansal Aksiyon Merkezi */}

@@ -5,6 +5,7 @@ import AppShell from "@/components/AppShell";
 import BudgetProgress from "@/components/BudgetProgress";
 import ForecastCard from "@/components/ForecastCard";
 import StatCard from "@/components/StatCard";
+import ScenarioAnalysisCard from "@/components/budget/ScenarioAnalysisCard";
 import { forecastAllCategories, getRiskyForecastCategories } from "@/lib/forecasting";
 import { isBudgetExceeded } from "@/lib/finance";
 import { useFinanceData } from "@/lib/useFinanceData";
@@ -59,6 +60,10 @@ export default function BudgetPage() {
             Gelecek ay için bütçe aşımı beklenen kategori bulunmuyor.
           </p>
         )}
+      </section>
+
+      <section className="w-full mt-4">
+        <ScenarioAnalysisCard />
       </section>
 
       <div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
