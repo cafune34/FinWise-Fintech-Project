@@ -1,4 +1,4 @@
-﻿export type TransactionCategory =
+export type TransactionCategory =
   | "market"
   | "ulasim"
   | "fatura"
@@ -38,6 +38,8 @@ export type PortfolioAllocation = {
 
 export type PaymentType = "fatura" | "transfer" | "abonelik";
 
+export type TransactionType = "gelir" | "gider" | "transfer";
+
 export type User = {
   id: string;
   fullName: string;
@@ -50,11 +52,13 @@ export type BankAccount = {
   id: string;
   userId: string;
   bankName: string;
+  accountName?: string;
   iban: string;
   balance: number;
   currency: "TRY";
   type: "vadesiz" | "birikim";
-  isMock: true;
+  isMock?: true;
+  status?: "aktif" | "pasif";
 };
 
 export type Transaction = {
@@ -64,9 +68,10 @@ export type Transaction = {
   amount: number;
   category: TransactionCategory;
   direction: "in" | "out";
+  type?: TransactionType;
   occurredAt: string;
   description?: string;
-  isMock: true;
+  isMock?: true;
 };
 
 export type Budget = {
@@ -84,8 +89,24 @@ export type PaymentOrder = {
   payee: string;
   amount: number;
   dueDate: string;
-  status: "planlandi" | "simule_edildi";
-  isMock: true;
+  status: "planlandi" | "isleme_alindi" | "beklemede" | "tamamlandi" | "reddedildi";
+  paymentType?: PaymentType;
+  sourceAccountId?: string;
+  referenceNumber?: string;
+  referenceNo?: string;
+  description?: string;
+  createdAt?: string;
+  isMock?: true;
+  postedTransactionId?: string;
+};
+
+export type RoboProfileResult = {
+  id: string;
+  score: number;
+  profile: RiskProfile;
+  allocation: PortfolioAllocation[];
+  answers: RoboAnswer[];
+  analyzedAt: string;
 };
 
 export type RegTechSeverity = "high" | "medium" | "low";
@@ -107,6 +128,8 @@ export type RegTechAlert = {
   ruleCode?: RegTechRuleCode;
   title?: string;
   reason: string;
+  impact?: string;
+  recommendedAction?: string;
   createdAt: string;
   resolved: boolean;
 };

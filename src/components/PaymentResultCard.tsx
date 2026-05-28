@@ -17,22 +17,27 @@ function formatDateTimeTR(value: string): string {
 }
 
 export default function PaymentResultCard({ result, warnings }: PaymentResultCardProps) {
+  const statusLabelMap: Record<typeof result.status, string> = {
+    isleme_alindi: "İşleme Alındı",
+    beklemede: "Beklemede",
+    tamamlandi: "Tamamlandı",
+  };
+
   return (
-    <article className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
-      <h3 className="text-base font-semibold text-emerald-200">Ödeme Sonucu</h3>
+    <article className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-6 shadow-xl shadow-black/10">
+      <h3 className="text-base font-semibold text-emerald-200">Talimat oluşturuldu</h3>
       <p className="mt-2 text-sm font-medium text-white">{result.message}</p>
 
-      <div className="mt-3 grid gap-2 text-sm text-slate-200 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 text-sm text-slate-200 2xl:grid-cols-2">
         <p>
-          Referans No: <span className="font-medium text-cyan-300">{result.referenceNumber}</span>
+          Referans numarası: <span className="font-medium text-cyan-300">{result.referenceNumber}</span>
         </p>
-        <p>Durum: Simüle Edildi</p>
+        <p>Durum: {statusLabelMap[result.status]}</p>
         <p>Ödeme Türü: {result.paymentTypeLabel}</p>
         <p>Tutar: {formatCurrencyTRY(result.amount)}</p>
         <p>Kaynak Hesap: {result.sourceAccountName}</p>
         <p>Alıcı/Kurum: {result.payeeName}</p>
-        <p>Simülasyon Zamanı: {formatDateTimeTR(result.simulatedAt)}</p>
-        <p>Gerçek İşlem: Hayır</p>
+        <p>Talimat zamanı: {formatDateTimeTR(result.createdAt)}</p>
       </div>
 
       {result.description ? (
@@ -48,10 +53,6 @@ export default function PaymentResultCard({ result, warnings }: PaymentResultCar
           ))}
         </div>
       ) : null}
-
-      <p className="mt-3 rounded-md border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-sm text-amber-200">
-        Bu sonuç yalnızca eğitim amaçlı simülasyondur. Gerçek para transferi yapılmaz.
-      </p>
     </article>
   );
 }

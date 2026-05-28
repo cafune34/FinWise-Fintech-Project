@@ -1,5 +1,9 @@
-﻿import AppShell from "@/components/AppShell";
+"use client";
+
+import AppShell from "@/components/AppShell";
 import RoboQuestionnaire from "@/components/RoboQuestionnaire";
+import RoboGoalProjection from "@/components/robo-advisor/RoboGoalProjection";
+import { useFinanceData } from "@/lib/useFinanceData";
 import type { RoboQuestion } from "@/types/finance";
 
 const roboQuestions: RoboQuestion[] = [
@@ -51,17 +55,17 @@ const roboQuestions: RoboQuestion[] = [
 ];
 
 export default function RoboAdvisorPage() {
+  const { lastRoboResult } = useFinanceData();
+
   return (
     <AppShell
-      title="Robo Danışman"
-      description="Risk anketi sonucu profilinizi ve eğitim amaçlı örnek portföy dağılımını görüntüleyin."
+      title="Yatırım Profili"
+      description="Risk profili analizi ve önerilen dağılım görünümüyle finansal tercihlerinizi değerlendirin."
     >
-      <p className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
-        Bu modül eğitim amaçlı robo-danışmanlık simülasyonudur. Gerçek yatırım tavsiyesi değildir.
-      </p>
-
       <RoboQuestionnaire questions={roboQuestions} />
+      {lastRoboResult && (
+        <RoboGoalProjection profile={lastRoboResult.profile} />
+      )}
     </AppShell>
   );
 }
-
