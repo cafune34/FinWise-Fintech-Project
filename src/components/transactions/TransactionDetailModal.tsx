@@ -28,6 +28,13 @@ const toSafePdfText = (str: string): string => {
     .replace(/Ç/g, "C");
 };
 
+const formatPdfCurrencyTRY = (amount: number): string => {
+  return `${amount.toLocaleString("tr-TR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} TL`;
+};
+
 export default function TransactionDetailModal({ transaction, account, onClose }: TransactionDetailModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -62,7 +69,7 @@ export default function TransactionDetailModal({ transaction, account, onClose }
     });
 
     const safeTitle = toSafePdfText(transaction.title);
-    const safeAmount = formatCurrencyTRY(transaction.amount);
+    const safeAmount = formatPdfCurrencyTRY(transaction.amount);
     const safeCategory = toSafePdfText(categoryLabels[transaction.category] || transaction.category);
     const safeAccount = toSafePdfText(
       account 
