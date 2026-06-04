@@ -382,8 +382,8 @@ export function getScenarioRecommendations(result: {
   scenario: ScenarioInput;
   simulatedBalance: number;
   simulatedNetCashFlow: number;
-  budgetImpact: any;
-  emergencyFundImpact: any;
+  budgetImpact: ReturnType<typeof calculateBudgetImpact>;
+  emergencyFundImpact: ReturnType<typeof calculateEmergencyFundImpact>;
   riskLevel: ScenarioRiskLevel;
 }): { recommendations: string[]; warnings: string[] } {
   const recommendations: string[] = [];

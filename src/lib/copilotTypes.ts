@@ -94,6 +94,14 @@ export type CopilotScenarioSimulatorSummary = {
   summary: string;
 };
 
+export type CopilotInflationTimelineSummary = {
+  available: boolean;
+  currentPurchasingPowerIndex: number;
+  totalLossPercent: number;
+  summary: string;
+  route: "/inflation-timeline";
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -113,6 +121,7 @@ export type CopilotFinanceContext = {
   spendingDna: CopilotSpendingDnaSummary;
   emergencyFund: CopilotEmergencyFundSummary;
   scenarioSimulator?: CopilotScenarioSimulatorSummary;
+  inflationTimeline?: CopilotInflationTimelineSummary;
   updatedAt: string;
   generatedAt: string;
 };

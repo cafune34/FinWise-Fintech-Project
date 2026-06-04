@@ -268,7 +268,8 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
         context.netCashFlow
       )}), riskli harcamalar ve bütçe baskısı üzerinden öneriler üretebilir. ` +
       `API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır. ` +
-      `What-if Simülatörü ayrı bir sayfa olarak kullanılabilir.`,
+      `What-if Simülatörü ayrı bir sayfa olarak kullanılabilir. ` +
+      `Enflasyon Zaman Tüneli modülü, TL'nin yıllara göre demo satın alma gücü analizini ayrı sayfada sunar.`,
     conclusion: buildConclusion({
       netCashFlow: context.netCashFlow,
       behavioralHighRiskCount,
