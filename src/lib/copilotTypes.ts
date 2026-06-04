@@ -63,6 +63,12 @@ export type CopilotBehavioralInsightsSummary = {
   summary: string;
 };
 
+export type CopilotPurchasingPowerSummary = {
+  totalTryAssets: number;
+  note: string;
+  route: "/purchasing-power";
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -78,6 +84,7 @@ export type CopilotFinanceContext = {
   paymentOrders: CopilotPaymentSummary;
   roboAdvisor: CopilotRoboAdvisorSummary;
   behavioralInsights: CopilotBehavioralInsightsSummary;
+  purchasingPower: CopilotPurchasingPowerSummary;
   updatedAt: string;
   generatedAt: string;
 };

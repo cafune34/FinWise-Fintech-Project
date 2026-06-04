@@ -182,6 +182,11 @@ export function buildCopilotFinanceContext(
       topBiases: behavioralSummary.topBiases,
       summary: behavioralSummary.summary,
     },
+    purchasingPower: {
+      totalTryAssets: roundMoney(calculateTotalBalance(activeAccounts)),
+      note: "Kur bazlı karşılıklar ve demo enflasyon notu /purchasing-power panelinde izlenir.",
+      route: "/purchasing-power",
+    },
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };
