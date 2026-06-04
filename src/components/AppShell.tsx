@@ -23,6 +23,7 @@ import {
   WalletCards,
   ChevronDown,
   Calendar,
+  Fingerprint,
   X,
 } from "lucide-react";
 import {
@@ -53,6 +54,7 @@ const navItems: NavItem[] = [
   { label: "Risk İzleme", href: "/regtech", icon: ShieldCheck },
   { label: "Yatırım Profili", href: "/robo-advisor", icon: Gauge },
   { label: "Satın Alma Gücü", href: "/purchasing-power", icon: Gauge },
+  { label: "Harcama DNA’sı", href: "/spending-dna", icon: Fingerprint },
   { label: "Davranışsal Finans", href: "/behavioral-finance", icon: Brain },
   { label: "Copilot", href: "/copilot", icon: Sparkles },
   { label: "Ayarlar", href: "/settings", icon: Settings },

@@ -69,6 +69,14 @@ export type CopilotPurchasingPowerSummary = {
   route: "/purchasing-power";
 };
 
+export type CopilotSpendingDnaSummary = {
+  primaryProfile: string;
+  riskLevel: RiskProfile;
+  summary: string;
+  recommendations: string[];
+  route: "/spending-dna";
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -85,6 +93,7 @@ export type CopilotFinanceContext = {
   roboAdvisor: CopilotRoboAdvisorSummary;
   behavioralInsights: CopilotBehavioralInsightsSummary;
   purchasingPower: CopilotPurchasingPowerSummary;
+  spendingDna: CopilotSpendingDnaSummary;
   updatedAt: string;
   generatedAt: string;
 };

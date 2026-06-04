@@ -6,6 +6,7 @@ import {
   getCategoryExpenseTotals,
 } from "@/lib/finance";
 import { analyzeBehavioralFinance, summarizeBehavioralInsights } from "@/lib/behavioralFinance";
+import { analyzeSpendingDna, summarizeSpendingDnaForCopilot } from "@/lib/spendingDna";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
@@ -128,6 +129,7 @@ export function buildCopilotFinanceContext(
     (a, b) => new Date(b.analyzedAt).getTime() - new Date(a.analyzedAt).getTime()
   )[0];
   const behavioralSummary = summarizeBehavioralInsights(analyzeBehavioralFinance(snapshot));
+  const spendingDnaSummary = summarizeSpendingDnaForCopilot(analyzeSpendingDna(snapshot));
 
   return {
     userName: snapshot.user.fullName,
@@ -187,6 +189,7 @@ export function buildCopilotFinanceContext(
       note: "Kur bazlı karşılıklar ve demo enflasyon notu /purchasing-power panelinde izlenir.",
       route: "/purchasing-power",
     },
+    spendingDna: spendingDnaSummary,
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };
