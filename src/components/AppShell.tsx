@@ -24,6 +24,7 @@ import {
   WalletCards,
   ChevronDown,
   Calendar,
+  FileText,
   Fingerprint,
   X,
 } from "lucide-react";
@@ -57,6 +58,7 @@ const navItems: NavItem[] = [
   { label: "Satın Alma Gücü", href: "/purchasing-power", icon: Gauge },
   { label: "Acil Durum Fonu", href: "/emergency-fund", icon: LifeBuoy },
   { label: "Harcama DNA’sı", href: "/spending-dna", icon: Fingerprint },
+  { label: "FinWise Report", href: "/financial-report", icon: FileText },
   { label: "Davranışsal Finans", href: "/behavioral-finance", icon: Brain },
   { label: "Copilot", href: "/copilot", icon: Sparkles },
   { label: "Ayarlar", href: "/settings", icon: Settings },
