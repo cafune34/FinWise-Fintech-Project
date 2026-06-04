@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Sparkles,
   UserRound,
   WalletCards,
   ChevronDown,
@@ -50,6 +51,7 @@ const navItems: NavItem[] = [
   { label: "Ödeme Talimatları", href: "/payments", icon: CreditCard },
   { label: "Risk İzleme", href: "/regtech", icon: ShieldCheck },
   { label: "Yatırım Profili", href: "/robo-advisor", icon: Gauge },
+  { label: "Copilot", href: "/copilot", icon: Sparkles },
   { label: "Ayarlar", href: "/settings", icon: Settings },
 ];
 
