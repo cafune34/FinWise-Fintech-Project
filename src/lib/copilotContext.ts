@@ -5,6 +5,7 @@ import {
   calculateTotalBalance,
   getCategoryExpenseTotals,
 } from "@/lib/finance";
+import { analyzeBehavioralFinance, summarizeBehavioralInsights } from "@/lib/behavioralFinance";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
@@ -126,6 +127,7 @@ export function buildCopilotFinanceContext(
   const lastRoboResult = [...snapshot.roboResults].sort(
     (a, b) => new Date(b.analyzedAt).getTime() - new Date(a.analyzedAt).getTime()
   )[0];
+  const behavioralSummary = summarizeBehavioralInsights(analyzeBehavioralFinance(snapshot));
 
   return {
     userName: snapshot.user.fullName,
@@ -173,6 +175,13 @@ export function buildCopilotFinanceContext(
           })),
         }
       : null,
+    behavioralInsights: {
+      total: behavioralSummary.total,
+      highRiskCount: behavioralSummary.highRiskCount,
+      mediumRiskCount: behavioralSummary.mediumRiskCount,
+      topBiases: behavioralSummary.topBiases,
+      summary: behavioralSummary.summary,
+    },
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };

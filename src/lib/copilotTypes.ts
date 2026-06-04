@@ -55,6 +55,14 @@ export type CopilotRoboAdvisorSummary = {
   }>;
 } | null;
 
+export type CopilotBehavioralInsightsSummary = {
+  total: number;
+  highRiskCount: number;
+  mediumRiskCount: number;
+  topBiases: string[];
+  summary: string;
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -69,6 +77,7 @@ export type CopilotFinanceContext = {
   riskyTransactions: CopilotRiskyTransaction[];
   paymentOrders: CopilotPaymentSummary;
   roboAdvisor: CopilotRoboAdvisorSummary;
+  behavioralInsights: CopilotBehavioralInsightsSummary;
   updatedAt: string;
   generatedAt: string;
 };

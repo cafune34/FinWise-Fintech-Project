@@ -6,6 +6,7 @@ import { clsx } from "clsx";
 import { useState, type ComponentType, type ReactNode } from "react";
 import {
   Bell,
+  Brain,
   ChartPie,
   CircleDollarSign,
   CreditCard,
@@ -51,6 +52,7 @@ const navItems: NavItem[] = [
   { label: "Ödeme Talimatları", href: "/payments", icon: CreditCard },
   { label: "Risk İzleme", href: "/regtech", icon: ShieldCheck },
   { label: "Yatırım Profili", href: "/robo-advisor", icon: Gauge },
+  { label: "Davranışsal Finans", href: "/behavioral-finance", icon: Brain },
   { label: "Copilot", href: "/copilot", icon: Sparkles },
   { label: "Ayarlar", href: "/settings", icon: Settings },
 ];
