@@ -77,6 +77,16 @@ export type CopilotSpendingDnaSummary = {
   route: "/spending-dna";
 };
 
+export type CopilotEmergencyFundSummary = {
+  completionPercentage: number;
+  targetAmount: number;
+  missingAmount: number;
+  statusLabel: string;
+  summary: string;
+  recommendations: string[];
+  route: "/emergency-fund";
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -94,6 +104,7 @@ export type CopilotFinanceContext = {
   behavioralInsights: CopilotBehavioralInsightsSummary;
   purchasingPower: CopilotPurchasingPowerSummary;
   spendingDna: CopilotSpendingDnaSummary;
+  emergencyFund: CopilotEmergencyFundSummary;
   updatedAt: string;
   generatedAt: string;
 };

@@ -6,6 +6,7 @@ import {
   getCategoryExpenseTotals,
 } from "@/lib/finance";
 import { analyzeBehavioralFinance, summarizeBehavioralInsights } from "@/lib/behavioralFinance";
+import { analyzeEmergencyFund, summarizeEmergencyFundForCopilot } from "@/lib/emergencyFund";
 import { analyzeSpendingDna, summarizeSpendingDnaForCopilot } from "@/lib/spendingDna";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
@@ -130,6 +131,7 @@ export function buildCopilotFinanceContext(
   )[0];
   const behavioralSummary = summarizeBehavioralInsights(analyzeBehavioralFinance(snapshot));
   const spendingDnaSummary = summarizeSpendingDnaForCopilot(analyzeSpendingDna(snapshot));
+  const emergencyFundSummary = summarizeEmergencyFundForCopilot(analyzeEmergencyFund(snapshot));
 
   return {
     userName: snapshot.user.fullName,
@@ -190,6 +192,7 @@ export function buildCopilotFinanceContext(
       route: "/purchasing-power",
     },
     spendingDna: spendingDnaSummary,
+    emergencyFund: emergencyFundSummary,
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };
