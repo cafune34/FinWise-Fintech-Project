@@ -15,6 +15,7 @@ import {
   ListChecks,
   RefreshCcw,
   Search,
+  Settings,
   ShieldCheck,
   UserRound,
   WalletCards,
@@ -49,6 +50,7 @@ const navItems: NavItem[] = [
   { label: "Ödeme Talimatları", href: "/payments", icon: CreditCard },
   { label: "Risk İzleme", href: "/regtech", icon: ShieldCheck },
   { label: "Yatırım Profili", href: "/robo-advisor", icon: Gauge },
+  { label: "Ayarlar", href: "/settings", icon: Settings },
 ];
 
 type AppShellProps = {

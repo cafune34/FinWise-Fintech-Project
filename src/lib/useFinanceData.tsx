@@ -79,6 +79,7 @@ type FinanceDataContextValue = FinanceSnapshot & {
   updatePaymentOrderStatus: (orderId: string, status: PaymentOrder["status"]) => void;
   deletePaymentOrder: (orderId: string) => void;
   saveRoboProfileResult: (input: SaveRoboProfileInput) => RoboProfileResult;
+  replaceSnapshotFromBackup: (snapshot: FinanceSnapshot) => void;
   resetToSeed: () => void;
 };
 
@@ -514,6 +515,15 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
     showToast("Veriler başlangıç durumuna sıfırlandı.", "info");
   }, [showToast]);
 
+  const replaceSnapshotFromBackup = useCallback(
+    (nextSnapshot: FinanceSnapshot) => {
+      writeFinanceSnapshot(nextSnapshot);
+      setSnapshot(readFinanceSnapshot());
+      showToast("Veriler başarıyla geri yüklendi.", "success");
+    },
+    [showToast]
+  );
+
   const budgetsWithSpending = useMemo(
     () => getBudgetsWithSpending(snapshot.budgets, snapshot.transactions),
     [snapshot.budgets, snapshot.transactions]
@@ -537,6 +547,7 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
       updatePaymentOrderStatus,
       deletePaymentOrder,
       saveRoboProfileResult,
+      replaceSnapshotFromBackup,
       resetToSeed,
     }),
     [
@@ -550,6 +561,7 @@ export function FinanceDataProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       hydrated,
       lastRoboResult,
+      replaceSnapshotFromBackup,
       resetToSeed,
       saveRoboProfileResult,
       snapshot,
