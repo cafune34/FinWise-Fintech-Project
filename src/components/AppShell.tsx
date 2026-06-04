@@ -27,6 +27,7 @@ import {
   FileText,
   Fingerprint,
   X,
+  WandSparkles,
 } from "lucide-react";
 import {
   calculateMonthlyExpense,
@@ -59,6 +60,7 @@ const navItems: NavItem[] = [
   { label: "Acil Durum Fonu", href: "/emergency-fund", icon: LifeBuoy },
   { label: "Harcama DNA’sı", href: "/spending-dna", icon: Fingerprint },
   { label: "FinWise Report", href: "/financial-report", icon: FileText },
+  { label: "Senaryo Simülatörü", href: "/scenario-simulator", icon: WandSparkles },
   { label: "Davranışsal Finans", href: "/behavioral-finance", icon: Brain },
   { label: "Copilot", href: "/copilot", icon: Sparkles },
   { label: "Ayarlar", href: "/settings", icon: Settings },

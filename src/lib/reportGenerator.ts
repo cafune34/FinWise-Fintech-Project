@@ -267,7 +267,8 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
       `FinWise Copilot, bu snapshot için nakit akışı (${formatCurrencyTRY(
         context.netCashFlow
       )}), riskli harcamalar ve bütçe baskısı üzerinden öneriler üretebilir. ` +
-      `API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır.`,
+      `API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır. ` +
+      `What-if Simülatörü ayrı bir sayfa olarak kullanılabilir.`,
     conclusion: buildConclusion({
       netCashFlow: context.netCashFlow,
       behavioralHighRiskCount,

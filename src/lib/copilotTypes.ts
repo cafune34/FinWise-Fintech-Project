@@ -87,6 +87,13 @@ export type CopilotEmergencyFundSummary = {
   route: "/emergency-fund";
 };
 
+export type CopilotScenarioSimulatorSummary = {
+  available: boolean;
+  supportedTypes: string[];
+  route: "/scenario-simulator";
+  summary: string;
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -105,6 +112,7 @@ export type CopilotFinanceContext = {
   purchasingPower: CopilotPurchasingPowerSummary;
   spendingDna: CopilotSpendingDnaSummary;
   emergencyFund: CopilotEmergencyFundSummary;
+  scenarioSimulator?: CopilotScenarioSimulatorSummary;
   updatedAt: string;
   generatedAt: string;
 };

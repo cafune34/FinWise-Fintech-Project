@@ -193,6 +193,19 @@ export function buildCopilotFinanceContext(
     },
     spendingDna: spendingDnaSummary,
     emergencyFund: emergencyFundSummary,
+    scenarioSimulator: {
+      available: true,
+      supportedTypes: [
+        "one_time_expense",
+        "monthly_recurring_expense",
+        "extra_income",
+        "rent_increase",
+        "subscription",
+        "debt_installment",
+      ],
+      route: "/scenario-simulator",
+      summary: "What-if simülatörü ile bakiye, bütçe ve acil durum fonu etkileri simüle edilebilir.",
+    },
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };
