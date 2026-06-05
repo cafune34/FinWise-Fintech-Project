@@ -64,8 +64,9 @@ export default function TransactionsPage() {
         transactions,
         budgets: budgetsWithSpending,
         userId: user.id,
+        accounts,
       }),
-    [budgetsWithSpending, transactions, user.id]
+    [accounts, budgetsWithSpending, transactions, user.id]
   );
   const highRiskTransactionIds = useMemo(() => getHighRiskTransactions(alerts), [alerts]);
   const income = transactions.filter((txn) => txn.type === "gelir").reduce((sum, txn) => sum + txn.amount, 0);

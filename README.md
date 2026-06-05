@@ -1,143 +1,79 @@
-# FinWise - Kişisel Finans ve Operasyon Yönetim Paneli (V2)
+# FinWise - Kişisel Finans ve Operasyon Yönetim Paneli
 
-FinWise V2, bireysel ve kurumsal finansal durum takibini tek bir çatı altında toplayan, masaüstü odaklı, modern ve profesyonel bir finansal kontrol paneli (fintech) platformudur. Açık bankacılık standartları, kişisel finans yönetimi, risk izleme ve yatırım profili analizlerini kullanıcı dostu ve akıcı bir arayüzle sunar.
+FinWise, Finansal Teknolojiler dersi kapsamında geliştirilen eğitim amaçlı bir kişisel finans ve bütçe yönetim prototipidir. Uygulama; hesap takibi, bütçe analizi, ödeme talimatları, RegTech risk izleme, AI destekli finansal yorumlama, acil durum fonu analizi, harcama davranışı profili ve finansal rapor üretimi özelliklerini tek panelde birleştirir.
 
----
+## 1. Proje Özeti
+FinWise, kullanıcıların bireysel veya küçük ölçekli operasyonel bütçelerini tek bir merkezden izlemesini, analiz etmesini ve yönetmesini amaçlar. Tarayıcı tabanlı `localStorage` snapshot mimarisi sayesinde tüm veriler yerel olarak saklanır ve güvenli bir şekilde yönetilir. Proje, modern fintech gereksinimlerini pratik ve görsel bir kontrol paneli (dashboard) üzerinden simüle eder.
 
-## 📖 Ders Bağlamı
-Bu proje, üniversite düzeyindeki **Finansal Teknolojiler (Fintech)** dersi kapsamında, çevik ürün geliştirme yöntemleri (sprint tabanlı süreçler) takip edilerek tasarlanmış ve geliştirilmiştir. FinTech teorisindeki açık bankacılık (AISP/PISP), risk uyumluluğu (RegTech) ve dijital portföy yönetimi (Robo-danışmanlık) kavramlarının arayüz ve akış düzeyindeki pratik uygulamalarını sergilemek amacıyla hazırlanmıştır.
+## 2. Öne Çıkan Özellikler
+* **Dashboard / Finansal Sağlık Skoru:** Kullanıcının genel bakiye durumunu, gelir-gider dengesini ve finansal sağlık skorunu gösteren dinamik özet paneli.
+* **Live Market Ticker:** BIST100, Dolar, Euro, GBP ve Altın fiyatlarını (Frankfurter ve Yahoo Finance API'leri üzerinden) simüle eden ve güncel tutan kayan fiyat bandı.
+* **Hesaplar ve İşlem Takibi:** Farklı banka hesapları tanımlama, gelir ve gider ekleme/silme ile tüm hesap hareketlerinin senkronize izlenmesi.
+* **Bütçe Planı ve Senaryo Analizi:** Kategori bazlı bütçe limitleri, bütçe aşım uyarıları ve geçmiş harcamalara dayalı 3 aylık bütçe projeksiyonu/senaryoları.
+* **Ödeme Talimatları:** PISP/AISP standartlarında yeni ödeme talimatı oluşturma, bekleme, onaylama ve iptal yönetimi.
+* **Risk İzleme / RegTech:** Şüpheli işlem hareketlerini, bütçe aşımlarını ve yüksek tutarlı transferleri anlık analiz eden ve risk seviyelerine göre uyarı üreten kural motoru.
+* **Gemini API Destekli Copilot & Yerel Fallback:** Finansal verilerin durumuna göre AI destekli kişiselleştirilmiş yorumlar ve öneriler sunan sohbet botu. Gemini API çalışmadığında kural tabanlı yerel analiz fallback mekanizması devreye girer.
+* **Acil Durum Fonu:** 3 veya 6 aylık giderleri karşılamayı hedefleyen acil durum fonu hedefi ve tamamlanma yüzdesi takibi.
+* **Harcama DNA’sı:** Yatırım ve tüketim davranışlarına göre dinamik olarak hesaplanan finansal kişilik profili (Dengeli Planlayıcı vb.).
+* **Satın Alma Gücü:** Enflasyon oranlarının ve zamanın nakit birikimler üzerindeki aşındırıcı etkisini görselleştiren simülasyon paneli.
+* **Para Akış Haritası:** Gelir akışlarının hesaplara ve bütçe kategorilerine dağılımını gösteren görsel akış haritası.
+* **Harcama Isı Haritası:** Haftalık ve günlük harcama yoğunluğunu gösteren matris görselleştirmesi.
+* **Finansal Analiz PDF Raporu:** jsPDF ve html2canvas kütüphaneleriyle oluşturulan, tüm grafik ve verileri içeren indirilebilir finansal analiz raporu.
+* **JSON Export/Import:** localStorage verilerini yedekleme ve geri yükleme imkanı.
 
----
+## 3. Kullanılan Teknolojiler
+* **Core:** Next.js 16.2 & React 19.2 (TypeScript)
+* **Styling:** Tailwind CSS v4 & Vanilla CSS
+* **Grafikler & Görselleştirme:** Recharts
+* **Veri Yedekleme:** Tarayıcı tabanlı `localStorage` Snapshot mimarisi
+* **Yapay Zeka:** Gemini API (Google Generative AI REST API)
+* **Raporlama:** jsPDF, html2canvas
+* **Sürüm Kontrolü:** GitHub
 
-## 🎯 Proje Amacı
-- **Entegre Finansal Görünüm**: Birden fazla banka hesabını, nakit akışını ve bütçe limitlerini tek ekrandan yönetmek.
-- **Teorik Fintech Uygulamaları**: Açık bankacılık, ödeme hizmetleri ve yatırım analitiği teorisini çalışan bir prototipe dönüştürmek.
-- **Yerel Veri Kalıcılığı**: Sunucu bağımlılığı olmadan, tüm kullanıcı girişlerini ve dinamik hesaplamaları tarayıcı belleğinde (localStorage) kalıcı hale getirmek.
-- **Profesyonel Arayüz Standartları**: Modern UI prensipleriyle (Dark Mode, uyumlu renk paletleri, görsel grafikler) kurumsal fintech kalitesinde bir deneyim sağlamak.
+## 4. Demo Veri Seti
+Projede, gerçekçi bir devlet memurunun bütçesini simüle eden varsayılan veri seti yüklü gelmektedir:
+* **Portföy (Toplam Varlık):** 148.100 TL
+* **Aylık Gelir:** 48.500 TL
+* **Aylık Gider:** 30.520 TL
+* **Net Nakit Akışı:** 17.980 TL
+* **RegTech Sinyali/Uyarısı:** 2 aktif uyarı
+* **Acil Durum Fonu Tamamlanma Oranı:** %61,1
+* **Harcama DNA'sı:** Dengeli Planlayıcı / Orta Risk
 
----
+## 5. Gemini Copilot
+FinWise Copilot, kullanıcının güncel finansal profilini (bakiye, işlemler, bütçe limitleri, risk durumları) analiz ederek anlamlı finansal tavsiyeler üretir.
+* **REST API Yapısı:** API istekleri en güncel Google AI endpoint standartlarına uygundur.
+* **Güvenli Fallback:** API anahtarı girilmemişse veya kota dolmuşsa, yerel kural motoru devreye girerek kullanıcının sorusuna uygun statik finansal analiz çıktılarını anında üretir.
 
-## 🛠️ Ana Modüller
-
-1. **Dashboard (Genel Bakış)**: Finansal sağlık skoru, toplam varlık, aylık gelir-gider ve net nakit akışı göstergeleri. Grafiklerle desteklenen kategori bazlı harcama dağılımı ve bekleyen işlemler/risk sinyalleri özeti.
-2. **Accounts (Hesaplar)**: Farklı bankalardaki vadesiz ve vadeli mevduat hesaplarının bakiyeleri, hesap detayları ve yeni hesap ekleme imkanı.
-3. **Transactions (İşlemler)**: Tüm hesap hareketlerinin listelendiği, tarih, kategori ve hesap bazlı filtreleme sunan, dinamik işlem ekleme/silme fonksiyonlarına sahip modül.
-4. **Budget (Bütçe Planı)**: Kategori bazlı bütçe limiti belirleme, harcama oranlarının takibi, limit aşım uyarıları ve geçmiş harcamalara dayalı 3 aylık bütçe tahminleme motoru.
-5. **Risk İzleme (RegTech)**: Şüpheli işlem hareketlerini, bütçe aşım uyarılarını ve yüksek tutarlı transferleri kural tabanlı analiz eden, risk seviyelerine göre aksiyon öneren denetim merkezi.
-6. **Ödeme Talimatları (Payments)**: AISP/PISP standartlarında ödeme başlatma simülasyonu, bekleyen ve tamamlanan talimatların durum yönetimi, dinamik talimat iptali ve detay inceleme.
-7. **Yatırım Profili (Investment Profile)**: Kullanıcının risk algısını belirleyen 5 adımlı yatırım anketi, kişiye özel oluşturulan varlık dağılım grafiği (fon, altın, hisse senedi vb.) ve analiz geçmişi takibi.
-
----
-
-## 💻 Kullanılan Teknolojiler
-- **Core Framework**: Next.js 16.2 (App Router) & React 19.2
-- **Diller**: TypeScript & HTML5 / CSS3
-- **Stil Yönetimi**: Tailwind CSS v4 (Modern HSL renk paleti ve özel animasyonlar)
-- **Veri Görselleştirme**: Recharts (Duyarlı ve etkileşimli grafikler)
-- **Form / Veri Doğrulama**: Zod
-- **İkon Seti**: Lucide React
-- **Veri Yönetimi**: Tarayıcı tabanlı `localStorage` Snapshot mimarisi
-
----
-
-## ⚙️ Kurulum ve Çalıştırma
-
-### Gereksinimler
-- Node.js (v18 veya üzeri önerilir)
-- npm veya yarn paket yöneticisi
-
-### Kurulum
-Proje dizininde bağımlılıkları yüklemek için:
+## 6. Kurulum
+Bağımlılıkları yüklemek için:
 ```bash
 npm install
 ```
 
-### Çalıştırma (Geliştirme Modu)
+## 7. Ortam Değişkenleri
+AI özelliklerinin çalışabilmesi için projenin kök dizininde bir `.env.local` dosyası oluşturup aşağıdaki değişkeni tanımlayabilirsiniz:
+```env
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+```
+*Not: API anahtarı girilmediğinde sistem otomatik olarak yerel analiz motoru (fallback) modunda çalışacaktır.*
+
+## 8. Çalıştırma Komutları
 Yerel geliştirme sunucusunu başlatmak için:
 ```bash
 npm run dev
 ```
-Uygulamaya tarayıcınızdan `http://localhost:3000` adresinden erişebilirsiniz.
-
-### Derleme (Production Build)
-Projeyi üretime hazır hale getirmek ve statik sayfaları optimize etmek için:
+Uygulamayı derlemek ve optimize etmek için:
 ```bash
 npm run build
-```
-Derlenmiş uygulamayı yerelde çalıştırmak için:
-```bash
-npm start
+npm run start
 ```
 
----
+## 9. Test Durumu
+* **Linter Kontrolleri:** `npm run lint` komutuyla tüm ESLint kuralları kontrol edilmiş ve sıfır hata ile doğrulanmıştır.
+* **Derleme Testi:** `npm run build` komutuyla Next.js derleme süreci test edilmiş ve statik sayfalar ile dinamik yollar hatasız bir şekilde oluşturulmuştur.
 
-## 🗺️ Sayfa ve Modül Haritası
-- `/` - Landing Page (FinWise Tanıtım & Giriş Sayfası)
-- `/dashboard` - Finansal Özet ve Operasyon Kontrol Paneli
-- `/accounts` - Banka Hesapları Yönetimi
-- `/transactions` - İşlem Geçmişi ve Kayıt Ekleme/Silme
-- `/budget` - Bütçe Limitleri ve Harcama Tahminleme
-- `/regtech` - Risk Sinyalleri ve RegTech İzleme Modülü
-- `/payments` - Ödeme Talimatı Başlatma ve Durum Takibi
-- `/robo-advisor` - Risk Anketi ve Yatırım Profili Analizi
-
----
-
-## 🔄 Veri Yönetimi ve Kalıcılık
-FinWise V2, backend bağlantısı gerektirmeksizin kullanıcı girdilerini tarayıcıda saklar:
-- **Snapshot Yapısı**: İlk açılışta `src/data/mockData.ts` içerisindeki varsayılan veriler `localStorage` üzerine yüklenir.
-- **Dinamik Güncelleme**: Eklenen hesaplar, silinen işlemler, düzenlenen bütçe limitleri, yeni ödeme talimatları ve yatırım profili anket sonuçları anında `localStorage` üzerinde güncellenir ve tüm sayfalar bu ortak state'ten beslenir.
-- **Sıfırlama (Reset Data)**: AppShell altındaki "Başlangıç Verilerine Dön" butonu ile kullanıcı dilediği zaman tarayıcı belleğindeki verileri sıfırlayıp fabrika ayarlarına dönebilir.
-
----
-
-## 🏗️ Teknik Mimari
-```
-┌────────────────────────────────────────────────────────┐
-│                      Sunum Katmanı                     │
-│      Next.js App Router Sayfaları (Dashboard vb.)     │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                     Bileşen Katmanı                    │
-│    AppShell, Metrik Kartları, Recharts Grafikleri      │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                   İş Kuralları Katmanı                  │
-│       src/lib (Tahminleme, Risk Kural Motoru)          │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                     Veri Katmanı                       │
-│     localStorage (Snapshot) <-> src/data/mockData.ts   │
-└────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📈 Final Demo Akışı
-1. **Landing Page**: FinWise V2 tanıtım kartları ve özellik sunumunun incelenmesi.
-2. **Dashboard**: Finansal durum, net nakit akışı ve kategori grafiklerinin gözlemlenmesi.
-3. **Hesap Ekleme**: "Hesaplar" sayfasında yeni bir banka hesabı tanımlanması ve dashboard'a anlık yansıması.
-4. **İşlem Ekleme / Silme**: Harcama veya gelir girişi yapılması, bakiyelerin otomatik güncellenmesi.
-5. **Bütçe Yönetimi**: Bütçe limitlerinin güncellenmesi, limit aşım durumlarının izlenmesi.
-6. **Risk Analizi**: Risk İzleme ekranında üretilen kritik sinyallerin ve çözüm önerilerinin incelenmesi.
-7. **Ödeme Talimatı**: Yeni bir ödeme emri başlatılması, onay/iptal süreçlerinin yürütülmesi.
-8. **Yatırım Profili**: Risk analizi anketinin çözülerek kişiselleştirilmiş portföy dağılımının ve geçmiş sonuçların incelenmesi.
-9. **Sıfırlama**: Tüm işlemler bittikten sonra başlangıç verilerine dönülerek sistemin ilk haline getirilmesi.
-
----
-
-## 🪵 GitHub Branch Yapısı
-- `main` veya `master`: Kararlı ana sürüm (production).
-- `develop`: Geliştirme çalışmalarının birleştiği entegrasyon dalı.
-- `sprint-X-y-z`: Sprint bazlı özellik geliştirme ve revizyon dalları.
-- `sprint-9-final-delivery-v2`: Final teslim paketinin hazırlandığı geçerli branch.
-
----
-
-## ⚠️ Akademik Bağlam ve Sınırlar (Teknik Dürüstlük)
-* **Banka API Entegrasyonu**: Uygulamada gerçek bankaların açık bankacılık servisleriyle (API) entegrasyon bulunmamaktadır; tüm banka verileri arayüz akışlarını simüle etmek amacıyla üretilmiştir.
-* **Ödeme İşlemleri**: Ödeme modülü gerçek bir para transferi gerçekleştirmez, AISP/PISP altyapısındaki "Ödeme Başlatma ve Talimat Yönetimi" mantığını tasarımsal olarak gösterir.
-* **Yatırım Profili**: Modüldeki risk anket soruları ve portföy dağılım önerileri finansal/yatırım danışmanlığı kapsamında olmayıp, akademik proje sınırları dahilinde tasarlanmış örnek senaryolardır.
+## 10. Sınırlılıklar
+* **Açık Bankacılık API'leri:** Gerçek banka API entegrasyonu bulunmamakta, işlemler ve hesaplar simüle edilmektedir.
+* **Ödeme Sistemleri:** Gerçek bir para transferi veya ödeme geçidi bulunmaz, PISP mekanizmasının UI seviyesindeki durum yönetimi gösterilmektedir.
+* **Finansal Öneriler:** Yapay zeka veya yerel analiz çıktısı olarak verilen öneriler eğitim amaçlıdır, kesinlikle yatırım tavsiyesi niteliği taşımaz.

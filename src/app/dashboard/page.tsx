@@ -15,6 +15,7 @@ import SavingsTargetBox from "@/components/dashboard/SavingsTargetBox";
 import CashFlowForecastStrip from "@/components/dashboard/CashFlowForecastStrip";
 import SubscriptionAlert from "@/components/dashboard/SubscriptionAlert";
 import FinancialCalendar from "@/components/dashboard/FinancialCalendar";
+import MarketTicker from "@/components/dashboard/MarketTicker";
 import {
   calculateMonthlyExpense,
   calculateMonthlyIncome,
@@ -71,9 +72,10 @@ export default function DashboardPage() {
         transactions,
         budgets: budgetsWithSpending,
         userId: user.id,
+        accounts,
         referenceDate,
       }),
-    [budgetsWithSpending, referenceDate, transactions, user.id]
+    [accounts, budgetsWithSpending, referenceDate, transactions, user.id]
   );
   const priorityAlerts = regtechAlerts.slice(0, 3);
   const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));
@@ -224,6 +226,10 @@ export default function DashboardPage() {
     >
       <div className="mb-5 w-full">
         <CashFlowForecastStrip />
+      </div>
+
+      <div className="mb-5 w-full">
+        <MarketTicker />
       </div>
 
       <section className="grid w-full items-start gap-5 lg:grid-cols-1 xl:grid-cols-[1.4fr_1fr_1fr]">

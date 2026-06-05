@@ -42,7 +42,9 @@ export default function RoboGoalProjection({ profile, baseAmount = 10000 }: Robo
   }, [profile, baseAmount]);
 
   const profileLabel = profile === "dusuk" ? "Düşük Risk" : profile === "orta" ? "Orta Risk" : "Yüksek Risk";
-  const expectedReturn = data[11].amount - baseAmount;
+  const lastPoint = data[data.length - 1];
+  const expectedReturn = lastPoint ? lastPoint.amount - baseAmount : 0;
+  const hasChartData = data.length > 0;
 
   return (
     <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10 mt-6">
@@ -58,8 +60,9 @@ export default function RoboGoalProjection({ profile, baseAmount = 10000 }: Robo
         </div>
       </div>
 
-      <div className="h-64 w-full mb-4">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="mb-4 h-[260px] min-h-[260px] min-w-0 w-full">
+        {hasChartData ? (
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
           <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" vertical={false} />
             <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
@@ -86,6 +89,11 @@ export default function RoboGoalProjection({ profile, baseAmount = 10000 }: Robo
             />
           </LineChart>
         </ResponsiveContainer>
+        ) : (
+          <div className="flex h-full min-h-[260px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-slate-950/30">
+            <p className="text-xs text-slate-500">Grafik için yeterli veri yok.</p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-slate-900/50 border border-white/5">
@@ -95,7 +103,7 @@ export default function RoboGoalProjection({ profile, baseAmount = 10000 }: Robo
         </div>
         <div>
           <p className="text-xs text-slate-400">12 Ay Sonunda Varsayımsal Tutar</p>
-          <p className="text-lg font-semibold text-cyan-300">{formatCurrencyTRY(data[11].amount)}</p>
+          <p className="text-lg font-semibold text-cyan-300">{formatCurrencyTRY(lastPoint?.amount ?? baseAmount)}</p>
         </div>
         <div className="text-right">
           <p className="text-xs text-slate-400">Potansiyel Getiri</p>

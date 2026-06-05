@@ -9,7 +9,7 @@ import { useFinanceData } from "@/lib/useFinanceData";
 import { Award } from "lucide-react";
 
 export default function RegtechPage() {
-  const { transactions, budgetsWithSpending, user } = useFinanceData();
+  const { accounts, transactions, budgetsWithSpending, user } = useFinanceData();
   const [showAll, setShowAll] = useState(false);
   const alerts = useMemo(
     () =>
@@ -17,8 +17,9 @@ export default function RegtechPage() {
         transactions,
         budgets: budgetsWithSpending,
         userId: user.id,
+        accounts,
       }),
-    [budgetsWithSpending, transactions, user.id]
+    [accounts, budgetsWithSpending, transactions, user.id]
   );
   
   const counts = getAlertSeverityCounts(alerts);

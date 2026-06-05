@@ -9,7 +9,7 @@ export default function CashFlowForecastStrip() {
   const { paymentOrders, transactions } = useFinanceData();
 
   const insights = useMemo(() => getSmartInsights(transactions, paymentOrders), [transactions, paymentOrders]);
-  const upcomingOutflow = useMemo(() => calculateUpcomingCashOutflow(paymentOrders, 7), [paymentOrders]);
+  const upcomingOutflow = useMemo(() => calculateUpcomingCashOutflow(paymentOrders, transactions, 7), [paymentOrders, transactions]);
 
   const hasHighOutflow = upcomingOutflow > 5000;
 
