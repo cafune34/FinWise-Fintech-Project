@@ -10,6 +10,7 @@ import { analyzeEmergencyFund, summarizeEmergencyFundForCopilot } from "@/lib/em
 import { analyzeSpendingDna, summarizeSpendingDnaForCopilot } from "@/lib/spendingDna";
 import { summarizeInflationTimelineForCopilot } from "@/lib/inflationTimeline";
 import { analyzeCarbonFootprint, summarizeCarbonFootprintForCopilot } from "@/lib/carbonFootprint";
+import { buildCashFlowSankey, summarizeCashFlowForCopilot } from "@/lib/cashFlowSankey";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
@@ -136,6 +137,7 @@ export function buildCopilotFinanceContext(
   const emergencyFundSummary = summarizeEmergencyFundForCopilot(analyzeEmergencyFund(snapshot));
   const inflationTimelineSummary = summarizeInflationTimelineForCopilot(snapshot);
   const carbonFootprintSummary = summarizeCarbonFootprintForCopilot(analyzeCarbonFootprint(snapshot));
+  const cashFlowSummary = summarizeCashFlowForCopilot(buildCashFlowSankey(snapshot));
 
   return {
     userName: snapshot.user.fullName,
@@ -212,6 +214,7 @@ export function buildCopilotFinanceContext(
     },
     inflationTimeline: inflationTimelineSummary,
     carbonFootprint: carbonFootprintSummary,
+    cashFlowMap: cashFlowSummary,
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };

@@ -111,6 +111,17 @@ export type CopilotCarbonFootprintSummary = {
   route: "/esg-carbon";
 };
 
+export type CopilotCashFlowMapSummary = {
+  available: boolean;
+  totalIncome: number;
+  totalOutflow: number;
+  remainingCash: number;
+  savingsRate: number;
+  topOutflowCategory?: string;
+  route: "/cash-flow-map";
+  summary: string;
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -132,6 +143,7 @@ export type CopilotFinanceContext = {
   scenarioSimulator?: CopilotScenarioSimulatorSummary;
   inflationTimeline?: CopilotInflationTimelineSummary;
   carbonFootprint?: CopilotCarbonFootprintSummary;
+  cashFlowMap?: CopilotCashFlowMapSummary;
   updatedAt: string;
   generatedAt: string;
 };

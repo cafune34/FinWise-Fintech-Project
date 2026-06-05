@@ -30,6 +30,7 @@ import {
   WandSparkles,
   History,
   Leaf,
+  Network,
 } from "lucide-react";
 import {
   calculateMonthlyExpense,
@@ -62,6 +63,7 @@ const navItems: NavItem[] = [
   { label: "Acil Durum Fonu", href: "/emergency-fund", icon: LifeBuoy },
   { label: "Harcama DNA’sı", href: "/spending-dna", icon: Fingerprint },
   { label: "FinWise Report", href: "/financial-report", icon: FileText },
+  { label: "Para Akış Haritası", href: "/cash-flow-map", icon: Network },
   { label: "Senaryo Simülatörü", href: "/scenario-simulator", icon: WandSparkles },
   { label: "Enflasyon Tüneli", href: "/inflation-timeline", icon: History },
   { label: "ESG Karbon", href: "/esg-carbon", icon: Leaf },
