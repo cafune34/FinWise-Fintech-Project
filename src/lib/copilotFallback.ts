@@ -206,6 +206,25 @@ function buildGeneralAnswer(context: CopilotFinanceContext): string {
 export function generateCopilotFallbackAnswer(question: string, context: CopilotFinanceContext): string {
   const normalizedQuestion = normalizeQuestion(question);
 
+  // Check if it's a general greeting / chat question
+  const greetings = ["selam", "merhaba", "nasilsin", "tunaydin", "gunaydin", "mrb", "slm", "nasi gidiyor", "merhabalar", "hello", "hi", "hey"];
+  const isGreeting = greetings.some(g => normalizedQuestion === g || normalizedQuestion.startsWith(g + " ") || normalizedQuestion.includes(" " + g));
+  
+  // Financial keywords to ensure we don't accidentally intercept a financial query
+  const financialKeywords = [
+    "butce", "gelir", "gider", "harcama", "nakit", "akis", "tasarruf", "birikim",
+    "kart", "borc", "limit", "kategori", "analiz", "risk", "yatirim", "fon",
+    "acil", "regtech", "sinyal", "fatura", "odeme", "talimat", "nereye", "kac",
+    "ne kadar", "kanal", "kira", "market", "portfoy", "bakiye", "para", "durum"
+  ];
+  const hasFinancial = financialKeywords.some(keyword => normalizedQuestion.includes(keyword));
+
+  if (isGreeting && !hasFinancial) {
+    return withDisclaimer(
+      "Merhaba, iyiyim. FinWise Copilot olarak bütçe, nakit akışı, risk sinyalleri ve harcama kategorilerin hakkında yardımcı olabilirim."
+    );
+  }
+
   if (normalizedQuestion.includes("en cok") || normalizedQuestion.includes("nereye") || normalizedQuestion.includes("harcad")) {
     return buildSpendingAnswer(context);
   }

@@ -7,8 +7,8 @@ import {
 import { generateCopilotFallbackAnswer } from "@/lib/copilotFallback";
 
 const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash";
-const GEMINI_TIMEOUT_MS = 10000;
-const MODELS_TO_TRY = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+const GEMINI_TIMEOUT_MS = 20000;
+const MODELS_TO_TRY = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
 let cachedWorkingModel: string | null = null;
 
@@ -337,7 +337,7 @@ async function requestGeminiAnswer(question: string, context: CopilotFinanceCont
           isGenericOrTooShort: false,
         };
 
-        if (response.status === 400 || response.status === 404 || response.status === 429) {
+        if (response.status === 400 || response.status === 404 || response.status === 429 || response.status >= 500) {
           if (!overrideModel && model !== models[models.length - 1]) {
             clearTimeout(timeoutId);
             continue;
@@ -443,6 +443,10 @@ async function requestGeminiAnswer(question: string, context: CopilotFinanceCont
         isGenericOrTooShort: false,
       };
 
+      if (!overrideModel && model !== models[models.length - 1]) {
+        continue;
+      }
+
       return lastResult;
     }
   }
@@ -485,7 +489,7 @@ export async function POST(request: Request) {
     if (!hasApiKey) {
       const defaultModel = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
       console.info(
-        `AI_DEBUG hasApiKey=false selectedModel=${defaultModel} requestUrlHost=generativelanguage.googleapis.com status=none fallbackReason=missing_api_key responseLength=0 parsedCandidateCount=0 isGenericOrTooShort=false provider=fallback`
+        `AI_DEBUG hasApiKey=false selectedModel=${defaultModel} requestUrlHost=generativelanguage.googleapis.com status=none fallbackReason=missing_api_key responseLength=0 parsedCandidateCount=0 isGenericOrTooShort=false provider=fallback timeoutMs=${GEMINI_TIMEOUT_MS}`
       );
       console.info("AI_PROVIDER=fallback");
       return fallbackResponse(question, context);
@@ -497,7 +501,7 @@ export async function POST(request: Request) {
     const provider = geminiResult.answer ? "gemini" : "fallback";
 
     console.info(
-      `AI_DEBUG hasApiKey=true selectedModel=${geminiResult.selectedModel} requestUrlHost=${requestUrlHost} status=${geminiResult.geminiHttpStatus} fallbackReason=${geminiResult.fallbackReason} responseLength=${geminiResult.responseTextLength} parsedCandidateCount=${geminiResult.parsedCandidateCount} isGenericOrTooShort=${geminiResult.isGenericOrTooShort} provider=${provider}`
+      `AI_DEBUG hasApiKey=true selectedModel=${geminiResult.selectedModel} requestUrlHost=${requestUrlHost} status=${geminiResult.geminiHttpStatus} fallbackReason=${geminiResult.fallbackReason} responseLength=${geminiResult.responseTextLength} parsedCandidateCount=${geminiResult.parsedCandidateCount} isGenericOrTooShort=${geminiResult.isGenericOrTooShort} provider=${provider} timeoutMs=${GEMINI_TIMEOUT_MS}`
     );
     console.info(`AI_PROVIDER=${provider}`);
 
@@ -514,7 +518,7 @@ export async function POST(request: Request) {
   } catch {
     const defaultModel = process.env.GEMINI_MODEL?.trim() || cachedWorkingModel || DEFAULT_GEMINI_MODEL;
     console.info(
-      `AI_DEBUG hasApiKey=${hasApiKey} selectedModel=${defaultModel} requestUrlHost=generativelanguage.googleapis.com status=none fallbackReason=unknown_error responseLength=0 parsedCandidateCount=0 isGenericOrTooShort=false provider=fallback`
+      `AI_DEBUG hasApiKey=${hasApiKey} selectedModel=${defaultModel} requestUrlHost=generativelanguage.googleapis.com status=none fallbackReason=unknown_error responseLength=0 parsedCandidateCount=0 isGenericOrTooShort=false provider=fallback timeoutMs=${GEMINI_TIMEOUT_MS}`
     );
     console.info("AI_PROVIDER=fallback");
 
