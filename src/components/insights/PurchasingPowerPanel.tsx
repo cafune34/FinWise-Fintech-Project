@@ -29,6 +29,7 @@ const sourceClasses: Record<PurchasingPowerDataSource, string> = {
   live: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
   fallback: "border-amber-400/30 bg-amber-400/10 text-amber-200",
   demo: "border-cyan-300/25 bg-cyan-300/10 text-cyan-200",
+  derived: "border-cyan-300/30 bg-cyan-300/10 text-cyan-200",
 };
 
 const levelLabels: Record<PurchasingPowerLevel, string> = {
@@ -101,7 +102,7 @@ export default function PurchasingPowerPanel() {
             <div>
               <h3 className="text-lg font-semibold text-white">TL Satın Alma Gücü</h3>
               <p className="mt-1 text-sm leading-6 text-slate-400">
-                Portföyünüzün döviz ve demo değer koruma görünümü.
+                Portföyünüzün döviz ve piyasa değer koruma görünümü.
               </p>
             </div>
           </div>
@@ -143,7 +144,7 @@ export default function PurchasingPowerPanel() {
             value={typeof result.gramGoldValue === "number" ? `${formatNumber(result.gramGoldValue)} gr` : "Veri yok"}
             description={
               typeof result.gramGoldTryRate === "number"
-                ? `Demo kur: ${formatCurrencyTRY(result.gramGoldTryRate)}`
+                ? `Kur: ${formatCurrencyTRY(result.gramGoldTryRate)}`
                 : "Gram altın hesaplanamadı"
             }
             icon={Landmark}
@@ -177,7 +178,13 @@ export default function PurchasingPowerPanel() {
             />
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-slate-300">{result.protectionComment}</p>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <SmallMetric title="Nakit Akışı" value={formatCurrencyTRY(result.metrics.netCashFlow)} />
+            <SmallMetric title="Varlık Tamponu" value={`${formatNumber(result.metrics.assetExpenseRatio)}x`} />
+            <SmallMetric title="Zorunlu Gider Payı" value={`${formatNumber(result.metrics.mandatoryRatio * 100)}%`} />
+          </div>
+
+          <p className="mt-6 text-sm leading-6 text-slate-300">{result.protectionComment}</p>
         </article>
 
         <article className="rounded-xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10">
@@ -256,6 +263,15 @@ function InfoBlock({ title, body }: { title: string; body: string }) {
     <div className="rounded-lg border border-white/10 bg-slate-950/35 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-300">{body}</p>
+    </div>
+  );
+}
+
+function SmallMetric({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-slate-950/35 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-slate-400">{title}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }

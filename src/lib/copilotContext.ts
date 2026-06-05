@@ -13,7 +13,9 @@ import { analyzeCarbonFootprint, summarizeCarbonFootprintForCopilot } from "@/li
 import { buildCashFlowSankey, summarizeCashFlowForCopilot } from "@/lib/cashFlowSankey";
 import { buildSpendingHeatmap } from "@/lib/spendingHeatmap";
 import { categoryLabels } from "@/lib/labels";
+import { generateRegTechAlerts } from "@/lib/regtech";
 import type { FinanceSnapshot } from "@/lib/storage";
+import type { RegTechAlert } from "@/types/finance";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
 import type {
   CopilotBudgetStatus,
@@ -35,6 +37,13 @@ function roundPercent(value: number): number {
   return Number(value.toFixed(1));
 }
 
+function formatMonthLabel(referenceDate: Date): string {
+  return new Intl.DateTimeFormat("tr-TR", {
+    month: "long",
+    year: "numeric",
+  }).format(referenceDate);
+}
+
 function isSameMonth(dateValue: string, referenceDate: Date): boolean {
   const date = new Date(dateValue);
 
@@ -53,6 +62,10 @@ function getBudgetStatus(spent: number, limit: number): CopilotBudgetStatus {
   if (spent > limit) return "exceeded";
   if (limit > 0 && (spent / limit) * 100 >= NEAR_LIMIT_THRESHOLD) return "near_limit";
   return "healthy";
+}
+
+function getRegTechSeverity(alert: RegTechAlert): "high" | "medium" | "low" {
+  return alert.severity ?? (alert.level === "yuksek" ? "high" : alert.level === "orta" ? "medium" : "low");
 }
 
 function buildBudgetSummaries(
@@ -121,6 +134,7 @@ export function buildCopilotFinanceContext(
   const activeAccounts = snapshot.accounts.filter((account) => account.status !== "pasif");
   const monthlyIncome = roundMoney(calculateMonthlyIncome(snapshot.transactions, referenceDate));
   const monthlyExpense = roundMoney(calculateMonthlyExpense(snapshot.transactions, referenceDate));
+  const totalBalance = roundMoney(calculateTotalBalance(activeAccounts));
   const budgets = buildBudgetSummaries(snapshot.budgets, snapshot.transactions, referenceDate);
   const exceededBudgets = budgets.filter((budget) => budget.status === "exceeded");
   const nearLimitBudgets = budgets.filter((budget) => budget.status === "near_limit");
@@ -140,10 +154,29 @@ export function buildCopilotFinanceContext(
   const carbonFootprintSummary = summarizeCarbonFootprintForCopilot(analyzeCarbonFootprint(snapshot));
   const cashFlowSummary = summarizeCashFlowForCopilot(buildCashFlowSankey(snapshot));
   const heatmapResult = buildSpendingHeatmap(snapshot, 90);
+  const regTechAlerts = generateRegTechAlerts({
+    transactions: snapshot.transactions,
+    budgets: snapshot.budgets,
+    userId: snapshot.user.id,
+    accounts: activeAccounts,
+    referenceDate,
+  });
+  const severityCounts = regTechAlerts.reduce(
+    (counts, alert) => {
+      const severity = getRegTechSeverity(alert);
+      counts[severity] += 1;
+      return counts;
+    },
+    { high: 0, medium: 0, low: 0 }
+  );
 
   return {
     userName: snapshot.user.fullName,
-    totalBalance: roundMoney(calculateTotalBalance(activeAccounts)),
+    userFullName: snapshot.user.fullName,
+    currentMonth: `${referenceDate.getFullYear()}-${String(referenceDate.getMonth() + 1).padStart(2, "0")}`,
+    currentMonthLabel: formatMonthLabel(referenceDate),
+    totalBalance,
+    portfolioTotal: totalBalance,
     accountCount: activeAccounts.length,
     monthlyIncome,
     monthlyExpense,
@@ -175,6 +208,17 @@ export function buildCopilotFinanceContext(
           dueDate: order.dueDate,
           status: order.status,
         })),
+    },
+    regTech: {
+      total: regTechAlerts.length,
+      highSeverityCount: severityCounts.high,
+      mediumSeverityCount: severityCounts.medium,
+      lowSeverityCount: severityCounts.low,
+      topAlerts: regTechAlerts.slice(0, 4).map((alert) => ({
+        title: alert.title ?? "RegTech sinyali",
+        severity: getRegTechSeverity(alert),
+        reason: alert.reason,
+      })),
     },
     roboAdvisor: lastRoboResult
       ? {

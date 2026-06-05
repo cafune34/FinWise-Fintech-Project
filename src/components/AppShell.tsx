@@ -102,15 +102,22 @@ export default function AppShell({ title, description, children }: AppShellProps
     transactions,
     budgets: budgetsWithSpending,
     userId: "user-1",
+    accounts,
   });
 
   const highRiskAlertsCount = regtechAlerts.filter(
-    (alert) => (alert.severity ?? (alert.level === "yuksek" ? "high" : "low")) === "high"
+    (alert) => (alert.severity ?? (alert.level === "yuksek" ? "high" : alert.level === "orta" ? "medium" : "low")) === "high"
+  ).length;
+  const mediumRiskAlertsCount = regtechAlerts.filter(
+    (alert) => (alert.severity ?? (alert.level === "yuksek" ? "high" : alert.level === "orta" ? "medium" : "low")) === "medium"
+  ).length;
+  const lowRiskAlertsCount = regtechAlerts.filter(
+    (alert) => (alert.severity ?? (alert.level === "yuksek" ? "high" : alert.level === "orta" ? "medium" : "low")) === "low"
   ).length;
 
   const pendingPaymentsCount = (paymentOrders || []).filter((order) => order.status === "beklemede").length;
   const exceededBudgetsCount = budgetsWithSpending.filter((b) => b.spent > b.limit).length;
-  const totalNotificationsCount = pendingPaymentsCount + highRiskAlertsCount + exceededBudgetsCount;
+  const totalNotificationsCount = regtechAlerts.length;
 
   const nakitAkisiPuan = netCashFlow > 0 ? 30 : 10;
   const bütcePuan = exceededBudgetsCount === 0 ? 25 : exceededBudgetsCount === 1 ? 18 : exceededBudgetsCount === 2 ? 12 : 5;
@@ -160,7 +167,7 @@ export default function AppShell({ title, description, children }: AppShellProps
 
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,#070b14_0%,#0c1220_48%,#111827_100%)]" />
       <div className="flex min-h-screen w-full flex-col lg:flex-row">
-        <aside className="border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
+        <aside className="no-scrollbar border-b border-white/10 bg-[#0b1220]/95 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0 lg:p-6 2xl:w-[312px]">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/30 bg-cyan-300/10">
               <Landmark className="h-5 w-5 text-cyan-300" />
@@ -391,9 +398,9 @@ export default function AppShell({ title, description, children }: AppShellProps
                       <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Sistem Bildirimleri</h4>
                       <div className="space-y-2.5 text-xs">
                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                          <span className="text-slate-300">Bekleyen ödeme talimatı:</span>
-                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", pendingPaymentsCount > 0 ? "bg-amber-500/10 text-amber-300 border border-amber-500/20" : "text-slate-400")}>
-                            {pendingPaymentsCount} Adet
+                          <span className="text-slate-300">Aktif risk uyarısı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", totalNotificationsCount > 0 ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20" : "text-slate-400")}>
+                            {totalNotificationsCount} Adet
                           </span>
                         </div>
                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
@@ -402,10 +409,22 @@ export default function AppShell({ title, description, children }: AppShellProps
                             {highRiskAlertsCount} Adet
                           </span>
                         </div>
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-300">Orta seviye uyarı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", mediumRiskAlertsCount > 0 ? "bg-amber-500/10 text-amber-300 border border-amber-500/20" : "text-slate-400")}>
+                            {mediumRiskAlertsCount} Adet
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                          <span className="text-slate-300">Düşük/bilgi uyarısı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", lowRiskAlertsCount > 0 ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20" : "text-slate-400")}>
+                            {lowRiskAlertsCount} Adet
+                          </span>
+                        </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-300">Bütçe aşımı:</span>
-                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", exceededBudgetsCount > 0 ? "bg-rose-500/10 text-rose-300 border border-rose-500/20" : "text-slate-400")}>
-                            {exceededBudgetsCount} Kategori
+                          <span className="text-slate-300">Bekleyen ödeme talimatı:</span>
+                          <span className={clsx("font-semibold rounded-full px-2 py-0.5", pendingPaymentsCount > 0 ? "bg-slate-500/10 text-slate-300 border border-slate-500/20" : "text-slate-400")}>
+                            {pendingPaymentsCount} Adet
                           </span>
                         </div>
                       </div>

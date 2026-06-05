@@ -14,12 +14,14 @@ const sourceLabels: Record<MarketDataSource, string> = {
   live: "Canlı veri",
   fallback: "Fallback veri",
   demo: "Demo veri",
+  derived: "Yaklaşık canlı",
 };
 
 const sourceClasses: Record<MarketDataSource, string> = {
   live: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
   fallback: "border-amber-400/30 bg-amber-400/10 text-amber-200",
   demo: "border-cyan-300/25 bg-cyan-300/10 text-cyan-200",
+  derived: "border-cyan-300/30 bg-cyan-300/10 text-cyan-200",
 };
 
 export default function MarketTicker() {
@@ -96,7 +98,7 @@ export default function MarketTicker() {
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Info className="h-3.5 w-3.5 text-cyan-300" />
-            BIST100 ve Gram Altın demo göstergedir.
+            {isFallback ? "BIST100 ve Gram Altın demo göstergedir." : "BIST100 ve Gram Altın verileri gün içi gecikmeli olabilir."}
           </span>
         </div>
         <p className="text-slate-500">Piyasa göstergeleri bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</p>
@@ -114,15 +116,30 @@ function TickerCard({ item }: { item: MarketTickerItem }) {
         ? "text-emerald-300"
         : "text-rose-300";
 
+  const isGold = item.symbol === "XAU/TRY";
+  const displaySymbol = isGold ? "Gram Altın" : item.symbol;
+
+  let badgeLabel = sourceLabels[item.source];
+  if (item.isDemo) badgeLabel = "Demo gösterge";
+  if (isGold) {
+    if (item.source === "fallback" || typeof item.changePercent !== "number") {
+      badgeLabel = "Canlı veri alınamadı";
+    } else {
+      badgeLabel = "Yaklaşık gram altın";
+    }
+  }
+
   return (
     <article className="min-h-[118px] rounded-lg border border-white/10 bg-slate-950/35 p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold uppercase tracking-[0.12em] text-cyan-200">{item.symbol}</p>
+          <p className={`truncate text-xs font-semibold tracking-[0.12em] text-cyan-200 ${!isGold ? "uppercase" : ""}`}>
+            {displaySymbol}
+          </p>
           <p className="mt-1 truncate text-xs text-slate-400">{item.label}</p>
         </div>
         <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${sourceClasses[badgeSource]}`}>
-          {item.isDemo ? "Demo gösterge" : sourceLabels[item.source]}
+          {badgeLabel}
         </span>
       </div>
 

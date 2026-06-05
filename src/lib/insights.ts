@@ -69,7 +69,7 @@ export function detectSubscriptions(transactions: Transaction[], paymentOrders: 
 /**
  * Önümüzdeki X gün içerisindeki bekleyen ödeme talimatlarının toplam çıkışını hesaplar.
  */
-export function calculateUpcomingCashOutflow(paymentOrders: PaymentOrder[], days: number = 7): number {
+export function calculateUpcomingCashOutflow(paymentOrders: PaymentOrder[], transactions?: Transaction[], days: number = 7): number {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -77,13 +77,26 @@ export function calculateUpcomingCashOutflow(paymentOrders: PaymentOrder[], days
   endOfTargetDate.setDate(startOfToday.getDate() + days);
   endOfTargetDate.setHours(23, 59, 59, 999);
 
-  return paymentOrders
+  const ordersTotal = paymentOrders
     .filter((order) => order.status === "beklemede" || order.status === "isleme_alindi")
     .filter((order) => {
       const orderDate = new Date(order.dueDate);
       return orderDate >= startOfToday && orderDate <= endOfTargetDate;
     })
     .reduce((sum, order) => sum + order.amount, 0);
+
+  if (ordersTotal > 0 || !transactions || transactions.length === 0) {
+    return ordersTotal;
+  }
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime();
+  const recentOutflows = transactions
+    .filter((t) => t.direction === "out" || t.type === "gider")
+    .filter((t) => new Date(t.occurredAt).getTime() > thirtyDaysAgo)
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const dailyAvg = recentOutflows / 30;
+  return dailyAvg * days;
 }
 
 /**
@@ -91,7 +104,7 @@ export function calculateUpcomingCashOutflow(paymentOrders: PaymentOrder[], days
  */
 export function getSmartInsights(transactions: Transaction[], paymentOrders: PaymentOrder[]): SmartInsight[] {
   const insights: SmartInsight[] = [];
-  const outflow = calculateUpcomingCashOutflow(paymentOrders, 7);
+  const outflow = calculateUpcomingCashOutflow(paymentOrders, transactions, 7);
   
   if (outflow > 0) {
     insights.push({

@@ -1,11 +1,12 @@
 import { calculateMonthlyExpense, calculateMonthlyIncome, isBudgetExceeded } from "@/lib/finance";
 import { categoryLabels } from "@/lib/labels";
-import type { Budget, RegTechAlert, RegTechSeverity, Transaction } from "@/types/finance";
+import type { BankAccount, Budget, RegTechAlert, RegTechSeverity, Transaction, TransactionCategory } from "@/types/finance";
 
 type GenerateRegTechAlertsInput = {
   transactions: Transaction[];
   budgets: Budget[];
   userId: string;
+  accounts?: BankAccount[];
   referenceDate?: Date;
 };
 
@@ -17,6 +18,9 @@ type SeverityCounts = {
 };
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const EMERGENCY_TARGET_MONTHS = 3;
+const EMERGENCY_LOOKBACK_DAYS = 30;
+const ESSENTIAL_CATEGORIES = new Set<TransactionCategory>(["kira", "fatura", "market", "ulasim", "saglik"]);
 
 function severityToLevel(severity: RegTechSeverity): RegTechAlert["level"] {
   if (severity === "high") {
@@ -83,16 +87,183 @@ function createAlert(
   };
 }
 
+function normalizeText(value?: string): string {
+  return (value ?? "").toLocaleLowerCase("tr-TR");
+}
+
+function getBudgetLimit(budgets: Budget[], category: Transaction["category"]): number {
+  return budgets.find((budget) => budget.category === category)?.limit ?? 0;
+}
+
+function isRegularEssentialPayment(
+  transaction: Transaction,
+  budgets: Budget[],
+  monthlyIncome: number
+): boolean {
+  if (transaction.category !== "kira" && transaction.category !== "fatura") {
+    return false;
+  }
+
+  const text = `${normalizeText(transaction.title)} ${normalizeText(transaction.description)}`;
+  const looksRegular =
+    text.includes("aylik") ||
+    text.includes("duzenli") ||
+    text.includes("kira") ||
+    text.includes("aidat") ||
+    text.includes("fatura");
+
+  if (!looksRegular) {
+    return false;
+  }
+
+  const budgetLimit = getBudgetLimit(budgets, transaction.category);
+  const withinBudget = budgetLimit > 0 && transaction.amount <= budgetLimit * 1.05;
+  const withinIncomeShare =
+    transaction.category === "kira" && monthlyIncome > 0 && transaction.amount <= monthlyIncome * 0.35;
+
+  return withinBudget || withinIncomeShare;
+}
+
+function safeDate(value: string): Date | null {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getAnalysisReferenceDate(transactions: Transaction[], referenceDate: Date): Date {
+  const latestTransactionDate = transactions
+    .map((transaction) => safeDate(transaction.occurredAt))
+    .filter((date): date is Date => Boolean(date))
+    .sort((a, b) => b.getTime() - a.getTime())[0];
+
+  return latestTransactionDate && latestTransactionDate > referenceDate ? latestTransactionDate : referenceDate;
+}
+
+function isOutflow(transaction: Transaction): boolean {
+  return transaction.direction === "out" || transaction.type === "gider" || transaction.type === "transfer";
+}
+
+function isSameMonth(dateValue: string, referenceDate: Date): boolean {
+  const date = safeDate(dateValue);
+  return date ? date.getFullYear() === referenceDate.getFullYear() && date.getMonth() === referenceDate.getMonth() : false;
+}
+
+function getDedicatedEmergencyFundBalance(accounts: BankAccount[] = []): number {
+  return accounts
+    .filter((account) => account.status !== "pasif")
+    .filter((account) => account.currency === "TRY")
+    .filter((account) => account.balance > 0)
+    .filter((account) => normalizeText(`${account.accountName ?? ""} ${account.bankName}`).includes("acil durum"))
+    .reduce((sum, account) => sum + account.balance, 0);
+}
+
+function calculateRecentEssentialExpense(transactions: Transaction[], referenceDate: Date): number {
+  const startDate = new Date(referenceDate.getTime() - EMERGENCY_LOOKBACK_DAYS * DAY_IN_MS);
+
+  return transactions
+    .filter((transaction) => ESSENTIAL_CATEGORIES.has(transaction.category))
+    .filter(isOutflow)
+    .filter((transaction) => {
+      const date = safeDate(transaction.occurredAt);
+      return date ? date > startDate && date <= referenceDate : false;
+    })
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+}
+
+function createEmergencyFundAlert(input: GenerateRegTechAlertsInput): RegTechAlert | null {
+  const emergencyBalance = getDedicatedEmergencyFundBalance(input.accounts);
+  if (emergencyBalance <= 0) {
+    return null;
+  }
+
+  const referenceDate = getAnalysisReferenceDate(input.transactions, input.referenceDate ?? new Date());
+  const monthlyEssentialExpense = calculateRecentEssentialExpense(input.transactions, referenceDate);
+  const targetAmount = monthlyEssentialExpense * EMERGENCY_TARGET_MONTHS;
+  if (targetAmount <= 0) {
+    return null;
+  }
+
+  const completionPercentage = (emergencyBalance / targetAmount) * 100;
+  if (completionPercentage >= 100) {
+    return null;
+  }
+
+  return createAlert({
+    id: "alert-emergency-fund-incomplete",
+    userId: input.userId,
+    severity: completionPercentage < 67 ? "medium" : "low",
+    ruleCode: "EMERGENCY_FUND_INCOMPLETE",
+    title: "Acil fon hedefi henuz tamamlanmadi",
+    reason: `Acil durum fonu 3 aylik hedefin yaklasik %${Math.round(completionPercentage)} seviyesinde. Duzenli katki devam etmeli.`,
+    impact: "Beklenmeyen giderlerde likit tampon henuz hedef seviyeye ulasmamis olabilir.",
+    recommendedAction: "Acil durum fonu tamamlanana kadar aylik duzenli aktarimi koruyun.",
+    createdAt: referenceDate.toISOString(),
+  });
+}
+
+function createNearBudgetAlert(input: GenerateRegTechAlertsInput): RegTechAlert | null {
+  const referenceDate = getAnalysisReferenceDate(input.transactions, input.referenceDate ?? new Date());
+  const marketBudget = input.budgets.find((budget) => budget.category === "market");
+  if (!marketBudget || marketBudget.limit <= 0) {
+    return null;
+  }
+
+  const monthlyMarketSpent =
+    marketBudget.spent > 0
+      ? marketBudget.spent
+      : input.transactions
+          .filter(isOutflow)
+          .filter((transaction) => transaction.category === "market")
+          .filter((transaction) => isSameMonth(transaction.occurredAt, referenceDate))
+          .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  const usageRatio = monthlyMarketSpent / marketBudget.limit;
+  const dayOfMonth = Math.max(1, referenceDate.getDate());
+  const monthLength = new Date(referenceDate.getFullYear(), referenceDate.getMonth() + 1, 0).getDate();
+  const projectedRatio = (monthlyMarketSpent / dayOfMonth) * monthLength / marketBudget.limit;
+
+  if (usageRatio < 0.7 && projectedRatio < 1.1) {
+    return null;
+  }
+
+  return createAlert({
+    id: "alert-budget-market-near-limit",
+    userId: input.userId,
+    severity: "low",
+    ruleCode: "BUDGET_NEAR_LIMIT",
+    title: "Market butcesi limite yaklasiyor",
+    reason: `Market harcamalari aylik limitin yaklasik %${Math.round(usageRatio * 100)} seviyesine ulasti. Ayin kalan gunleri icin haftalik takip onerilir.`,
+    impact: "Harcama temposu korunursa market butcesi ay bitmeden baski altina girebilir.",
+    recommendedAction: "Haftalik market listesini ve kalan limitinizi birlikte kontrol edin.",
+    createdAt: referenceDate.toISOString(),
+  });
+}
+
 export function generateRegTechAlerts({
   transactions,
   budgets,
   userId,
+  accounts,
   referenceDate = new Date(),
 }: GenerateRegTechAlertsInput): RegTechAlert[] {
   const alerts: RegTechAlert[] = [];
+  const monthlyIncome = calculateMonthlyIncome(transactions, referenceDate);
+  const emergencyFundAlert = createEmergencyFundAlert({ transactions, budgets, userId, accounts, referenceDate });
+  const nearBudgetAlert = createNearBudgetAlert({ transactions, budgets, userId, accounts, referenceDate });
+
+  if (emergencyFundAlert) {
+    alerts.push(emergencyFundAlert);
+  }
+
+  if (nearBudgetAlert) {
+    alerts.push(nearBudgetAlert);
+  }
 
   transactions.forEach((transaction) => {
-    if (transaction.amount > 10000) {
+    if (
+      transaction.amount > 10000 &&
+      transaction.type !== "gelir" &&
+      !isRegularEssentialPayment(transaction, budgets, monthlyIncome)
+    ) {
       let reason = `Tek işlem tutarı 10.000 TL eşiğini aştı (${transaction.amount.toLocaleString("tr-TR")} TL).`;
       let impact = "Büyük miktarda nakit çıkışı veya bütçe dengesinin bozulması.";
       let recommendedAction = "İşlemin kaynağı ve açıklaması kontrol edilmeli.";
@@ -113,10 +284,6 @@ export function generateRegTechAlerts({
         reason = `Yüksek tutarlı fatura ödemesi saptandı (${transaction.amount.toLocaleString("tr-TR")} TL).`;
         impact = "Kurumsal veya dönemsel hizmet giderlerinde bütçe payı aşırı artabilir.";
         recommendedAction = "Fatura detayları ve tarifeler incelenmeli, gereksiz abonelikler sonlandırılmalı.";
-      } else if (transaction.category === "maas") {
-        reason = `Portföyünüze olağan dışı yüksek tutarlı bir maaş girişi yansıdı (${transaction.amount.toLocaleString("tr-TR")} TL).`;
-        impact = "Yatırıma yönlendirilebilir likit fon seviyeniz ciddi oranda arttı.";
-        recommendedAction = "FinWise kontrol panelinden güncel bir risk/getiri profili anketi doldurulması önerilir.";
       } else {
         const hash = transaction.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const variant = hash % 3;
@@ -152,7 +319,6 @@ export function generateRegTechAlerts({
     }
   });
 
-  const monthlyIncome = calculateMonthlyIncome(transactions, referenceDate);
   const monthlyExpense = calculateMonthlyExpense(transactions, referenceDate);
 
   if (monthlyExpense > monthlyIncome) {

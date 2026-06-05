@@ -1,6 +1,6 @@
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
-import type { Transaction, TransactionCategory } from "@/types/finance";
+import type { BankAccount, Transaction, TransactionCategory } from "@/types/finance";
 
 export type EmergencyFundStatus = "kritik" | "gelistirilmeli" | "iyi" | "guclu";
 
@@ -81,6 +81,11 @@ function isEssentialExpense(transaction: Transaction): boolean {
   return isOutflow(transaction) && ESSENTIAL_CATEGORIES.has(transaction.category);
 }
 
+function isDedicatedEmergencyFundAccount(account: BankAccount): boolean {
+  const name = `${account.accountName ?? ""} ${account.bankName}`.toLocaleLowerCase("tr-TR");
+  return name.includes("acil durum");
+}
+
 function getReferenceDate(transactions: Transaction[]): Date {
   const dates = transactions
     .map((transaction) => safeDate(transaction.occurredAt))
@@ -119,6 +124,7 @@ export function calculateAvailableAssets(snapshot: FinanceSnapshot): number {
       .filter((account) => account.status !== "pasif")
       .filter((account) => account.currency === "TRY")
       .filter((account) => account.balance > 0)
+      .filter(isDedicatedEmergencyFundAccount)
       .reduce((sum, account) => sum + account.balance, 0)
   );
 }

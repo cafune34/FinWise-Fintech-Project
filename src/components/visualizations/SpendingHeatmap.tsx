@@ -60,13 +60,16 @@ export function SpendingHeatmap({ result }: SpendingHeatmapProps) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Heatmap Grid Area */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 xl:col-span-2">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
               <CalendarDays className="h-4 w-4 text-cyan-400" />
               Harcama Yoğunluğu
             </h3>
             <span className="text-xs text-slate-400">Son {result.days.length} Gün</span>
           </div>
+          <p className="mb-6 text-sm text-slate-400 leading-relaxed">
+            Günlük harcama yoğunluğunuzu renk koyuluğuna göre inceleyebilirsiniz. Detaylar için ilgili güne tıklayın.
+          </p>
 
           <div className="flex flex-wrap gap-1.5 md:gap-2">
             {result.days.map((day) => (
@@ -133,7 +136,9 @@ export function SpendingHeatmap({ result }: SpendingHeatmapProps) {
             ) : (
               <div className="flex h-32 flex-col items-center justify-center text-slate-500">
                 <CalendarDays className="mb-2 h-8 w-8 opacity-20" />
-                <p className="text-xs">Detay görmek için bir güne tıklayın.</p>
+                <p className="text-xs text-center px-4 leading-relaxed">
+                  Bir güne tıklayarak o güne ait toplam harcama, işlem sayısı ve baskın kategoriyi görebilirsiniz.
+                </p>
               </div>
             )}
           </div>
@@ -165,6 +170,34 @@ export function SpendingHeatmap({ result }: SpendingHeatmapProps) {
               ))}
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* Information Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-white/5 bg-white/[0.01] p-4">
+          <h4 className="text-xs font-semibold text-white mb-1.5">Bu harita neyi gösterir?</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Her kare bir günü temsil eder. Renk yoğunluğu o gün yapılan toplam harcamayı gösterir.
+          </p>
+        </div>
+        <div className="rounded-xl border border-white/5 bg-white/[0.01] p-4">
+          <h4 className="text-xs font-semibold text-white mb-1.5">Renkler nasıl okunur?</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Koyu ve açık tonlar dönem içindeki harcama sıralamasına göre düşük, orta, yüksek ve aşırı günleri gösterir.
+          </p>
+        </div>
+        <div className="rounded-xl border border-white/5 bg-white/[0.01] p-4">
+          <h4 className="text-xs font-semibold text-white mb-1.5">Aşırı günler neden önemli?</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Aşırı günler bütçe dengesini bozan tekil harcama sıçramalarını bulmak için kullanılır.
+          </p>
+        </div>
+        <div className="rounded-xl border border-white/5 bg-white/[0.01] p-4">
+          <h4 className="text-xs font-semibold text-white mb-1.5">Nasıl aksiyon alınır?</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Aşırı günlerdeki kategoriye bakıp tekrar eden harcamalar için limit belirleyebilirsiniz.
+          </p>
         </div>
       </div>
 

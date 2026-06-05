@@ -127,24 +127,24 @@ function createMonitoringInsight(type: BehavioralBiasType): BehavioralInsight {
     id: `${type}-monitoring`,
     type,
     title: `${labels} izleme sinyali`,
-    description: "Bu alanda belirgin bir davranissal risk sinyali olusmadi.",
-    evidence: "Mevcut veride guclu risk sinyali yok; duzenli takip onerilir.",
+    description: "Bu alanda belirgin bir davranışsal risk sinyali oluşmadı.",
+    evidence: "Mevcut veride güçlü risk sinyali yok; düzenli takip önerilir.",
     riskLevel: "dusuk",
     recommendation: getMonitoringRecommendation(type),
     metric: {
       label: "Durum",
-      value: "Izleme",
+      value: "İzleme",
     },
   };
 }
 
 function getMonitoringRecommendation(type: BehavioralBiasType): string {
   const recommendations: Record<BehavioralBiasType, string> = {
-    present_bias: "Istege bagli harcamalari haftalik limitlerle izlemeye devam edin.",
-    mental_accounting: "Gelir geldigi gun birikim ve zorunlu odeme paylarini ayirmayi surdurun.",
-    anchoring_bias: "Kategori limitlerini aylik yerine haftalik alt hedeflerle de kontrol edin.",
-    loss_aversion: "Yuksek tutarli zorunlu odemeler icin ayri bir tampon fon planlayin.",
-    overconfidence: "Yatirim ve transfer kararlarinda ust limit ve ikinci kontrol kuralini koruyun.",
+    present_bias: "İsteğe bağlı harcamaları haftalık limitlerle izlemeye devam edin.",
+    mental_accounting: "Gelir geldiği gün birikim ve zorunlu ödeme paylarını ayırmayı sürdürün.",
+    anchoring_bias: "Kategori limitlerini aylık yerine haftalık alt hedeflerle de kontrol edin.",
+    loss_aversion: "Yüksek tutarlı zorunlu ödemeler için ayrı bir tampon fon planlayın.",
+    overconfidence: "Yatırım ve transfer kararlarında üst limit ve ikinci kontrol kuralını koruyun.",
   };
 
   return recommendations[type];
@@ -195,14 +195,14 @@ function analyzePresentBias(transactions: Transaction[], referenceDate: Date): B
   return {
     id: "present-bias-spending-spike",
     type: "present_bias",
-    title: "Anlik harcama egilimi",
-    description: "Son donemde istege bagli harcama temposu genel ortalamanin uzerine cikti.",
-    evidence: `Son 7 gunluk istege bagli harcama gunluk ortalamanin ${formatRatio(ratio)} seviyesinde.`,
+    title: "Anlık harcama eğilimi",
+    description: "Son dönemde isteğe bağlı harcama temposu genel ortalamanın üzerine çıktı.",
+    evidence: `Son 7 günlük isteğe bağlı harcama günlük ortalamanın ${formatRatio(ratio)} seviyesinde.`,
     riskLevel: riskFromRatio(ratio),
-    recommendation: "Buyuk harcamalarda 24 saat bekleme kurali uygulayin.",
+    recommendation: "Büyük harcamalarda 24 saat bekleme kuralı uygulayın.",
     affectedCategories,
     metric: {
-      label: "Son 7 gun / ortalama",
+      label: "Son 7 gün / ortalama",
       value: formatRatio(ratio),
     },
   };
@@ -251,13 +251,13 @@ function analyzeMentalAccounting(transactions: Transaction[]): BehavioralInsight
   return {
     id: "mental-accounting-post-income-spend",
     type: "mental_accounting",
-    title: "Maas sonrasi harcama artisi",
-    description: "Gelir girisinden hemen sonra harcama hacmi normal uc gunluk ortalamanin uzerine cikiyor.",
-    evidence: `Gelir girislerinden sonraki 3 gunde harcama normal donemin ${formatRatio(ratio)} seviyesinde.`,
+    title: "Maaş sonrası harcama artışı",
+    description: "Gelir girişinden hemen sonra harcama hacmi normal üç günlük ortalamanın üzerine çıkıyor.",
+    evidence: `Gelir girişlerinden sonraki 3 günde harcama normal dönemin ${formatRatio(ratio)} seviyesinde.`,
     riskLevel: ratio >= 2 ? "yuksek" : ratio >= 1.4 ? "orta" : "dusuk",
-    recommendation: "Maas geldigi gun otomatik birikim veya butce kilidi kurali kullanin.",
+    recommendation: "Maaş geldiği gün otomatik birikim veya bütçe kilidi kuralı kullanın.",
     metric: {
-      label: "Maas sonrasi tempo",
+      label: "Maaş sonrası tempo",
       value: formatRatio(ratio),
     },
   };
@@ -316,14 +316,14 @@ function analyzeAnchoringBias(snapshot: FinanceSnapshot, referenceDate: Date): B
   return {
     id: `anchoring-${candidate.budget.category}`,
     type: "anchoring_bias",
-    title: "Gecmis harcama referansi riski",
-    description: `${label} kategorisinde eski ortalamaya guvenmek mevcut limit kullanimini perdeleyebilir.`,
-    evidence: `${label} kategorisi limitin ${formatPercent(candidate.usagePercent)} seviyesine ulasti.`,
+    title: "Geçmiş harcama referansı riski",
+    description: `${label} kategorisinde eski ortalamaya güvenmek mevcut limit kullanımını perdeleyebilir.`,
+    evidence: `${label} kategorisi limitin ${formatPercent(candidate.usagePercent)} seviyesine ulaştı.`,
     riskLevel,
-    recommendation: "Kategori limitini haftalik alt limite bolerek takip edin.",
+    recommendation: "Kategori limitini haftalık alt limite bölerek takip edin.",
     affectedCategories: [label],
     metric: {
-      label: "Butce kullanimi",
+      label: "Bütçe kullanımı",
       value: formatPercent(candidate.usagePercent),
     },
   };
@@ -356,13 +356,13 @@ function analyzeLossAversion(transactions: Transaction[]): BehavioralInsight | n
   return {
     id: "loss-aversion-large-protective-outflows",
     type: "loss_aversion",
-    title: "Zorunlu odeme baskisi",
-    description: "Yuksek tutarli zorunlu veya risk azaltici odemeler nakit akisinda baski olusturuyor olabilir.",
+    title: "Zorunlu ödeme baskısı",
+    description: "Yüksek tutarlı zorunlu veya risk azaltıcı ödemeler nakit akışında baskı oluşturuyor olabilir.",
     evidence: largestEssential
-      ? `Tekil yuksek tutarli ${categoryLabel(largestEssential.category)} islemi toplam cikislarin ${formatPercent(largestShare)} payini olusturuyor.`
-      : `Zorunlu kategoriler toplam cikislarin ${formatPercent(essentialShare)} payini olusturuyor.`,
+      ? `Tekil yüksek tutarlı ${categoryLabel(largestEssential.category)} işlemi toplam çıkışların ${formatPercent(largestShare)} payını oluşturuyor.`
+      : `Zorunlu kategoriler toplam çıkışların ${formatPercent(essentialShare)} payını oluşturuyor.`,
     riskLevel,
-    recommendation: "Yuksek tutarli zorunlu odemeler icin ayri acil durum/fatura fonu plani olusturun.",
+    recommendation: "Yüksek tutarlı zorunlu ödemeler için ayrı acil durum/fatura fonu planı oluşturun.",
     affectedCategories: Array.from(new Set(essentialOutflows.map((transaction) => categoryLabel(transaction.category)))),
     metric: {
       label: "Zorunlu pay",
@@ -400,14 +400,14 @@ function analyzeOverconfidence(snapshot: FinanceSnapshot): BehavioralInsight | n
   return {
     id: "overconfidence-risky-movement-density",
     type: "overconfidence",
-    title: "Riskli transfer/yatirim yogunlugu",
-    description: "Yatirim ve transfer hareketleri toplam cikislar icinde belirgin bir paya ulasiyor.",
-    evidence: `Yatirim ve transfer islemleri toplam cikislarin ${formatPercent(riskyShare)} payini olusturuyor.`,
+    title: "Riskli transfer/yatırım yoğunluğu",
+    description: "Yatırım ve transfer hareketleri toplam çıkışlar içinde belirgin bir paya ulaşıyor.",
+    evidence: `Yatırım ve transfer işlemleri toplam çıkışların ${formatPercent(riskyShare)} payını oluşturuyor.`,
     riskLevel,
-    recommendation: "Yuksek tutarli yatirim/transfer kararlarinda ust limit ve ikinci kontrol kurali belirleyin.",
+    recommendation: "Yüksek tutarlı yatırım/transfer kararlarında üst limit ve ikinci kontrol kuralı belirleyin.",
     affectedCategories: Array.from(new Set(riskyMovements.map((transaction) => categoryLabel(transaction.category)))),
     metric: {
-      label: "Riskli hareket payi",
+      label: "Riskli hareket payı",
       value: formatPercent(riskyShare),
     },
   };
@@ -455,10 +455,10 @@ export function summarizeBehavioralInsights(insights: BehavioralInsight[]): Beha
     topBiases,
     summary:
       highRiskCount > 0
-        ? `${highRiskCount} yuksek riskli davranissal sinyal one cikiyor.`
+        ? `${highRiskCount} yüksek riskli davranışsal sinyal öne çıkıyor.`
         : mediumRiskCount > 0
-          ? `${mediumRiskCount} orta riskli davranissal sinyal takip edilmeli.`
-          : "Guclu davranissal risk sinyali yok; duzenli takip onerilir.",
+          ? `${mediumRiskCount} orta riskli davranışsal sinyal takip edilmeli.`
+          : "Güçlü davranışsal risk sinyali yok; düzenli takip önerilir.",
   };
 }
 
@@ -470,9 +470,9 @@ function riskWeight(level: BehavioralRiskLevel): number {
 
 export function getBehavioralRiskLabel(level: BehavioralRiskLevel): string {
   const labels: Record<BehavioralRiskLevel, string> = {
-    dusuk: "Dusuk",
+    dusuk: "Düşük",
     orta: "Orta",
-    yuksek: "Yuksek",
+    yuksek: "Yüksek",
   };
 
   return labels[level];

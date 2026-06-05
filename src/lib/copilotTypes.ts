@@ -45,6 +45,18 @@ export type CopilotPaymentSummary = {
   }>;
 };
 
+export type CopilotRegTechSummary = {
+  total: number;
+  highSeverityCount: number;
+  mediumSeverityCount: number;
+  lowSeverityCount: number;
+  topAlerts: Array<{
+    title: string;
+    severity: "high" | "medium" | "low";
+    reason: string;
+  }>;
+};
+
 export type CopilotRoboAdvisorSummary = {
   profile: RiskProfile;
   score: number;
@@ -135,7 +147,11 @@ export type CopilotSpendingHeatmapSummary = {
 
 export type CopilotFinanceContext = {
   userName: string;
+  userFullName: string;
+  currentMonth: string;
+  currentMonthLabel: string;
   totalBalance: number;
+  portfolioTotal: number;
   accountCount: number;
   monthlyIncome: number;
   monthlyExpense: number;
@@ -146,6 +162,7 @@ export type CopilotFinanceContext = {
   nearLimitBudgets: CopilotBudgetSummary[];
   riskyTransactions: CopilotRiskyTransaction[];
   paymentOrders: CopilotPaymentSummary;
+  regTech: CopilotRegTechSummary;
   roboAdvisor: CopilotRoboAdvisorSummary;
   behavioralInsights: CopilotBehavioralInsightsSummary;
   purchasingPower: CopilotPurchasingPowerSummary;
@@ -168,5 +185,6 @@ export type CopilotRequestBody = {
 export type CopilotResponseBody = {
   answer: string;
   source: CopilotMessageSource;
+  provider?: CopilotMessageSource;
   disclaimer: string;
 };

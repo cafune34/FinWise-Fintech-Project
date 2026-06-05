@@ -7,12 +7,11 @@ import {
 } from "@/lib/marketData";
 import {
   calculateMonthlyExpense,
-  calculateMonthlyIncome,
   calculateNetCashFlow,
 } from "@/lib/finance";
 import type { FinanceSnapshot } from "@/lib/storage";
 
-export type PurchasingPowerDataSource = "live" | "fallback" | "demo";
+export type PurchasingPowerDataSource = "live" | "fallback" | "demo" | "derived";
 export type PurchasingPowerLevel = "dusuk" | "orta" | "yuksek";
 
 export type PurchasingPowerResult = {
@@ -33,6 +32,11 @@ export type PurchasingPowerResult = {
   inflationNote: string;
   recommendations: string[];
   disclaimer: string;
+  metrics: {
+    netCashFlow: number;
+    assetExpenseRatio: number;
+    mandatoryRatio: number;
+  };
 };
 
 const FALLBACK_USD_TRY = 32.1;
@@ -98,7 +102,18 @@ export function buildPurchasingPowerFromRates(
   const usdTryRate = usdItem.value;
   const eurTryRate = eurItem.value;
   const gramGoldTryRate = isPositiveNumber(goldItem?.value) ? goldItem.value : undefined;
-  const protectionScore = calculateProtectionScore(snapshot, totalTryAssets);
+  
+  const monthlyExpense = calculateMonthlyExpense(snapshot.transactions);
+  const netCashFlow = calculateNetCashFlow(snapshot.transactions);
+  const assetExpenseRatio = monthlyExpense > 0 ? totalTryAssets / monthlyExpense : totalTryAssets > 0 ? 6 : 0;
+  const mandatoryExpense = snapshot.transactions
+    .filter((transaction) => transaction.direction === "out")
+    .filter((transaction) => ["kira", "fatura", "saglik"].includes(transaction.category))
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+  const mandatoryRatio = monthlyExpense > 0 ? mandatoryExpense / monthlyExpense : 0;
+  
+  const metrics = { netCashFlow, assetExpenseRatio, mandatoryRatio };
+  const protectionScore = calculateProtectionScore(snapshot, totalTryAssets, metrics);
   const protectionLevel = getProtectionLevel(protectionScore);
 
   return {
@@ -119,6 +134,7 @@ export function buildPurchasingPowerFromRates(
     inflationNote: buildInflationNote(marketData.source),
     recommendations: buildRecommendations(snapshot, protectionScore),
     disclaimer: DISCLAIMER,
+    metrics,
   };
 }
 
@@ -157,22 +173,13 @@ export function formatNumber(value: number): string {
   return numberFormatter.format(value);
 }
 
-function calculateProtectionScore(snapshot: FinanceSnapshot, totalTryAssets: number): number {
-  const monthlyIncome = calculateMonthlyIncome(snapshot.transactions);
-  const monthlyExpense = calculateMonthlyExpense(snapshot.transactions);
-  const netCashFlow = calculateNetCashFlow(snapshot.transactions);
-  const assetExpenseRatio = monthlyExpense > 0 ? totalTryAssets / monthlyExpense : totalTryAssets > 0 ? 6 : 0;
+function calculateProtectionScore(snapshot: FinanceSnapshot, totalTryAssets: number, metrics: { netCashFlow: number; assetExpenseRatio: number; mandatoryRatio: number }): number {
+  const { netCashFlow, assetExpenseRatio, mandatoryRatio } = metrics;
   const investmentTransactions = snapshot.transactions.filter((transaction) => transaction.category === "yatirim");
-  const mandatoryExpense = snapshot.transactions
-    .filter((transaction) => transaction.direction === "out")
-    .filter((transaction) => ["kira", "fatura", "saglik"].includes(transaction.category))
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-  const mandatoryRatio = monthlyExpense > 0 ? mandatoryExpense / monthlyExpense : 0;
 
   let score = 35;
 
   if (netCashFlow > 0) score += 20;
-  if (netCashFlow === 0 && monthlyIncome > 0) score += 8;
   if (netCashFlow < 0) score -= 10;
 
   if (assetExpenseRatio >= 6) score += 25;
@@ -239,7 +246,7 @@ function findMarketItem(items: MarketTickerItem[], symbol: string): MarketTicker
 }
 
 function normalizeSource(source: MarketDataSource): PurchasingPowerDataSource {
-  return source === "live" ? "live" : source === "demo" ? "demo" : "fallback";
+  return source === "live" ? "live" : source === "derived" ? "derived" : source === "demo" ? "demo" : "fallback";
 }
 
 function isPositiveNumber(value: unknown): value is number {

@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
   Legend,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -35,43 +34,78 @@ interface CustomTooltipProps {
 }
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#0b1220]/95 border border-white/10 rounded-xl p-3 shadow-xl backdrop-blur-md">
-        <p className="text-xs font-semibold text-slate-400 mb-1">{label}</p>
-        <p className="text-sm font-bold text-cyan-300">
-          {formatCurrencyTRY(Number(payload[0].value ?? 0))}
-        </p>
-      </div>
-    );
+  if (!active || !payload?.length) {
+    return null;
   }
-  return null;
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-[#0b1220]/95 p-3 shadow-xl backdrop-blur-md">
+      <p className="mb-1 text-xs font-semibold text-slate-400">{label}</p>
+      <p className="text-sm font-bold text-cyan-300">{formatCurrencyTRY(Number(payload[0].value ?? 0))}</p>
+    </div>
+  );
 };
 
 export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartProps) {
-  const [isClient, setIsClient] = useState(false);
+  const [hasStableSize, setHasStableSize] = useState(false);
+  const [chartWidth, setChartWidth] = useState(1);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const hasChartData = data.length > 0;
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setIsClient(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
+    const updateSize = () => {
+      const rect = chartRef.current?.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.floor(rect?.width ?? 0));
+      setChartWidth(nextWidth);
+      setHasStableSize(Boolean(rect && rect.width > 0 && rect.height > 0));
+    };
+
+    const frameId = window.requestAnimationFrame(updateSize);
+    const observer = new ResizeObserver(updateSize);
+
+    if (chartRef.current) {
+      observer.observe(chartRef.current);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
   }, []);
 
-  if (!isClient) {
+  if (!hasStableSize) {
     return (
-      <div className="h-[300px] w-full flex items-center justify-center bg-slate-900/10 rounded-xl">
-        <p className="text-xs text-slate-500">Grafik yükleniyor...</p>
+      <div
+        ref={chartRef}
+        className="flex h-[300px] min-h-[300px] w-full min-w-[1px] items-center justify-center rounded-xl bg-slate-900/10"
+      >
+        <p className="text-xs text-slate-500">Grafik yukleniyor...</p>
+      </div>
+    );
+  }
+
+  if (!hasChartData) {
+    return (
+      <div
+        ref={chartRef}
+        className="flex h-[300px] min-h-[300px] w-full min-w-[1px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-slate-950/30"
+      >
+        <p className="text-xs text-slate-500">Grafik icin yeterli veri yok.</p>
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
+    <div ref={chartRef} className="h-[300px] min-h-[300px] w-full min-w-[1px] overflow-hidden">
+      <BarChart width={chartWidth} height={300} data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
         <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />
-        <YAxis stroke="#94a3b8" tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`} tickLine={false} axisLine={false} />
+        <YAxis
+          stroke="#94a3b8"
+          tickFormatter={(value) => `${Math.round(Number(value) / 1000)}K`}
+          tickLine={false}
+          axisLine={false}
+        />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
         <Legend />
         <Bar dataKey="value" name="Harcama" radius={[6, 6, 0, 0]} activeBar={false}>
@@ -80,6 +114,6 @@ export default function ExpenseByCategoryChart({ data }: ExpenseByCategoryChartP
           ))}
         </Bar>
       </BarChart>
-    </ResponsiveContainer>
+    </div>
   );
 }

@@ -17,9 +17,14 @@ import { useFinanceData } from "@/lib/useFinanceData";
 const SUGGESTED_QUESTIONS = [
   "Bu ay neden tasarruf edemedim?",
   "En çok nereye para harcadım?",
-  "Bütçem riskte mi?",
-  "Hangi harcamaları azaltmalıyım?",
-  "Bekleyen ödemelerim risk oluşturuyor mu?",
+  "Bütçemde ilk neyi düzeltmeliyim?",
+  "Acil durum fonum yeterli mi?",
+  "Harcama DNA profilim ne söylüyor?",
+  "Enflasyon karşısında durumum nasıl?",
+  "Param en çok hangi kanallara akıyor?",
+  "Harcama yoğunluğum hangi günlerde artıyor?",
+  "Finansal raporumdaki en önemli risk ne?",
+  "Senaryo simülatörünü ne için kullanabilirim?"
 ];
 
 type ChatMessage = {
@@ -27,6 +32,7 @@ type ChatMessage = {
   role: "user" | "assistant";
   content: string;
   source?: CopilotMessageSource;
+  provider?: CopilotMessageSource;
 };
 
 function createMessageId(prefix: string): string {
@@ -123,6 +129,7 @@ export default function CopilotChat() {
           role: "assistant",
           content: payload.answer,
           source: payload.source,
+          provider: payload.provider,
         },
       ]);
     } catch {
@@ -134,6 +141,7 @@ export default function CopilotChat() {
           role: "assistant",
           content: generateCopilotFallbackAnswer(trimmedQuestion, copilotContext),
           source: "fallback",
+          provider: "fallback",
         },
       ]);
     } finally {
@@ -191,7 +199,7 @@ export default function CopilotChat() {
         </section>
       </aside>
 
-      <section className="flex min-h-[640px] flex-col rounded-2xl border border-white/10 bg-[#0b1220]/80 shadow-2xl shadow-black/20">
+      <section className="flex h-[820px] max-h-[calc(100vh-6rem)] flex-col rounded-2xl border border-white/10 bg-[#0b1220]/80 shadow-2xl shadow-black/20">
         <div className="border-b border-white/10 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -204,7 +212,7 @@ export default function CopilotChat() {
           </div>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 no-scrollbar">
           {messages.length === 0 ? (
             <div className="flex h-full min-h-[360px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.025] p-6 text-center">
               <div className="max-w-md">
@@ -239,17 +247,17 @@ export default function CopilotChat() {
                         : "border-white/10 bg-white/[0.045] text-slate-200"
                     )}
                   >
-                    {!isUser && message.source && (
+                    {!isUser && (message.provider || message.source) && (
                       <div className="mb-2 flex">
                         <span
                           className={clsx(
                             "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]",
-                            message.source === "gemini"
+                            (message.provider || message.source) === "gemini"
                               ? "border-cyan-300/30 bg-cyan-300/10 text-cyan-200"
                               : "border-amber-300/30 bg-amber-300/10 text-amber-200"
                           )}
                         >
-                          {message.source === "gemini" ? "AI" : "Yerel analiz"}
+                          {(message.provider || message.source) === "gemini" ? "Gemini Analizi" : "Yerel Analiz"}
                         </span>
                       </div>
                     )}

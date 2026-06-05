@@ -107,8 +107,16 @@ export default function EmergencyFundCard({ result }: EmergencyFundCardProps) {
             <div className="h-2 rounded-full bg-cyan-300 transition-all" style={{ width: `${progressWidth}%` }} />
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <SmallMetric title="Nakit Akışı Notu" value={formatCurrencyTRY(result.metrics.netCashFlow)} />
+          <p className="mt-6 text-xs leading-relaxed text-slate-400">
+            Aylık net gelir-gider dengeniz, zorunlu harcamalarınız ve bekleyen ödemeler hedefe ulaşma hızınızı belirler.
+          </p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <SmallMetric
+              title="Aylık Net Nakit Akışı"
+              value={formatCurrencyTRY(result.metrics.netCashFlow)}
+              tone={result.metrics.netCashFlow >= 0 ? "positive" : "negative"}
+            />
             <SmallMetric title="Bekleyen Ödeme Etkisi" value={formatCurrencyTRY(result.metrics.pendingPaymentAmount)} />
             <SmallMetric title="Temel Gider Payı" value={formatPercent(result.metrics.essentialExpenseRatio)} />
             <SmallMetric title="Aktif Hesap Bakiyesi" value={formatCurrencyTRY(result.metrics.activeAccountBalance)} />
@@ -182,11 +190,17 @@ function MetricCard({
   );
 }
 
-function SmallMetric({ title, value }: { title: string; value: string }) {
+function SmallMetric({ title, value, tone = "neutral" }: { title: string; value: string; tone?: "neutral" | "positive" | "negative" }) {
+  const toneClass = {
+    neutral: "text-white",
+    positive: "text-emerald-300",
+    negative: "text-rose-300",
+  }[tone];
+
   return (
     <div className="rounded-lg border border-white/10 bg-slate-950/35 p-3">
       <p className="text-xs text-slate-400">{title}</p>
-      <p className="mt-1 break-words text-sm font-semibold text-white">{value}</p>
+      <p className={clsx("mt-1 break-words text-sm font-semibold", toneClass)}>{value}</p>
     </div>
   );
 }

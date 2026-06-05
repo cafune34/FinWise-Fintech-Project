@@ -164,7 +164,7 @@ export function buildSpendingHeatmap(snapshot: FinanceSnapshot, daysToAnalyze: n
 
     const dayObj: SpendingHeatmapDay = {
       date: dStr,
-      dayLabel: new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "long", year: "numeric" }).format(date),
+      dayLabel: `${String(date.getDate()).padStart(2, "0")} ${new Intl.DateTimeFormat("tr-TR", { month: "long" }).format(date)} ${date.getFullYear()}`,
       amount,
       transactionCount: dayTransactions.length,
       intensity: getIntensity(amount),
@@ -192,7 +192,9 @@ export function buildSpendingHeatmap(snapshot: FinanceSnapshot, daysToAnalyze: n
     { label: "Aşırı", intensity: "extreme" as SpendingHeatmapIntensity, minAmount: p90 + 0.01 },
   ];
 
-  const currentPeriodLabel = `${new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(dateRange[0])} - ${new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(dateRange[dateRange.length - 1])}`;
+  const dStart = dateRange[0];
+  const dEnd = dateRange[dateRange.length - 1];
+  const currentPeriodLabel = `${new Intl.DateTimeFormat("tr-TR", { month: "long" }).format(dStart)} ${dStart.getFullYear()} - ${new Intl.DateTimeFormat("tr-TR", { month: "long" }).format(dEnd)} ${dEnd.getFullYear()}`;
 
   const insights: string[] = [
     `İncelenen ${daysToAnalyze} günün ${activeSpendingDays} gününde harcama yapılmış, ${zeroSpendDays} gününde ise harcama yapılmamıştır.`,

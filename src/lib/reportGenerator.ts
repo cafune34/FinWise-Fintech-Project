@@ -1,3 +1,4 @@
+import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { analyzeBehavioralFinance, getBehavioralBiasLabel, getBehavioralRiskLabel } from "@/lib/behavioralFinance";
 import { buildCopilotFinanceContext } from "@/lib/copilotContext";
@@ -65,30 +66,13 @@ export type FinancialReportData = {
   disclaimer: string;
 };
 
-const PAGE_WIDTH = 210;
-const PAGE_HEIGHT = 297;
-const MARGIN_X = 16;
-const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_X * 2;
-const PAGE_BOTTOM = 18;
-const SECTION_GAP = 6;
+const PDF_PAGE_WIDTH = 210;
+const PDF_PAGE_HEIGHT = 297;
+const REPORT_RENDER_WIDTH = 794;
+const REPORT_PAGE_SAFE_GAP = 28;
 const RISKY_CATEGORIES = new Set<TransactionCategory>(["transfer", "yatirim", "kira", "fatura"]);
 const REPORT_DISCLAIMER =
   "Bu rapor yatırım tavsiyesi değildir; eğitim amaçlı akademik fintech karar destek prototipidir.";
-
-const turkishPdfMap: Record<string, string> = {
-  "ğ": "g",
-  "Ğ": "G",
-  "ü": "u",
-  "Ü": "U",
-  "ş": "s",
-  "Ş": "S",
-  "ı": "i",
-  "İ": "I",
-  "ö": "o",
-  "Ö": "O",
-  "ç": "c",
-  "Ç": "C",
-};
 
 function roundMoney(value: number): number {
   return Number(value.toFixed(2));
@@ -176,14 +160,14 @@ function buildConclusion(data: {
     return `Snapshot, pozitif nakit akışına rağmen davranışsal finans tarafında ${data.behavioralHighRiskCount} yüksek riskli sinyal içeriyor.`;
   }
 
-  return `Snapshot, nakit akışı ve güvenlik fonu perspektifinde izlenebilir bir finansal görünüm sunuyor.`;
+  return "Snapshot, nakit akışı ve güvenlik fonu perspektifinde izlenebilir bir finansal görünüm sunuyor.";
 }
 
 export function formatCurrencyTRY(value: number): string {
-  return `${new Intl.NumberFormat("tr-TR", {
+  return `₺${new Intl.NumberFormat("tr-TR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value)} TL`;
+  }).format(value)}`;
 }
 
 export function formatPercent(value: number): string {
@@ -199,21 +183,9 @@ export function formatDate(value?: string | Date): string {
 
   return new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
-    month: "2-digit",
+    month: "long",
     year: "numeric",
   }).format(date);
-}
-
-export function sanitizePdfText(value: unknown): string {
-  return String(value ?? "")
-    .replace(/[ğĞüÜşŞıİöÖçÇ]/g, (char) => turkishPdfMap[char] ?? char)
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, "-")
-    .replace(/₺/g, "TL")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
 }
 
 export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialReportData {
@@ -269,12 +241,12 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
       `FinWise Copilot, bu snapshot için nakit akışı (${formatCurrencyTRY(
         context.netCashFlow
       )}), riskli harcamalar ve bütçe baskısı üzerinden öneriler üretebilir. ` +
-      `API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır. ` +
-      `Para Akış Haritası modülü, gelirin gider kategorilerine görsel dağılımını ayrı sayfada sunar. ` +
-      `Harcama Isı Haritası modülü, günlük harcama yoğunluğunu takvim görünümünde ayrı sayfada sunar. ` +
-      `What-if Simülatörü ayrı bir sayfa olarak kullanılabilir. ` +
-      `Enflasyon Zaman Tüneli modülü, TL'nin yıllara göre demo satın alma gücü analizini ayrı sayfada sunar. ` +
-      `Karbon Ayak İzi modülü, harcama kategorilerini demo ESG katsayılarıyla analiz eder. ` +
+      "API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır. " +
+      "Para Akış Haritası modülü, gelirin gider kategorilerine görsel dağılımını ayrı sayfada sunar. " +
+      "Harcama Isı Haritası modülü, günlük harcama yoğunluğunu takvim görünümünde ayrı sayfada sunar. " +
+      "What-if Simülatörü ayrı bir sayfa olarak kullanılabilir. " +
+      "Enflasyon Zaman Tüneli modülü, TL'nin yıllara göre demo satın alma gücü analizini ayrı sayfada sunar. " +
+      "Karbon Ayak İzi modülü, harcama kategorilerini demo ESG katsayılarıyla analiz eder. " +
       `En son verilere göre tahmini toplam salınım ${formatKgCo2(carbonResult.totalEstimatedKgCo2)} düzeyindedir.`,
     conclusion: buildConclusion({
       netCashFlow: context.netCashFlow,
@@ -285,286 +257,549 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
   };
 }
 
-export function addReportHeader(doc: jsPDF, title: string, subtitle?: string): number {
-  doc.setFillColor(7, 11, 20);
-  doc.rect(0, 0, PAGE_WIDTH, 30, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.setTextColor(34, 211, 238);
-  doc.text("FinWise", MARGIN_X, 13);
-  doc.setFontSize(10);
-  doc.setTextColor(226, 232, 240);
-  doc.text(sanitizePdfText(title), MARGIN_X, 22);
+function createElement<K extends keyof HTMLElementTagNameMap>(
+  tagName: K,
+  className?: string,
+  text?: string
+): HTMLElementTagNameMap[K] {
+  const element = document.createElement(tagName);
 
-  if (subtitle) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184);
-    doc.text(sanitizePdfText(subtitle), PAGE_WIDTH - MARGIN_X, 22, { align: "right" });
+  if (className) {
+    element.className = className;
   }
 
-  return 42;
-}
-
-export function addPageIfNeeded(doc: jsPDF, currentY: number, neededHeight: number): number {
-  if (currentY + neededHeight <= PAGE_HEIGHT - PAGE_BOTTOM) {
-    return currentY;
+  if (text !== undefined) {
+    element.textContent = text;
   }
 
-  doc.addPage();
-  return addReportHeader(doc, "FinWise Finansal Analiz Raporu", "Devam");
+  return element;
 }
 
-export function addSectionTitle(doc: jsPDF, title: string, currentY: number): number {
-  const y = addPageIfNeeded(doc, currentY + SECTION_GAP, 12);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.setTextColor(15, 23, 42);
-  doc.text(sanitizePdfText(title), MARGIN_X, y);
-  doc.setDrawColor(34, 211, 238);
-  doc.setLineWidth(0.4);
-  doc.line(MARGIN_X, y + 2.5, PAGE_WIDTH - MARGIN_X, y + 2.5);
-
-  return y + 9;
+function appendChildren(parent: HTMLElement, children: HTMLElement[]): HTMLElement {
+  children.forEach((child) => parent.appendChild(child));
+  return parent;
 }
 
-export function addKeyValueRows(doc: jsPDF, rows: KeyValueRow[], currentY: number): number {
-  let y = currentY;
+function createKeyValueRows(rows: KeyValueRow[]): HTMLElement {
+  const list = createElement("div", "kv-list");
 
-  rows.forEach((row, index) => {
-    const valueLines = doc.splitTextToSize(sanitizePdfText(row.value), CONTENT_WIDTH - 66) as string[];
-    const rowHeight = Math.max(9, valueLines.length * 4.8 + 5);
-    y = addPageIfNeeded(doc, y, rowHeight + 2);
-
-    doc.setFillColor(index % 2 === 0 ? 248 : 255, index % 2 === 0 ? 250 : 255, index % 2 === 0 ? 252 : 255);
-    doc.rect(MARGIN_X, y - 3, CONTENT_WIDTH, rowHeight, "F");
-    doc.setDrawColor(226, 232, 240);
-    doc.line(MARGIN_X, y + rowHeight - 3, PAGE_WIDTH - MARGIN_X, y + rowHeight - 3);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(71, 85, 105);
-    doc.text(sanitizePdfText(row.label), MARGIN_X + 3, y + 2.5);
-
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(15, 23, 42);
-    valueLines.forEach((line, lineIndex) => {
-      doc.text(line, MARGIN_X + 62, y + 2.5 + lineIndex * 4.8);
-    });
-
-    y += rowHeight + 1.5;
+  rows.forEach((row) => {
+    const item = createElement("div", "kv-row");
+    item.dataset.pdfBlock = "true";
+    item.appendChild(createElement("div", "kv-label", row.label));
+    item.appendChild(createElement("div", "kv-value", row.value));
+    list.appendChild(item);
   });
 
-  return y + 2;
+  return list;
 }
 
-export function addTextBlock(doc: jsPDF, text: string, currentY: number): number {
-  let y = currentY;
-  const lines = doc.splitTextToSize(sanitizePdfText(text), CONTENT_WIDTH) as string[];
+function createSection(title: string, children: HTMLElement[]): HTMLElement {
+  const section = createElement("section", "report-section");
+  section.dataset.pdfBlock = "true";
+  section.appendChild(createElement("h2", "section-title", title));
+  appendChildren(section, children);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(51, 65, 85);
-
-  lines.forEach((line) => {
-    y = addPageIfNeeded(doc, y, 6);
-    doc.text(line, MARGIN_X, y);
-    y += 5.4;
-  });
-
-  return y + 2;
+  return section;
 }
 
-function addBulletRows(doc: jsPDF, items: string[], currentY: number): number {
-  let y = currentY;
+function createParagraph(text: string): HTMLElement {
+  const paragraph = createElement("p", "report-copy", text);
+  paragraph.dataset.pdfBlock = "true";
 
+  return paragraph;
+}
+
+function createBulletList(items: string[]): HTMLElement {
   if (items.length === 0) {
-    return addTextBlock(doc, "Bu bölüm için yeterli veri bulunmuyor.", y);
+    return createParagraph("Bu bölüm için yeterli veri bulunmuyor.");
   }
+
+  const list = createElement("ul", "bullet-list");
 
   items.forEach((item) => {
-    y = addTextBlock(doc, `- ${item}`, y);
+    const bullet = createElement("li", undefined, item);
+    bullet.dataset.pdfBlock = "true";
+    list.appendChild(bullet);
   });
 
-  return y;
+  return list;
 }
 
-function addReportFooters(doc: jsPDF, generatedAt: string) {
-  const pageCount = doc.getNumberOfPages();
-
-  for (let page = 1; page <= pageCount; page += 1) {
-    doc.setPage(page);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184);
-    doc.text(
-      sanitizePdfText(`FinWise Report | ${formatDate(generatedAt)} | Sayfa ${page}/${pageCount}`),
-      MARGIN_X,
-      PAGE_HEIGHT - 9
-    );
-    doc.text(sanitizePdfText("Yatirim tavsiyesi degildir."), PAGE_WIDTH - MARGIN_X, PAGE_HEIGHT - 9, {
-      align: "right",
-    });
-  }
-}
-
-function addBehavioralInsightRows(doc: jsPDF, data: FinancialReportData, currentY: number): number {
-  let y = currentY;
+function createBehavioralInsightCards(data: FinancialReportData): HTMLElement {
+  const wrapper = createElement("div", "insight-list");
 
   data.behavioralInsights.slice(0, 5).forEach((insight, index) => {
-    y = addKeyValueRows(
-      doc,
-      [
-        { label: `İçgörü ${index + 1}`, value: getBehavioralBiasLabel(insight.type) },
+    const card = createElement("article", "insight-card");
+    card.dataset.pdfBlock = "true";
+    card.appendChild(createElement("h3", "card-title", `İçgörü ${index + 1}: ${getBehavioralBiasLabel(insight.type)}`));
+    card.appendChild(
+      createKeyValueRows([
         { label: "Kanıt", value: insight.evidence },
         { label: "Risk seviyesi", value: getBehavioralRiskLabel(insight.riskLevel) },
         { label: "Öneri", value: insight.recommendation },
-      ],
-      y
+      ])
     );
+    wrapper.appendChild(card);
   });
 
-  return y;
+  return wrapper;
 }
 
-function renderFinancialReport(doc: jsPDF, data: FinancialReportData) {
-  let y = addReportHeader(doc, "FinWise Finansal Analiz Raporu", "Tek tık finansal analiz PDF'i");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(23);
-  doc.setTextColor(15, 23, 42);
-  doc.text(sanitizePdfText("FinWise Finansal Analiz Raporu"), MARGIN_X, y);
-  y += 10;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(71, 85, 105);
-  doc.text(sanitizePdfText(`Kullanıcı: ${data.user.fullName}`), MARGIN_X, y);
-  y += 6;
-  doc.text(sanitizePdfText(`Rapor tarihi: ${formatDate(data.generatedAt)}`), MARGIN_X, y);
-  y += 9;
-  y = addTextBlock(
-    doc,
-    "Eğitim amaçlı finansal analiz prototipi. Bu rapor yatırım tavsiyesi değildir.",
-    y
-  );
-
-  y = addSectionTitle(doc, "Kullanıcı Özeti", y);
-  y = addKeyValueRows(
-    doc,
-    [
-      { label: "Kullanıcı adı", value: data.user.fullName },
-      { label: "Risk profili", value: data.user.riskProfileLabel },
-      { label: "Toplam hesap sayısı", value: String(data.user.accountCount) },
-      { label: "Toplam varlık", value: formatCurrencyTRY(data.user.totalAssets) },
-      { label: "Snapshot güncelleme tarihi", value: formatDate(data.user.updatedAt) },
-    ],
-    y
-  );
-
-  y = addSectionTitle(doc, "Genel Finans Özeti", y);
-  y = addKeyValueRows(
-    doc,
-    [
-      { label: "Toplam TL varlık", value: formatCurrencyTRY(data.finance.totalTryAssets) },
-      { label: "Aylık gelir", value: formatCurrencyTRY(data.finance.monthlyIncome) },
-      { label: "Aylık gider", value: formatCurrencyTRY(data.finance.monthlyExpense) },
-      { label: "Net nakit akışı", value: formatCurrencyTRY(data.finance.netCashFlow) },
-      {
-        label: "En yüksek harcama kategorileri",
-        value:
-          data.finance.topExpenseCategories
-            .map((category) => `${category.label}: ${formatCurrencyTRY(category.amount)}`)
-            .join(" | ") || "Belirgin kategori yok",
-      },
-      { label: "Bekleyen ödeme tutarı", value: formatCurrencyTRY(data.finance.pendingPaymentAmount) },
-    ],
-    y
-  );
-
-  y = addSectionTitle(doc, "Riskli İşlemler", y);
+function createRiskyTransactionRows(data: FinancialReportData): HTMLElement {
   if (data.riskyTransactions.length === 0) {
-    y = addTextBlock(doc, "Riskli veya yüksek tutarlı işlem bulunamadı.", y);
-  } else {
-    y = addKeyValueRows(
-      doc,
-      data.riskyTransactions.map((transaction, index) => ({
-        label: `İşlem ${index + 1}`,
-        value: `${transaction.title} | ${transaction.categoryLabel} | ${formatCurrencyTRY(
-          transaction.amount
-        )} | ${formatDate(transaction.occurredAt)}`,
-      })),
-      y
-    );
+    return createParagraph("Riskli veya yüksek tutarlı işlem bulunamadı.");
   }
 
-  y = addSectionTitle(doc, "Davranışsal Finans İçgörüleri", y);
-  y = addBehavioralInsightRows(doc, data, y);
-
-  y = addSectionTitle(doc, "Harcama DNA'sı", y);
-  y = addKeyValueRows(
-    doc,
-    [
-      { label: "Ana profil", value: data.spendingDna.primaryProfile.label },
-      { label: "İkincil eğilim", value: data.spendingDna.secondaryProfile?.label ?? "Belirgin değil" },
-      { label: "Risk seviyesi", value: riskProfileLabels[data.spendingDna.riskLevel] },
-      { label: "Profil skoru", value: `${data.spendingDna.primaryProfile.score}/100` },
-    ],
-    y
+  return createKeyValueRows(
+    data.riskyTransactions.map((transaction, index) => ({
+      label: `İşlem ${index + 1}`,
+      value: `${transaction.title} | ${transaction.categoryLabel} | ${formatCurrencyTRY(
+        transaction.amount
+      )} | ${formatDate(transaction.occurredAt)}`,
+    }))
   );
-  y = addBulletRows(doc, data.spendingDna.recommendations.slice(0, 3), y);
+}
 
-  y = addSectionTitle(doc, "Acil Durum Fonu", y);
-  y = addKeyValueRows(
-    doc,
-    [
-      { label: "Aylık temel gider", value: formatCurrencyTRY(data.emergencyFund.monthlyEssentialExpense) },
-      { label: "3 aylık hedef", value: formatCurrencyTRY(data.emergencyFund.targetAmount) },
-      { label: "Mevcut varlık", value: formatCurrencyTRY(data.emergencyFund.currentAvailableAssets) },
-      { label: "Tamamlanma yüzdesi", value: formatPercent(data.emergencyFund.completionPercentage) },
-      {
-        label: "Eksik/fazla tutar",
-        value:
-          data.emergencyFund.missingAmount > 0
-            ? `${formatCurrencyTRY(data.emergencyFund.missingAmount)} eksik`
-            : `${formatCurrencyTRY(data.emergencyFund.surplusAmount)} fazla`,
-      },
-      { label: "Durum etiketi", value: data.emergencyFund.statusLabel },
-    ],
-    y
+function createReportStyles(): HTMLStyleElement {
+  const style = document.createElement("style");
+
+  style.textContent = `
+    .finwise-report,
+    .finwise-report * {
+      box-sizing: border-box;
+    }
+
+    .finwise-report {
+      width: ${REPORT_RENDER_WIDTH}px;
+      min-height: 100%;
+      background: #ffffff;
+      color: #0f172a;
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    .report-header {
+      background: #07111f;
+      color: #e2e8f0;
+      padding: 34px 48px 30px;
+    }
+
+    .brand-row {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      color: #67e8f9;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .badge {
+      border: 1px solid rgba(103, 232, 249, 0.38);
+      border-radius: 999px;
+      color: #cffafe;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      text-transform: uppercase;
+    }
+
+    .report-title {
+      color: #ffffff;
+      font-size: 31px;
+      line-height: 1.15;
+      margin: 24px 0 10px;
+    }
+
+    .report-subtitle {
+      color: #cbd5e1;
+      font-size: 14px;
+      margin: 0;
+      max-width: 620px;
+    }
+
+    .meta-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+      margin-top: 22px;
+    }
+
+    .meta-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .meta-label {
+      color: #94a3b8;
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      color: #ffffff;
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+    }
+
+    .intro-note {
+      background: #ecfeff;
+      border-bottom: 1px solid #bae6fd;
+      color: #164e63;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+      padding: 16px 48px;
+    }
+
+    .report-section {
+      padding: 24px 48px 0;
+    }
+
+    .section-title {
+      border-bottom: 2px solid #22d3ee;
+      color: #0f172a;
+      font-size: 18px;
+      line-height: 1.2;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+    }
+
+    .kv-list {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .kv-row {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 190px minmax(0, 1fr);
+      min-height: 42px;
+      padding: 10px 14px;
+    }
+
+    .kv-row:nth-child(odd) {
+      background: #f8fafc;
+    }
+
+    .kv-row + .kv-row {
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .kv-label {
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .kv-value {
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .report-copy {
+      color: #334155;
+      font-size: 14px;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .bullet-list {
+      color: #334155;
+      margin: 12px 0 0;
+      padding-left: 20px;
+    }
+
+    .bullet-list li {
+      margin: 7px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .insight-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .insight-card {
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .card-title {
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-size: 14px;
+      line-height: 1.3;
+      margin: 0;
+      padding: 10px 14px;
+    }
+
+    .subheading {
+      color: #0f172a;
+      font-size: 14px;
+      margin: 14px 0 8px;
+    }
+
+    .report-footer {
+      color: #64748b;
+      font-size: 11px;
+      margin-top: 28px;
+      padding: 0 48px 34px;
+      text-align: center;
+    }
+  `;
+
+  return style;
+}
+
+function createReportElement(data: FinancialReportData): HTMLElement {
+  const host = createElement("div");
+  host.setAttribute("aria-hidden", "true");
+  host.style.left = "-10000px";
+  host.style.pointerEvents = "none";
+  host.style.position = "fixed";
+  host.style.top = "0";
+  host.style.width = `${REPORT_RENDER_WIDTH}px`;
+  host.style.zIndex = "-1";
+
+  const report = createElement("div", "finwise-report");
+  const header = createElement("header", "report-header");
+  const brandRow = createElement("div", "brand-row");
+  brandRow.appendChild(createElement("div", "brand", "FinWise"));
+  brandRow.appendChild(createElement("div", "badge", "Yatırım Tavsiyesi Değildir"));
+  header.appendChild(brandRow);
+  header.appendChild(createElement("h1", "report-title", "FinWise Finansal Analiz Raporu"));
+  header.appendChild(
+    createElement(
+      "p",
+      "report-subtitle",
+      "Tek tık finansal analiz PDF'i; eğitim amaçlı akademik fintech karar destek prototipi."
+    )
   );
 
-  y = addSectionTitle(doc, "Satın Alma Gücü Özeti", y);
-  y = addKeyValueRows(
-    doc,
-    [
-      { label: "Toplam TL varlık", value: formatCurrencyTRY(data.purchasingPower.totalTryAssets) },
-      { label: "USD karşılığı", value: formatCurrencyUSD(data.purchasingPower.usdValue) },
-      { label: "EUR karşılığı", value: formatCurrencyEUR(data.purchasingPower.eurValue) },
-      { label: "Veri yaklaşımı", value: data.purchasingPower.sourceLabel },
-      { label: "Not", value: data.purchasingPower.note },
-    ],
-    y
+  const metaGrid = createElement("div", "meta-grid");
+  metaGrid.appendChild(
+    appendChildren(createElement("div", "meta-card"), [
+      createElement("span", "meta-label", "Kullanıcı"),
+      createElement("span", "meta-value", data.user.fullName),
+    ])
+  );
+  metaGrid.appendChild(
+    appendChildren(createElement("div", "meta-card"), [
+      createElement("span", "meta-label", "Rapor Tarihi"),
+      createElement("span", "meta-value", formatDate(data.generatedAt)),
+    ])
+  );
+  header.appendChild(metaGrid);
+  report.appendChild(header);
+  report.appendChild(
+    createElement(
+      "p",
+      "intro-note",
+      "Eğitim amaçlı finansal analiz prototipi. Bu rapor yatırım tavsiyesi değildir."
+    )
   );
 
-  y = addSectionTitle(doc, "AI Finans Koçu Özeti", y);
-  y = addTextBlock(doc, data.copilotSummary, y);
+  report.appendChild(
+    createSection("Kullanıcı Özeti", [
+      createKeyValueRows([
+        { label: "Kullanıcı adı", value: data.user.fullName },
+        { label: "Risk profili", value: data.user.riskProfileLabel },
+        { label: "Toplam hesap sayısı", value: String(data.user.accountCount) },
+        { label: "Toplam varlık", value: formatCurrencyTRY(data.user.totalAssets) },
+        { label: "Snapshot Güncelleme Tarihi", value: formatDate(data.user.updatedAt) },
+      ]),
+    ])
+  );
 
-  y = addSectionTitle(doc, "Sonuç ve Uyarı", y);
-  y = addTextBlock(doc, data.conclusion, y);
-  addTextBlock(doc, data.disclaimer, y);
-  addReportFooters(doc, data.generatedAt);
+  report.appendChild(
+    createSection("Genel Finans ve Bütçe Özeti", [
+      createKeyValueRows([
+        { label: "Toplam TL varlık", value: formatCurrencyTRY(data.finance.totalTryAssets) },
+        { label: "Aylık gelir", value: formatCurrencyTRY(data.finance.monthlyIncome) },
+        { label: "Aylık gider", value: formatCurrencyTRY(data.finance.monthlyExpense) },
+        { label: "Nakit akışı", value: formatCurrencyTRY(data.finance.netCashFlow) },
+        {
+          label: "En yüksek harcama kategorileri",
+          value:
+            data.finance.topExpenseCategories
+              .map((category) => `${category.label}: ${formatCurrencyTRY(category.amount)}`)
+              .join(" | ") || "Belirgin kategori yok",
+        },
+        { label: "Bekleyen ödeme tutarı", value: formatCurrencyTRY(data.finance.pendingPaymentAmount) },
+      ]),
+    ])
+  );
+
+  report.appendChild(createSection("Riskli İşlemler", [createRiskyTransactionRows(data)]));
+
+  report.appendChild(
+    createSection("Davranışsal Finans İçgörüleri", [
+      createKeyValueRows([{ label: "Risk aralığı", value: "Düşük / Orta / Yüksek" }]),
+      createBehavioralInsightCards(data),
+    ])
+  );
+
+  report.appendChild(
+    createSection("Harcama DNA'sı", [
+      createKeyValueRows([
+        { label: "Ana profil", value: data.spendingDna.primaryProfile.label },
+        { label: "İkincil eğilim", value: data.spendingDna.secondaryProfile?.label ?? "Belirgin değil" },
+        { label: "Risk seviyesi", value: riskProfileLabels[data.spendingDna.riskLevel] },
+        { label: "Profil skoru", value: `${data.spendingDna.primaryProfile.score}/100` },
+      ]),
+      createElement("h3", "subheading", "Öneriler"),
+      createBulletList(data.spendingDna.recommendations.slice(0, 3)),
+    ])
+  );
+
+  report.appendChild(
+    createSection("Acil Durum Fonu", [
+      createKeyValueRows([
+        { label: "Aylık temel gider", value: formatCurrencyTRY(data.emergencyFund.monthlyEssentialExpense) },
+        { label: "3 aylık hedef", value: formatCurrencyTRY(data.emergencyFund.targetAmount) },
+        { label: "Mevcut varlık", value: formatCurrencyTRY(data.emergencyFund.currentAvailableAssets) },
+        { label: "Tamamlanma yüzdesi", value: formatPercent(data.emergencyFund.completionPercentage) },
+        {
+          label: "Eksik/fazla tutar",
+          value:
+            data.emergencyFund.missingAmount > 0
+              ? `${formatCurrencyTRY(data.emergencyFund.missingAmount)} eksik`
+              : `${formatCurrencyTRY(data.emergencyFund.surplusAmount)} fazla`,
+        },
+        { label: "Durum etiketi", value: data.emergencyFund.statusLabel },
+      ]),
+    ])
+  );
+
+  report.appendChild(
+    createSection("Satın Alma Gücü Özeti", [
+      createKeyValueRows([
+        { label: "Toplam TL varlık", value: formatCurrencyTRY(data.purchasingPower.totalTryAssets) },
+        { label: "USD karşılığı", value: formatCurrencyUSD(data.purchasingPower.usdValue) },
+        { label: "EUR karşılığı", value: formatCurrencyEUR(data.purchasingPower.eurValue) },
+        { label: "Veri yaklaşımı", value: data.purchasingPower.sourceLabel },
+        { label: "Not", value: data.purchasingPower.note },
+      ]),
+    ])
+  );
+
+  report.appendChild(createSection("AI Finans Koçu Özeti", [createParagraph(data.copilotSummary)]));
+  report.appendChild(createSection("Sonuç ve Uyarı", [createParagraph(data.conclusion), createParagraph(data.disclaimer)]));
+  report.appendChild(createElement("footer", "report-footer", `FinWise Report | ${formatDate(data.generatedAt)}`));
+
+  host.appendChild(createReportStyles());
+  host.appendChild(report);
+
+  return host;
+}
+
+function applyPdfPageBreaks(report: HTMLElement): void {
+  const pageHeight = (report.offsetWidth * PDF_PAGE_HEIGHT) / PDF_PAGE_WIDTH;
+  const blocks = Array.from(report.querySelectorAll<HTMLElement>("[data-pdf-block]"));
+
+  blocks.forEach((block) => {
+    const blockHeight = block.offsetHeight;
+
+    if (blockHeight <= 0 || blockHeight >= pageHeight - REPORT_PAGE_SAFE_GAP * 2) {
+      return;
+    }
+
+    const pageOffset = block.offsetTop % pageHeight;
+
+    if (pageOffset > REPORT_PAGE_SAFE_GAP && pageOffset + blockHeight > pageHeight - REPORT_PAGE_SAFE_GAP) {
+      block.style.marginTop = `${pageHeight - pageOffset + REPORT_PAGE_SAFE_GAP}px`;
+    }
+  });
+}
+
+function addCanvasPagesToPdf(doc: jsPDF, canvas: HTMLCanvasElement): void {
+  const pageHeightPx = Math.floor((canvas.width * PDF_PAGE_HEIGHT) / PDF_PAGE_WIDTH);
+  let sourceY = 0;
+  let pageIndex = 0;
+
+  while (sourceY < canvas.height) {
+    const sliceHeight = Math.min(pageHeightPx, canvas.height - sourceY);
+    const pageCanvas = document.createElement("canvas");
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pageHeightPx;
+
+    const context = pageCanvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("PDF canvas context could not be created.");
+    }
+
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    context.drawImage(canvas, 0, sourceY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+    if (pageIndex > 0) {
+      doc.addPage();
+    }
+
+    doc.addImage(pageCanvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT);
+    sourceY += pageHeightPx;
+    pageIndex += 1;
+  }
+}
+
+async function waitForBrowserFonts(): Promise<void> {
+  await document.fonts.ready;
 }
 
 export async function generateFinancialReportPdf(snapshot: FinanceSnapshot): Promise<void> {
   const data = buildFinancialReportData(snapshot);
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+  const reportHost = createReportElement(data);
+  document.body.appendChild(reportHost);
 
-  renderFinancialReport(doc, data);
-  doc.save(`finwise-finansal-analiz-raporu-${data.fileDate}.pdf`);
+  try {
+    await waitForBrowserFonts();
+
+    const reportElement = reportHost.querySelector<HTMLElement>(".finwise-report");
+
+    if (!reportElement) {
+      throw new Error("Financial report HTML could not be prepared.");
+    }
+
+    applyPdfPageBreaks(reportElement);
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    const canvas = await html2canvas(reportElement, {
+      backgroundColor: "#ffffff",
+      logging: false,
+      scale: Math.min(window.devicePixelRatio * 1.5, 2),
+      useCORS: true,
+      windowWidth: REPORT_RENDER_WIDTH,
+    });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    addCanvasPagesToPdf(doc, canvas);
+    doc.save(`finwise-finansal-analiz-raporu-${data.fileDate}.pdf`);
+  } finally {
+    reportHost.remove();
+  }
 }

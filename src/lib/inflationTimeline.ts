@@ -64,7 +64,7 @@ export function buildInflationTimeline(snapshot: FinanceSnapshot): InflationTime
     // Wait, let's keep it simple as requested: "Bugünkü 175.210 TL'nin geçmiş yıllardaki alım gücü karşılığı".
     // 2026 index = 30. 2022 index = 100.
     // Equivalent Value in 2022 = baseAmount * (100 / 30).
-    const equivalentValue = baseAmount * (data.purchasingPowerIndex / currentData.purchasingPowerIndex);
+    const equivalentValue = baseAmount * (currentData.purchasingPowerIndex / data.purchasingPowerIndex);
     const valueLossFromBase = 100 - data.purchasingPowerIndex;
 
     return {
@@ -90,7 +90,7 @@ export function buildInflationTimeline(snapshot: FinanceSnapshot): InflationTime
     }
   }
 
-  const totalPurchasingPowerLossPercent = 100 - currentData.purchasingPowerIndex;
+  const totalPurchasingPowerLossPercent = (100 - currentData.purchasingPowerIndex) / 100;
 
   const summary = `Demo endekse göre TL satın alma gücü ${baseData.year}=100 kabul edildiğinde ${currentData.year}'da ${currentData.purchasingPowerIndex} seviyesine gerilemiş görünür.`;
   const interpretation = `Bugünkü ${formatCurrencyTRY(baseAmount)} varlığınızın ${baseData.year} yılındaki alım gücü karşılığı ${formatCurrencyTRY(points[0].equivalentValue)} seviyesindeydi. Bu süreçte TL bazlı varlıklar demo endekse göre ${formatPercent(totalPurchasingPowerLossPercent)} değer kaybına uğradı.`;

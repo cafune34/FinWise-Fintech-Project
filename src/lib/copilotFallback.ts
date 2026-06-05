@@ -2,11 +2,84 @@ import { COPILOT_DISCLAIMER, type CopilotFinanceContext } from "@/lib/copilotTyp
 import { formatCurrencyTRY } from "@/lib/format";
 
 function normalizeQuestion(question: string): string {
-  return question.toLocaleLowerCase("tr-TR");
+  return question
+    .toLocaleLowerCase("tr-TR")
+    .replaceAll("ç", "c")
+    .replaceAll("ğ", "g")
+    .replaceAll("ı", "i")
+    .replaceAll("ö", "o")
+    .replaceAll("ş", "s")
+    .replaceAll("ü", "u");
 }
 
 function withDisclaimer(answer: string): string {
   return answer.includes(COPILOT_DISCLAIMER) ? answer : `${answer}\n\n${COPILOT_DISCLAIMER}`;
+}
+
+function formatMoneyPlain(value: number): string {
+  return `${Math.round(value).toLocaleString("tr-TR")} TL`;
+}
+
+function formatPercentPlain(value: number): string {
+  return `%${Math.round(value)}`;
+}
+
+function formatRiskLevel(value: CopilotFinanceContext["spendingDna"]["riskLevel"]): string {
+  if (value === "yuksek") return "yüksek";
+  if (value === "orta") return "orta";
+  return "düşük";
+}
+
+function getPrimaryBudgetSignal(context: CopilotFinanceContext): string {
+  const riskyBudget = [...context.exceededBudgets, ...context.nearLimitBudgets][0];
+
+  if (riskyBudget) {
+    const status = riskyBudget.status === "exceeded" ? "limiti aşmış" : "limite yaklaşıyor";
+    return `${riskyBudget.label} bütçesi ${status} (${formatMoneyPlain(riskyBudget.spent)} / ${formatMoneyPlain(
+      riskyBudget.limit
+    )}, %${riskyBudget.usagePercent}).`;
+  }
+
+  const budgetAlert = context.regTech.topAlerts.find((alert) => {
+    const text = `${alert.title} ${alert.reason}`.toLocaleLowerCase("tr-TR");
+    return text.includes("bütçe") || text.includes("butce") || text.includes("limit") || text.includes("market");
+  });
+
+  if (budgetAlert) {
+    const text = `${budgetAlert.title} ${budgetAlert.reason}`.toLocaleLowerCase("tr-TR");
+
+    if (text.includes("market")) {
+      return `Market bütçesi limite yaklaşıyor: ${budgetAlert.reason}`;
+    }
+
+    return `${budgetAlert.title}: ${budgetAlert.reason}`;
+  }
+
+  return "Aktif bütçelerde kritik aşım görünmüyor.";
+}
+
+function buildMonthlyBudgetOverview(context: CopilotFinanceContext): string {
+  const cashFlowTone = context.netCashFlow >= 0 ? "pozitif" : "negatif";
+  const riskLevel = formatRiskLevel(context.spendingDna.riskLevel);
+  const emergencyPercent = formatPercentPlain(context.emergencyFund.completionPercentage);
+  const mainRecommendation =
+    context.netCashFlow >= 0
+      ? "Ekstra harcamaları sınırlayıp düzenli acil fon katkısını koruman mantıklı olur."
+      : "Önce zorunlu olmayan harcamaları kısıp nakit akışını pozitife çekmen gerekir.";
+
+  return withDisclaimer(
+    `${context.currentMonthLabel} bütçe görünümün genel olarak ${cashFlowTone}. Bu ay ${formatMoneyPlain(
+      context.monthlyIncome
+    )} gelir, ${formatMoneyPlain(context.monthlyExpense)} gider ve ${formatMoneyPlain(
+      context.netCashFlow
+    )} net nakit akışı görünüyorsun. Portföy toplamın ${formatMoneyPlain(
+      context.portfolioTotal
+    )}; acil fonun 3 aylık hedefin yaklaşık ${emergencyPercent} seviyesinde. Risk genel olarak ${riskLevel} görünüyor.\n\n- ${getPrimaryBudgetSignal(
+      context
+    )}\n- RegTech tarafında ${context.regTech.total} sinyal var; yüksek öncelikli sinyal sayısı ${
+      context.regTech.highSeverityCount
+    }.\n- ${mainRecommendation}`
+  );
 }
 
 function formatTopCategories(context: CopilotFinanceContext): string {
@@ -52,6 +125,10 @@ function buildSpendingAnswer(context: CopilotFinanceContext): string {
 }
 
 function buildBudgetRiskAnswer(context: CopilotFinanceContext): string {
+  if (context.currentMonthLabel) {
+    return buildMonthlyBudgetOverview(context);
+  }
+
   const hasRisk = context.exceededBudgets.length > 0 || context.nearLimitBudgets.length > 0;
   const intro = hasRisk
     ? "Bütçenizde takip gerektiren kategoriler var."
@@ -128,6 +205,26 @@ function buildGeneralAnswer(context: CopilotFinanceContext): string {
 
 export function generateCopilotFallbackAnswer(question: string, context: CopilotFinanceContext): string {
   const normalizedQuestion = normalizeQuestion(question);
+
+  if (normalizedQuestion.includes("en cok") || normalizedQuestion.includes("nereye") || normalizedQuestion.includes("harcad")) {
+    return buildSpendingAnswer(context);
+  }
+
+  if (normalizedQuestion.includes("butce") || normalizedQuestion.includes("risk") || normalizedQuestion.includes("limit")) {
+    return buildBudgetRiskAnswer(context);
+  }
+
+  if (normalizedQuestion.includes("tasarruf") || normalizedQuestion.includes("birikim") || normalizedQuestion.includes("neden")) {
+    return buildSavingsAnswer(context);
+  }
+
+  if (normalizedQuestion.includes("azalt") || normalizedQuestion.includes("kis") || normalizedQuestion.includes("dusur")) {
+    return buildReductionAnswer(context);
+  }
+
+  if (normalizedQuestion.includes("odeme") || normalizedQuestion.includes("talimat") || normalizedQuestion.includes("bekleyen")) {
+    return buildPaymentAnswer(context);
+  }
 
   if (
     normalizedQuestion.includes("en çok") ||

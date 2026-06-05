@@ -136,6 +136,9 @@ export default function SpendingDnaCard({ result }: SpendingDnaCardProps) {
           <Gauge className="h-5 w-5 text-cyan-300" />
           <h3 className="text-base font-semibold text-white">Finansal DNA Metrikleri</h3>
         </div>
+        <p className="mt-2 text-xs leading-relaxed text-slate-400">
+          Bu metrikler; gelir-gider dengesi, tasarruf oranı, zorunlu gider payı ve bekleyen ödemeler üzerinden profilinizi açıklar.
+        </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Metric title="Toplam Gelir" value={formatCurrencyTRY(result.metrics.totalIncome)} tone="positive" />
           <Metric title="Toplam Gider" value={formatCurrencyTRY(result.metrics.totalExpense)} tone="negative" />

@@ -1,4 +1,4 @@
-export type MarketDataSource = "live" | "fallback" | "demo";
+export type MarketDataSource = "live" | "fallback" | "demo" | "derived";
 
 export type MarketTickerItem = {
   symbol: string;
@@ -18,15 +18,7 @@ export type MarketTickerResult = {
   error?: string;
 };
 
-type FrankfurterRateRow = {
-  date?: unknown;
-  base?: unknown;
-  quote?: unknown;
-  rate?: unknown;
-};
-
-const MARKET_DATA_TIMEOUT_MS = 8000;
-const FRANKFURTER_RATES_URL = "https://api.frankfurter.dev/v2/rates?base=USD&quotes=TRY,EUR,GBP";
+const MARKET_DATA_TIMEOUT_MS = 10000;
 
 const numberFormatter = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
@@ -42,40 +34,60 @@ export async function fetchMarketTickerData(): Promise<MarketTickerResult> {
   const timeoutId = setTimeout(() => controller.abort(), MARKET_DATA_TIMEOUT_MS);
 
   try {
-    const response = await fetch(FRANKFURTER_RATES_URL, {
+    const response = await fetch("/api/market-data", {
       cache: "no-store",
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      throw new Error(`Frankfurter returned ${response.status}`);
+      throw new Error(`API returned ${response.status}`);
     }
 
-    const data: unknown = await response.json();
-    const rates = parseFrankfurterRates(data);
-    const usdTry = rates.get("TRY");
-    const usdEur = rates.get("EUR");
-    const usdGbp = rates.get("GBP");
+    const data = await response.json();
 
-    if (!isPositiveNumber(usdTry) || !isPositiveNumber(usdEur) || !isPositiveNumber(usdGbp)) {
-      throw new Error("Frankfurter response is missing required rates");
+    if (!isPositiveNumber(data.usdTry) || !isPositiveNumber(data.eurTry) || !isPositiveNumber(data.gbpTry)) {
+      throw new Error("API response is missing required currency rates");
     }
 
-    const eurTry = usdTry / usdEur;
-    const gbpTry = usdTry / usdGbp;
+    const items: MarketTickerItem[] = [
+      createCurrencyItem("USD/TRY", "Amerikan Doları", data.usdTry, "live", 0.12),
+      createCurrencyItem("EUR/TRY", "Euro", data.eurTry, "live", -0.08),
+      createCurrencyItem("GBP/TRY", "İngiliz Sterlini", data.gbpTry, "live", 0.05),
+    ];
+
+    if (isPositiveNumber(data.bist100)) {
+      items.push({
+        symbol: "BIST100",
+        label: "BIST 100",
+        value: data.bist100,
+        formattedValue: plainNumberFormatter.format(data.bist100),
+        changePercent: typeof data.bist100Change === "number" ? data.bist100Change : undefined,
+        source: "live",
+      });
+    } else {
+      items.push(createDemoIndexItem("fallback"));
+    }
+
+    if (isPositiveNumber(data.goldTry)) {
+      items.push({
+        symbol: "XAU/TRY",
+        label: "Gram Altın",
+        value: data.goldTry,
+        formattedValue: formatTryRate(data.goldTry),
+        changePercent: typeof data.goldChange === "number" ? data.goldChange : undefined,
+        source: "derived",
+      });
+    } else {
+      items.push(createDemoGoldItem("fallback"));
+    }
+
     const now = new Date().toISOString();
 
     return {
-      items: [
-        createCurrencyItem("USD/TRY", "Amerikan Doları", usdTry, "live", 0.12),
-        createCurrencyItem("EUR/TRY", "Euro", eurTry, "live", -0.08),
-        createCurrencyItem("GBP/TRY", "İngiliz Sterlini", gbpTry, "live", 0.05),
-        createDemoIndexItem(),
-        createDemoGoldItem(),
-      ],
+      items,
       source: "live",
-      sourceLabel: "Döviz: canlı kaynak (Frankfurter)",
-      updatedAt: now,
+      sourceLabel: "Döviz: canlı kaynak",
+      updatedAt: data.updatedAt || now,
     };
   } catch (error) {
     return getFallbackMarketTickerData(error instanceof Error ? error.message : "Piyasa verisi alınamadı");
@@ -119,22 +131,6 @@ export function formatMarketUpdatedAt(date: string | Date): string {
   }).format(parsedDate);
 }
 
-function parseFrankfurterRates(data: unknown): Map<string, number> {
-  if (!Array.isArray(data)) {
-    throw new Error("Frankfurter response is not an array");
-  }
-
-  const rates = new Map<string, number>();
-
-  data.forEach((row: FrankfurterRateRow) => {
-    if (typeof row.quote === "string" && typeof row.rate === "number") {
-      rates.set(row.quote, row.rate);
-    }
-  });
-
-  return rates;
-}
-
 function createCurrencyItem(
   symbol: string,
   label: string,
@@ -160,7 +156,7 @@ function createDemoIndexItem(source: MarketDataSource = "demo"): MarketTickerIte
     formattedValue: plainNumberFormatter.format(10000),
     changePercent: 0.42,
     source,
-    isDemo: true,
+    isDemo: true, // Mark as demo ONLY when fallback
   };
 }
 
@@ -172,7 +168,7 @@ function createDemoGoldItem(source: MarketDataSource = "demo"): MarketTickerItem
     formattedValue: formatTryRate(2450),
     changePercent: 0.18,
     source,
-    isDemo: true,
+    isDemo: true, // Mark as demo ONLY when fallback
   };
 }
 

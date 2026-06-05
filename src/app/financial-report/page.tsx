@@ -107,14 +107,6 @@ export default function FinancialReportPage() {
         </aside>
       </section>
 
-      <section className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-        <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
-          <p className="text-xs leading-5 text-amber-100/90">
-            Bu rapor yatırım tavsiyesi değildir; eğitim amaçlı finansal analiz prototipidir.
-          </p>
-        </div>
-      </section>
     </AppShell>
   );
 }

@@ -72,9 +72,10 @@ export default function DashboardPage() {
         transactions,
         budgets: budgetsWithSpending,
         userId: user.id,
+        accounts,
         referenceDate,
       }),
-    [budgetsWithSpending, referenceDate, transactions, user.id]
+    [accounts, budgetsWithSpending, referenceDate, transactions, user.id]
   );
   const priorityAlerts = regtechAlerts.slice(0, 3);
   const transactionById = new Map(transactions.map((transaction) => [transaction.id, transaction]));

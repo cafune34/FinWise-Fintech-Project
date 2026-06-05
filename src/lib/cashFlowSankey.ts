@@ -66,7 +66,7 @@ export function buildCashFlowSankey(snapshot: FinanceSnapshot): CashFlowSankeyRe
     relevantTransactions = transactions; // fallback
   }
 
-  const periodLabel = new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(referenceDate);
+  const periodLabel = `${new Intl.DateTimeFormat("tr-TR", { month: "long" }).format(referenceDate)} ${referenceDate.getFullYear()}`;
 
   let totalIncome = 0;
   let totalOutflow = 0;

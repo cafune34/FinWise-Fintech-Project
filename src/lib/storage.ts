@@ -15,7 +15,7 @@ import type {
 } from "@/types/finance";
 
 export const FINWISE_STORAGE_KEY = "finwise:v2:sprint7";
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 27;
 
 export type FinanceSnapshot = {
   version: number;

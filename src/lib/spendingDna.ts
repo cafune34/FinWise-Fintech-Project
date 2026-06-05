@@ -369,21 +369,44 @@ export function scoreSpendingDnaProfiles(
     .sort((a, b) => b.score - a.score);
 }
 
-export function getSpendingDnaRiskLevel(input: SpendingDnaMetrics | SpendingDnaResult): SpendingDnaRiskLevel {
+export function getSpendingDnaRiskLevel(
+  input: SpendingDnaMetrics | SpendingDnaResult,
+  primaryProfileId?: SpendingDnaProfileId,
+  primaryProfileScore?: number
+): SpendingDnaRiskLevel {
   const metrics = "metrics" in input ? input.metrics : input;
+
+  const isBalanced = primaryProfileId === "balanced_planner";
+  const highScore = (primaryProfileScore ?? 0) >= 80;
 
   if (
     metrics.netCashFlow < 0 ||
     metrics.budgetUsageAverage >= HIGH_BUDGET_USAGE ||
-    metrics.pendingPaymentAmount > metrics.totalExpense * 0.25
+    metrics.pendingPaymentAmount > Math.max(metrics.totalExpense * 0.5, metrics.netCashFlow * 1.5) ||
+    primaryProfileId === "risky_cash_flow"
   ) {
     return "yuksek";
   }
 
+  if (isBalanced && highScore) {
+    if (
+      metrics.pendingPaymentAmount > metrics.totalExpense * 0.25 ||
+      metrics.savingsRate < HEALTHY_SAVINGS_RATE ||
+      metrics.essentialExpenseRatio >= HIGH_ESSENTIAL_RATIO ||
+      metrics.highValueTransactionCount > 0
+    ) {
+      return "orta";
+    }
+    return "dusuk";
+  }
+
   if (
+    metrics.pendingPaymentAmount > metrics.totalExpense * 0.25 ||
     metrics.savingsRate < HEALTHY_SAVINGS_RATE ||
     metrics.essentialExpenseRatio >= HIGH_ESSENTIAL_RATIO ||
-    metrics.highValueTransactionCount > 0
+    metrics.highValueTransactionCount > 0 ||
+    primaryProfileId === "impulse_spender" ||
+    primaryProfileId === "subscription_dependent"
   ) {
     return "orta";
   }
@@ -396,7 +419,7 @@ export function analyzeSpendingDna(snapshot: FinanceSnapshot): SpendingDnaResult
   const allProfiles = scoreSpendingDnaProfiles(metrics, snapshot);
   const primaryProfile = allProfiles[0];
   const secondaryProfile = allProfiles[1];
-  const riskLevel = getSpendingDnaRiskLevel(metrics);
+  const riskLevel = getSpendingDnaRiskLevel(metrics, primaryProfile.id, primaryProfile.score);
   const limitedData = metrics.transactionCount < MIN_DATA_TRANSACTION_COUNT;
 
   return {
