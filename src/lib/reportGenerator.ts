@@ -9,6 +9,7 @@ import {
   getFallbackPurchasingPower,
 } from "@/lib/purchasingPower";
 import { analyzeSpendingDna } from "@/lib/spendingDna";
+import { analyzeCarbonFootprint, formatKgCo2 } from "@/lib/carbonFootprint";
 import { categoryLabels, riskProfileLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Transaction, TransactionCategory } from "@/types/finance";
@@ -227,6 +228,7 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
   const purchasingPower = getFallbackPurchasingPower(snapshot, "PDF raporu için güvenli senkron kur özeti");
   const totalTryAssets = calculateTotalTryAssets(snapshot);
   const behavioralHighRiskCount = behavioralInsights.filter((insight) => insight.riskLevel === "yuksek").length;
+  const carbonResult = analyzeCarbonFootprint(snapshot);
 
   return {
     generatedAt: generatedAt.toISOString(),
@@ -269,7 +271,9 @@ export function buildFinancialReportData(snapshot: FinanceSnapshot): FinancialRe
       )}), riskli harcamalar ve bütçe baskısı üzerinden öneriler üretebilir. ` +
       `API çağrısı yapılmadan mevcut Copilot context özetinden yararlanılmıştır. ` +
       `What-if Simülatörü ayrı bir sayfa olarak kullanılabilir. ` +
-      `Enflasyon Zaman Tüneli modülü, TL'nin yıllara göre demo satın alma gücü analizini ayrı sayfada sunar.`,
+      `Enflasyon Zaman Tüneli modülü, TL'nin yıllara göre demo satın alma gücü analizini ayrı sayfada sunar. ` +
+      `Karbon Ayak İzi modülü, harcama kategorilerini demo ESG katsayılarıyla analiz eder. ` +
+      `En son verilere göre tahmini toplam salınım ${formatKgCo2(carbonResult.totalEstimatedKgCo2)} düzeyindedir.`,
     conclusion: buildConclusion({
       netCashFlow: context.netCashFlow,
       behavioralHighRiskCount,

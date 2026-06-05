@@ -9,6 +9,7 @@ import { analyzeBehavioralFinance, summarizeBehavioralInsights } from "@/lib/beh
 import { analyzeEmergencyFund, summarizeEmergencyFundForCopilot } from "@/lib/emergencyFund";
 import { analyzeSpendingDna, summarizeSpendingDnaForCopilot } from "@/lib/spendingDna";
 import { summarizeInflationTimelineForCopilot } from "@/lib/inflationTimeline";
+import { analyzeCarbonFootprint, summarizeCarbonFootprintForCopilot } from "@/lib/carbonFootprint";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
@@ -134,6 +135,7 @@ export function buildCopilotFinanceContext(
   const spendingDnaSummary = summarizeSpendingDnaForCopilot(analyzeSpendingDna(snapshot));
   const emergencyFundSummary = summarizeEmergencyFundForCopilot(analyzeEmergencyFund(snapshot));
   const inflationTimelineSummary = summarizeInflationTimelineForCopilot(snapshot);
+  const carbonFootprintSummary = summarizeCarbonFootprintForCopilot(analyzeCarbonFootprint(snapshot));
 
   return {
     userName: snapshot.user.fullName,
@@ -209,6 +211,7 @@ export function buildCopilotFinanceContext(
       summary: "What-if simülatörü ile bakiye, bütçe ve acil durum fonu etkileri simüle edilebilir.",
     },
     inflationTimeline: inflationTimelineSummary,
+    carbonFootprint: carbonFootprintSummary,
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };

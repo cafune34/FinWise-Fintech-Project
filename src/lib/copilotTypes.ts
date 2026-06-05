@@ -102,6 +102,15 @@ export type CopilotInflationTimelineSummary = {
   route: "/inflation-timeline";
 };
 
+export type CopilotCarbonFootprintSummary = {
+  available: boolean;
+  totalEstimatedKgCo2: number;
+  highestImpactCategory?: string;
+  impactLevel: string;
+  summary: string;
+  route: "/esg-carbon";
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -122,6 +131,7 @@ export type CopilotFinanceContext = {
   emergencyFund: CopilotEmergencyFundSummary;
   scenarioSimulator?: CopilotScenarioSimulatorSummary;
   inflationTimeline?: CopilotInflationTimelineSummary;
+  carbonFootprint?: CopilotCarbonFootprintSummary;
   updatedAt: string;
   generatedAt: string;
 };
