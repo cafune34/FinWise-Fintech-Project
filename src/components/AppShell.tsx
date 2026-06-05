@@ -31,6 +31,7 @@ import {
   History,
   Leaf,
   Network,
+  CalendarDays,
 } from "lucide-react";
 import {
   calculateMonthlyExpense,
@@ -64,6 +65,7 @@ const navItems: NavItem[] = [
   { label: "Harcama DNA’sı", href: "/spending-dna", icon: Fingerprint },
   { label: "FinWise Report", href: "/financial-report", icon: FileText },
   { label: "Para Akış Haritası", href: "/cash-flow-map", icon: Network },
+  { label: "Harcama Isı Haritası", href: "/spending-heatmap", icon: CalendarDays },
   { label: "Senaryo Simülatörü", href: "/scenario-simulator", icon: WandSparkles },
   { label: "Enflasyon Tüneli", href: "/inflation-timeline", icon: History },
   { label: "ESG Karbon", href: "/esg-carbon", icon: Leaf },

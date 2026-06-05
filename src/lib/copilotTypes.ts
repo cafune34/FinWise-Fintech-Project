@@ -122,6 +122,17 @@ export type CopilotCashFlowMapSummary = {
   summary: string;
 };
 
+export type CopilotSpendingHeatmapSummary = {
+  available: boolean;
+  totalSpent: number;
+  averageDailySpend: number;
+  activeSpendingDays: number;
+  zeroSpendDays: number;
+  highestSpendDay?: string;
+  route: "/spending-heatmap";
+  summary: string;
+};
+
 export type CopilotFinanceContext = {
   userName: string;
   totalBalance: number;
@@ -144,6 +155,7 @@ export type CopilotFinanceContext = {
   inflationTimeline?: CopilotInflationTimelineSummary;
   carbonFootprint?: CopilotCarbonFootprintSummary;
   cashFlowMap?: CopilotCashFlowMapSummary;
+  spendingHeatmap?: CopilotSpendingHeatmapSummary;
   updatedAt: string;
   generatedAt: string;
 };

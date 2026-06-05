@@ -11,6 +11,7 @@ import { analyzeSpendingDna, summarizeSpendingDnaForCopilot } from "@/lib/spendi
 import { summarizeInflationTimelineForCopilot } from "@/lib/inflationTimeline";
 import { analyzeCarbonFootprint, summarizeCarbonFootprintForCopilot } from "@/lib/carbonFootprint";
 import { buildCashFlowSankey, summarizeCashFlowForCopilot } from "@/lib/cashFlowSankey";
+import { buildSpendingHeatmap } from "@/lib/spendingHeatmap";
 import { categoryLabels } from "@/lib/labels";
 import type { FinanceSnapshot } from "@/lib/storage";
 import type { Budget, Transaction, TransactionCategory } from "@/types/finance";
@@ -138,6 +139,7 @@ export function buildCopilotFinanceContext(
   const inflationTimelineSummary = summarizeInflationTimelineForCopilot(snapshot);
   const carbonFootprintSummary = summarizeCarbonFootprintForCopilot(analyzeCarbonFootprint(snapshot));
   const cashFlowSummary = summarizeCashFlowForCopilot(buildCashFlowSankey(snapshot));
+  const heatmapResult = buildSpendingHeatmap(snapshot, 90);
 
   return {
     userName: snapshot.user.fullName,
@@ -215,6 +217,16 @@ export function buildCopilotFinanceContext(
     inflationTimeline: inflationTimelineSummary,
     carbonFootprint: carbonFootprintSummary,
     cashFlowMap: cashFlowSummary,
+    spendingHeatmap: {
+      available: true,
+      totalSpent: heatmapResult.totalSpent,
+      averageDailySpend: heatmapResult.averageDailySpend,
+      activeSpendingDays: heatmapResult.activeSpendingDays,
+      zeroSpendDays: heatmapResult.zeroSpendDays,
+      highestSpendDay: heatmapResult.highestSpendDay ? heatmapResult.highestSpendDay.dayLabel : undefined,
+      route: "/spending-heatmap",
+      summary: heatmapResult.summary,
+    },
     updatedAt: snapshot.updatedAt,
     generatedAt: new Date().toISOString(),
   };
